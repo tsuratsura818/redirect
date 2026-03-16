@@ -1,6 +1,7 @@
 {
-  "name": "redirect",
+  "name": "qr-redirect-manager",
   "version": "0.1.0",
+  "description": "QRコードのリダイレクト先を動的に管理するSaaSサービス",
   "private": true,
   "scripts": {
     "dev": "next dev",

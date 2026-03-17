@@ -51,9 +51,9 @@ export default function NewQrPage() {
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          QRコード一覧
+          QR / NFC 一覧
         </Link>
-        <h1 className="text-2xl font-bold text-foreground">新規QRコード作成</h1>
+        <h1 className="text-2xl font-bold text-foreground">新規リダイレクト作成</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-card rounded-xl border border-border p-6 space-y-6">
@@ -122,7 +122,7 @@ export default function NewQrPage() {
             onChange={e => setDescription(e.target.value)}
             rows={3}
             className="w-full px-4 py-3 rounded-lg border border-border bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
-            placeholder="このQRコードの用途や設置場所など"
+            placeholder="QRコードの用途やNFCタグの設置場所など"
           />
         </div>
 
@@ -136,7 +136,7 @@ export default function NewQrPage() {
             disabled={loading}
             className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors font-medium disabled:opacity-50"
           >
-            {loading ? '作成中...' : 'QRコードを作成'}
+            {loading ? '作成中...' : 'リダイレクトを作成'}
           </button>
           <Link
             href="/dashboard/qr"

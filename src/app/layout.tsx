@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'QR Redirect Manager',
-  description: 'QRコードのリダイレクト先を動的に管理するサービス',
+  title: 'Pivolink — QRコード・NFCタグのリダイレクト管理',
+  description: 'Pivolink（ピボリンク）は、QRコード・NFCタグのリダイレクト先をいつでも変更できる管理サービス。印刷済みQRや設置済みNFCの遷移先をワンクリックで切替。',
 }
 
 export default function RootLayout({

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { checkQrLimit } from '@/lib/subscription'
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
@@ -7,6 +8,15 @@ export async function POST(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
+  }
+
+  // プラン上限チェック
+  const { allowed, current, max } = await checkQrLimit(user.id)
+  if (!allowed) {
+    return NextResponse.json(
+      { error: `リダイレクト数が上限に達しています（${current}/${max}件）。プランをアップグレードしてください。` },
+      { status: 403 }
+    )
   }
 
   const body = await request.json()

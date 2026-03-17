@@ -10,7 +10,7 @@ export default function ExpiredPage() {
           </svg>
         </div>
         <h1 className="text-2xl font-bold text-foreground mb-2">有効期限切れ</h1>
-        <p className="text-muted mb-8">このQRコードの有効期限が切れています。</p>
+        <p className="text-muted mb-8">このリダイレクトURLの有効期限が切れています。</p>
         <Link href="/" className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors font-medium">
           トップページへ
         </Link>

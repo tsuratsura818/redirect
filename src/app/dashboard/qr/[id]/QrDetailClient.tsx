@@ -83,7 +83,7 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
   }
 
   const handleDelete = async () => {
-    if (!confirm('このQRコードを削除しますか？この操作は元に戻せません。')) return
+    if (!confirm('このリダイレクトを削除しますか？この操作は元に戻せません。')) return
     await fetch(`/api/qr/${qr.id}`, { method: 'DELETE' })
     router.push('/dashboard/qr')
   }
@@ -102,19 +102,19 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
   return (
     <div>
       {/* ヘッダー */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div className="min-w-0">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-foreground">{qr.name}</h1>
-            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">{qr.name}</h1>
+            <span className={`px-2 py-0.5 rounded text-xs font-medium shrink-0 ${
               qr.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
             }`}>
               {qr.is_active ? 'アクティブ' : '停止中'}
             </span>
           </div>
-          <p className="text-sm text-muted mt-1">{redirectUrl}</p>
+          <p className="text-sm text-muted mt-1 truncate">{redirectUrl}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <a
             href={`/api/qr/${qr.id}/qrcode?format=png&size=400&baseUrl=${encodeURIComponent(baseUrl)}`}
             download={`qr-${qr.slug}.png`}
@@ -132,29 +132,34 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
         </div>
       </div>
 
-      {/* QRコードプレビュー */}
-      <div className="bg-card rounded-xl border border-border p-6 mb-6 flex items-center gap-8">
-        <div className="bg-white p-4 rounded-xl border border-border">
+      {/* QRコードプレビュー & NFC URL */}
+      <div className="bg-card rounded-xl border border-border p-4 sm:p-6 mb-6 flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-8">
+        <div className="bg-white p-4 rounded-xl border border-border shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`/api/qr/${qr.id}/qrcode?format=svg&size=200&baseUrl=${encodeURIComponent(baseUrl)}`}
             alt="QR Code"
-            width={160}
-            height={160}
+            width={140}
+            height={140}
+            className="sm:w-[160px] sm:h-[160px]"
           />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 w-full min-w-0">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-muted">スラッグ</span>
               <p className="font-medium text-foreground">/r/{qr.slug}</p>
             </div>
             <div>
-              <span className="text-muted">スキャン数</span>
+              <span className="text-muted">アクセス数</span>
               <p className="font-medium text-foreground">{qr.scan_count.toLocaleString()}</p>
             </div>
-            <div>
-              <span className="text-muted">デフォルトURL</span>
+            <div className="col-span-2">
+              <span className="text-muted">リダイレクトURL（QR / NFCタグ共通）</span>
+              <p className="font-medium text-foreground text-xs mt-0.5 bg-gray-50 px-3 py-2 rounded-lg border border-border select-all break-all">{redirectUrl}</p>
+            </div>
+            <div className="col-span-2 sm:col-span-1">
+              <span className="text-muted">デフォルト遷移先</span>
               <p className="font-medium text-foreground truncate">{qr.default_url}</p>
             </div>
             <div>
@@ -170,25 +175,27 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
       )}
 
       {/* タブ */}
-      <div className="flex gap-1 border-b border-border mb-6">
-        {tabs.map(t => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-              tab === t.key
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted hover:text-foreground'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mb-6">
+        <div className="flex gap-1 border-b border-border min-w-max">
+          {tabs.map(t => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`px-3 sm:px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                tab === t.key
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted hover:text-foreground'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* 概要タブ */}
       {tab === 'overview' && (
-        <div className="bg-card rounded-xl border border-border p-6 space-y-6">
+        <div className="bg-card rounded-xl border border-border p-4 sm:p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">名前</label>
@@ -259,7 +266,7 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
               onClick={handleDelete}
               className="px-4 py-2 text-sm text-danger hover:bg-red-50 rounded-lg transition-colors"
             >
-              QRコードを削除
+              リダイレクトを削除
             </button>
             <button
               onClick={handleSave}
@@ -372,8 +379,8 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
       </div>
 
       {showForm && (
-        <div className="bg-card rounded-xl border border-border p-6 mb-4 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="bg-card rounded-xl border border-border p-4 sm:p-6 mb-4 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">ルール名</label>
               <input
@@ -411,7 +418,7 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
           </div>
 
           {condType === 'schedule' && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">開始日時</label>
                 <input
@@ -500,18 +507,18 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
         ) : (
           rules.map(rule => (
             <div key={rule.id} className={`bg-card rounded-xl border border-border p-4 ${!rule.is_active ? 'opacity-50' : ''}`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${condTypeColor[rule.condition_type]}`}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className={`px-2 py-0.5 rounded text-xs font-medium shrink-0 ${condTypeColor[rule.condition_type]}`}>
                     {condTypeLabel[rule.condition_type]}
                   </span>
-                  <div>
+                  <div className="min-w-0">
                     <div className="font-medium text-foreground text-sm">{rule.name}</div>
-                    <div className="text-xs text-muted truncate max-w-md">{rule.destination_url}</div>
+                    <div className="text-xs text-muted truncate">{rule.destination_url}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted">優先度: {rule.priority}</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-xs text-muted hidden sm:inline">優先度: {rule.priority}</span>
                   <button
                     onClick={() => handleToggle(rule)}
                     className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
@@ -592,8 +599,8 @@ function CushionTab({ qrId, cushion, onUpdate }: { qrId: string; cushion: Cushio
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div className="bg-card rounded-xl border border-border p-6 space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-card rounded-xl border border-border p-4 sm:p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="font-bold text-foreground">クッションページ設定</h3>
           <label className="flex items-center gap-2 cursor-pointer">
@@ -626,7 +633,7 @@ function CushionTab({ qrId, cushion, onUpdate }: { qrId: string; cushion: Cushio
             placeholder="お知らせやクーポン情報など"
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">ボタンテキスト</label>
             <input

@@ -30,7 +30,7 @@ export default async function QrDetailPage({
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
-        QRコード一覧
+        QR / NFC 一覧
       </Link>
       <QrDetailClient qrCode={qrCode as QrCode} />
     </div>

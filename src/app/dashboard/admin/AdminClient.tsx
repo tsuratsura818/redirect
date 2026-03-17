@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { AdminUser } from '@/types/database'
 
-type AdminTab = 'users' | 'contacts'
+type AdminTab = 'users' | 'contacts' | 'feedbacks'
 
 interface Stats {
   total_users: number
@@ -11,6 +11,17 @@ interface Stats {
   total_scans: number
   recent_scans_7d: number
   recent_users_7d: number
+}
+
+interface FeedbackItem {
+  id: string
+  user_id: string
+  type: string
+  title: string
+  body: string
+  status: string
+  admin_note: string | null
+  created_at: string
 }
 
 interface ContactMessage {
@@ -29,19 +40,22 @@ export default function AdminClient({ currentUserId }: { currentUserId: string }
   const [users, setUsers] = useState<AdminUser[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [contacts, setContacts] = useState<ContactMessage[]>([])
+  const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
-    const [usersRes, statsRes, contactsRes] = await Promise.all([
+    const [usersRes, statsRes, contactsRes, feedbacksRes] = await Promise.all([
       fetch('/api/admin/users'),
       fetch('/api/admin/stats'),
       fetch('/api/admin/contacts'),
+      fetch('/api/admin/feedbacks'),
     ])
     if (usersRes.ok) setUsers(await usersRes.json())
     if (statsRes.ok) setStats(await statsRes.json())
     if (contactsRes.ok) setContacts(await contactsRes.json())
+    if (feedbacksRes.ok) setFeedbacks(await feedbacksRes.json())
     setLoading(false)
   }, [])
 
@@ -104,7 +118,24 @@ export default function AdminClient({ currentUserId }: { currentUserId: string }
             </span>
           )}
         </button>
+        <button
+          onClick={() => setTab('feedbacks')}
+          className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+            tab === 'feedbacks' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-foreground'
+          }`}
+        >
+          フィードバック
+          {feedbacks.filter(f => f.status === 'new').length > 0 && (
+            <span className="bg-primary text-white text-xs px-1.5 py-0.5 rounded-full leading-none">
+              {feedbacks.filter(f => f.status === 'new').length}
+            </span>
+          )}
+        </button>
       </div>
+
+      {tab === 'feedbacks' && (
+        <FeedbacksSection feedbacks={feedbacks} onUpdate={fetchData} />
+      )}
 
       {tab === 'contacts' && (
         <ContactsSection contacts={contacts} onUpdate={fetchData} />
@@ -330,6 +361,107 @@ function ContactsSection({ contacts, onUpdate }: { contacts: ContactMessage[]; o
               )}
             </div>
           ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+const fbTypeLabel: Record<string, string> = {
+  improvement: '改善要望',
+  feature: '新機能',
+  bug: '不具合',
+  other: 'その他',
+}
+
+const fbStatusOptions = [
+  { value: 'new', label: '受付済み', className: 'bg-blue-100 text-blue-700' },
+  { value: 'reviewing', label: '検討中', className: 'bg-yellow-100 text-yellow-700' },
+  { value: 'planned', label: '対応予定', className: 'bg-green-100 text-green-700' },
+  { value: 'done', label: '対応済み', className: 'bg-gray-100 text-gray-600' },
+  { value: 'declined', label: '見送り', className: 'bg-red-100 text-red-600' },
+]
+
+function FeedbacksSection({ feedbacks, onUpdate }: { feedbacks: FeedbackItem[]; onUpdate: () => void }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+
+  const updateStatus = async (id: string, status: string) => {
+    await fetch('/api/admin/feedbacks', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status }),
+    })
+    onUpdate()
+  }
+
+  const newCount = feedbacks.filter(f => f.status === 'new').length
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <span className="text-sm text-muted">{feedbacks.length} 件（新着 {newCount} 件）</span>
+      </div>
+
+      {feedbacks.length === 0 ? (
+        <div className="bg-card rounded-xl border border-border p-8 text-center text-muted">
+          フィードバックはまだありません
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {feedbacks.map(fb => {
+            const st = fbStatusOptions.find(s => s.value === fb.status) || fbStatusOptions[0]
+            return (
+              <div
+                key={fb.id}
+                className={`bg-card rounded-xl border border-border overflow-hidden ${fb.status === 'new' ? 'border-l-4 border-l-blue-400' : ''}`}
+              >
+                <button
+                  onClick={() => setExpandedId(expandedId === fb.id ? null : fb.id)}
+                  className="w-full text-left p-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 shrink-0">
+                        {fbTypeLabel[fb.type] || fb.type}
+                      </span>
+                      <span className="font-medium text-foreground text-sm truncate">{fb.title}</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${st.className}`}>{st.label}</span>
+                      <span className="text-xs text-muted">
+                        {new Date(fb.created_at).toLocaleDateString('ja-JP')}
+                      </span>
+                      <svg className={`w-4 h-4 text-muted transition-transform ${expandedId === fb.id ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
+
+                {expandedId === fb.id && (
+                  <div className="px-4 pb-4 border-t border-border pt-4 space-y-3">
+                    <p className="text-sm text-foreground/80 whitespace-pre-wrap leading-relaxed">{fb.body}</p>
+                    <div className="text-xs text-muted">User ID: {fb.user_id}</div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {fbStatusOptions.map(opt => (
+                        <button
+                          key={opt.value}
+                          onClick={() => updateStatus(fb.id, opt.value)}
+                          className={`text-xs px-3 py-1.5 rounded border transition-colors ${
+                            fb.status === opt.value
+                              ? opt.className + ' border-transparent font-medium'
+                              : 'border-border text-muted hover:bg-gray-100'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>

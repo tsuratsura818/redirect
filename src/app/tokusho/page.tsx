@@ -13,7 +13,7 @@ const rows = [
   { label: '電話番号', value: '【電話番号を記載】（お問い合わせはフォームよりお願いします）' },
   { label: 'メールアドレス', value: '【メールアドレスを記載】' },
   { label: 'サービスURL', value: 'https://redirect.tsuratsura.com' },
-  { label: '販売価格', value: 'Free: ¥0 / Pro: ¥980（税込）/月 / Business: ¥4,980（税込）/月' },
+  { label: '販売価格', value: 'Free: ¥0 / Pro: ¥780（税込）/月（通常¥980、Beta期間20%OFF） / Business: ¥3,980（税込）/月（通常¥4,980、Beta期間20%OFF）' },
   { label: '支払方法', value: 'クレジットカード（Stripe経由）' },
   { label: '支払時期', value: '申込時に初回決済、以降毎月自動課金' },
   { label: 'サービス提供時期', value: '決済完了後、即時利用可能' },

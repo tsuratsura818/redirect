@@ -1,10 +1,14 @@
 export type PlanId = 'free' | 'pro' | 'business'
 
+export const IS_BETA = true
+
 export interface PlanDefinition {
   id: PlanId
   name: string
   price: number
   priceLabel: string
+  betaPrice?: number
+  betaPriceLabel?: string
   description: string
   limits: {
     maxQrCodes: number
@@ -46,6 +50,8 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     name: 'Pro',
     price: 980,
     priceLabel: '¥980',
+    betaPrice: 780,
+    betaPriceLabel: '¥780',
     description: '本格運用したい方に',
     limits: {
       maxQrCodes: 50,
@@ -71,6 +77,8 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     name: 'Business',
     price: 4980,
     priceLabel: '¥4,980',
+    betaPrice: 3980,
+    betaPriceLabel: '¥3,980',
     description: '大規模運用・チーム向け',
     limits: {
       maxQrCodes: -1, // 無制限

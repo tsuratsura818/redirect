@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { PLANS, type PlanId } from '@/lib/plans'
+import { PLANS, IS_BETA, type PlanId } from '@/lib/plans'
 import type { UserSubscription } from '@/lib/subscription'
 
 interface SubscriptionData {
@@ -169,7 +169,14 @@ export default function PlanClient() {
       </div>
 
       {/* プラン一覧 */}
-      <h2 className="text-xl font-bold text-foreground mb-6">プランを選択</h2>
+      <div className="flex items-center gap-3 mb-6">
+        <h2 className="text-xl font-bold text-foreground">プランを選択</h2>
+        {IS_BETA && (
+          <span className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 px-3 py-1 rounded-full text-xs font-medium">
+            Beta限定20%OFF
+          </span>
+        )}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {(Object.values(PLANS) as (typeof PLANS)[PlanId][]).map(plan => {
           const isCurrent = plan.id === currentPlan
@@ -195,8 +202,18 @@ export default function PlanClient() {
               </div>
 
               <div className="mb-6">
-                <span className="text-3xl font-bold text-foreground">{plan.priceLabel}</span>
-                <span className="text-muted text-sm"> /月</span>
+                {IS_BETA && plan.betaPriceLabel ? (
+                  <>
+                    <span className="text-lg text-foreground/40 line-through mr-2">{plan.priceLabel}</span>
+                    <span className="text-3xl font-bold text-foreground">{plan.betaPriceLabel}</span>
+                    <span className="text-muted text-sm"> /月</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-3xl font-bold text-foreground">{plan.priceLabel}</span>
+                    <span className="text-muted text-sm"> /月</span>
+                  </>
+                )}
               </div>
 
               <ul className="space-y-2 mb-6">

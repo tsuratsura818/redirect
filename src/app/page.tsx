@@ -238,13 +238,22 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6">
           <ScrollReveal>
             <h2 className="text-3xl md:text-4xl font-extrabold text-center text-foreground mb-4 tracking-tight">料金プラン</h2>
-            <p className="text-center text-foreground/65 mb-14 text-base">無料から始めて、必要に応じてスケールアップ</p>
+            <p className="text-center text-foreground/65 mb-3 text-base">無料から始めて、必要に応じてスケールアップ</p>
+            <div className="flex justify-center mb-14">
+              <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-700 px-4 py-2 rounded-full text-sm font-medium">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Beta限定 — 全有料プラン20%OFF（正式リリースまで）
+              </div>
+            </div>
           </ScrollReveal>
           <div className="grid md:grid-cols-3 gap-8 items-start">
             {[
               {
                 name: 'Free',
                 price: '¥0',
+                originalPrice: null,
                 desc: 'まずは試してみたい方に',
                 features: ['QR/NFCリダイレクト 3件', '月間アクセス 1,000回', '基本アクセス解析', 'QRコード自動生成', '変更履歴ログ'],
                 cta: '無料で始める',
@@ -252,7 +261,8 @@ export default function Home() {
               },
               {
                 name: 'Pro',
-                price: '¥980',
+                price: '¥780',
+                originalPrice: '¥980',
                 desc: '本格運用したい方に',
                 features: ['QR/NFCリダイレクト 50件', '月間アクセス 50,000回', '詳細アクセス解析', 'スケジュール / デバイス別振分', 'A/Bテスト', 'クッションページ', 'CSVエクスポート'],
                 cta: 'Proで始める',
@@ -260,7 +270,8 @@ export default function Home() {
               },
               {
                 name: 'Business',
-                price: '¥4,980',
+                price: '¥3,980',
+                originalPrice: '¥4,980',
                 desc: '大規模運用・チーム向け',
                 features: ['QR/NFCリダイレクト 無制限', '月間アクセス 無制限', '詳細アクセス解析', '全ルール機能', 'クッションページ', 'CSVエクスポート', '優先サポート'],
                 cta: 'Businessで始める',
@@ -280,9 +291,17 @@ export default function Home() {
                       人気
                     </div>
                   )}
+                  {plan.originalPrice && (
+                    <div className="absolute -top-3.5 right-4 bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                      20%OFF
+                    </div>
+                  )}
                   <h3 className="text-xl font-extrabold text-foreground mb-1">{plan.name}</h3>
                   <p className="text-sm text-foreground/65 mb-5">{plan.desc}</p>
                   <div className="mb-6">
+                    {plan.originalPrice && (
+                      <span className="text-lg text-foreground/40 line-through mr-2">{plan.originalPrice}</span>
+                    )}
                     <span className="text-4xl font-extrabold text-foreground">{plan.price}</span>
                     <span className="text-foreground/55 text-sm"> /月</span>
                   </div>

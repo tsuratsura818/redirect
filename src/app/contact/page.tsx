@@ -9,11 +9,26 @@ export default function ContactPage() {
   const [category, setCategory] = useState('general')
   const [message, setMessage] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: バックエンドAPI連携（メール送信 or DB保存）
-    setSubmitted(true)
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, category, message }),
+      })
+      if (!res.ok) throw new Error()
+      setSubmitted(true)
+    } catch {
+      setError('送信に失敗しました。時間をおいて再度お試しください。')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -86,11 +101,15 @@ export default function ContactPage() {
                 placeholder="お問い合わせ内容をご記入ください"
               />
             </div>
+            {error && (
+              <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm">{error}</div>
+            )}
             <button
               type="submit"
-              className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark transition-colors"
+              disabled={loading}
+              className="w-full bg-primary text-white py-3 rounded-lg font-medium hover:bg-primary-dark transition-colors disabled:opacity-50"
             >
-              送信する
+              {loading ? '送信中...' : '送信する'}
             </button>
           </form>
         )}

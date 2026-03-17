@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { AdminUser } from '@/types/database'
 
+type AdminTab = 'users' | 'contacts'
+
 interface Stats {
   total_users: number
   total_qr_codes: number
@@ -11,20 +13,35 @@ interface Stats {
   recent_users_7d: number
 }
 
+interface ContactMessage {
+  id: string
+  name: string
+  email: string
+  category: string
+  message: string
+  is_read: boolean
+  note: string | null
+  created_at: string
+}
+
 export default function AdminClient({ currentUserId }: { currentUserId: string }) {
+  const [tab, setTab] = useState<AdminTab>('users')
   const [users, setUsers] = useState<AdminUser[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
+  const [contacts, setContacts] = useState<ContactMessage[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
-    const [usersRes, statsRes] = await Promise.all([
+    const [usersRes, statsRes, contactsRes] = await Promise.all([
       fetch('/api/admin/users'),
       fetch('/api/admin/stats'),
+      fetch('/api/admin/contacts'),
     ])
     if (usersRes.ok) setUsers(await usersRes.json())
     if (statsRes.ok) setStats(await statsRes.json())
+    if (contactsRes.ok) setContacts(await contactsRes.json())
     setLoading(false)
   }, [])
 
@@ -59,11 +76,41 @@ export default function AdminClient({ currentUserId }: { currentUserId: string }
 
   return (
     <div>
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">管理者パネル</h1>
         <p className="text-muted text-sm mt-1">ユーザー管理・サービス全体の統計</p>
       </div>
 
+      {/* タブ */}
+      <div className="flex gap-1 border-b border-border mb-6">
+        <button
+          onClick={() => setTab('users')}
+          className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+            tab === 'users' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-foreground'
+          }`}
+        >
+          ユーザー管理
+        </button>
+        <button
+          onClick={() => setTab('contacts')}
+          className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+            tab === 'contacts' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-foreground'
+          }`}
+        >
+          お問い合わせ
+          {contacts.filter(c => !c.is_read).length > 0 && (
+            <span className="bg-danger text-white text-xs px-1.5 py-0.5 rounded-full leading-none">
+              {contacts.filter(c => !c.is_read).length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {tab === 'contacts' && (
+        <ContactsSection contacts={contacts} onUpdate={fetchData} />
+      )}
+
+      {tab === 'users' && <>
       {/* 統計カード */}
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
@@ -198,6 +245,93 @@ export default function AdminClient({ currentUserId }: { currentUserId: string }
           </table>
         </div>
       </div>
+      </>}
+    </div>
+  )
+}
+
+function ContactsSection({ contacts, onUpdate }: { contacts: ContactMessage[]; onUpdate: () => void }) {
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+
+  const toggleRead = async (id: string, currentRead: boolean) => {
+    await fetch('/api/admin/contacts', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, is_read: !currentRead }),
+    })
+    onUpdate()
+  }
+
+  const unreadCount = contacts.filter(c => !c.is_read).length
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <span className="text-sm text-muted">{contacts.length} 件（未読 {unreadCount} 件）</span>
+      </div>
+
+      {contacts.length === 0 ? (
+        <div className="bg-card rounded-xl border border-border p-8 text-center text-muted">
+          お問い合わせはまだありません
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {contacts.map(c => (
+            <div
+              key={c.id}
+              className={`bg-card rounded-xl border border-border overflow-hidden ${!c.is_read ? 'border-l-4 border-l-primary' : ''}`}
+            >
+              <button
+                onClick={() => setExpandedId(expandedId === c.id ? null : c.id)}
+                className="w-full text-left p-4 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {!c.is_read && <div className="w-2 h-2 rounded-full bg-primary shrink-0" />}
+                    <div className="min-w-0">
+                      <div className="font-medium text-foreground text-sm">{c.name}</div>
+                      <div className="text-xs text-muted truncate">{c.email}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">{c.category}</span>
+                    <span className="text-xs text-muted">
+                      {new Date(c.created_at).toLocaleString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <svg className={`w-4 h-4 text-muted transition-transform ${expandedId === c.id ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </button>
+
+              {expandedId === c.id && (
+                <div className="px-4 pb-4 border-t border-border pt-4">
+                  <p className="text-sm text-foreground/80 whitespace-pre-wrap leading-relaxed mb-4">{c.message}</p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => toggleRead(c.id, c.is_read)}
+                      className={`text-xs px-3 py-1.5 rounded border transition-colors ${
+                        c.is_read
+                          ? 'border-border text-muted hover:bg-gray-100'
+                          : 'border-primary text-primary hover:bg-green-50'
+                      }`}
+                    >
+                      {c.is_read ? '未読に戻す' : '既読にする'}
+                    </button>
+                    <a
+                      href={`mailto:${c.email}`}
+                      className="text-xs px-3 py-1.5 rounded border border-border text-muted hover:bg-gray-100 transition-colors"
+                    >
+                      返信メール
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

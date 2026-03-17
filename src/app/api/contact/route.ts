@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     })
 
     if (error) {
-      return NextResponse.json({ error: '送信に失敗しました' }, { status: 500 })
+      return NextResponse.json({ error: '送信に失敗しました', detail: error.message, code: error.code }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })

@@ -119,15 +119,15 @@ export default function ContactPage() {
           <div className="space-y-4 text-sm">
             <div>
               <p className="font-medium text-foreground">Q. 無料プランで何件まで作れますか？</p>
-              <p className="text-foreground/65 mt-1">A. 無料プランでは最大5件のリダイレクトURLを作成できます。</p>
+              <p className="text-foreground/75 mt-1">A. 無料プランでは最大3件のリダイレクトURLを作成できます。</p>
             </div>
             <div>
               <p className="font-medium text-foreground">Q. 有料プランの解約はいつでもできますか？</p>
-              <p className="text-foreground/65 mt-1">A. はい、ダッシュボードのプラン管理画面からいつでも解約可能です。解約後も当月末まで利用できます。</p>
+              <p className="text-foreground/75 mt-1">A. はい、ダッシュボードのプラン管理画面からいつでも解約可能です。解約後も当月末まで利用できます。</p>
             </div>
             <div>
               <p className="font-medium text-foreground">Q. NFCタグはどこで購入できますか？</p>
-              <p className="text-foreground/65 mt-1">A. NFCタグは市販のNTAG213/215/216対応タグをご利用ください。Amazon等で購入可能です。</p>
+              <p className="text-foreground/75 mt-1">A. NFCタグは市販のNTAG213/215/216対応タグをご利用ください。Amazon等で購入可能です。</p>
             </div>
           </div>
         </div>

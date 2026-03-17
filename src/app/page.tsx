@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import ScrollReveal from '@/components/ScrollReveal'
 import Logo from '@/components/Logo'
@@ -8,24 +9,56 @@ import {
   GymIllust, PublisherIllust, EducationIllust, HotelIllust,
 } from '@/components/CaseIllustrations'
 
+export const metadata: Metadata = {
+  title: 'Pivolink — QRコード・NFCタグのリダイレクト管理SaaS',
+  description: 'QRコード・NFCタグのリダイレクト先をいつでも変更できる管理サービス。印刷済みQRコードの再発行不要。スケジュール切替・デバイス別振分・A/Bテスト対応。無料プランあり。',
+  alternates: { canonical: 'https://redirect.tsuratsura.com' },
+}
+
+const faqItems = [
+  { q: 'Pivolinkとは何ですか？', a: 'QRコードやNFCタグのリダイレクト先URLを、管理画面からいつでも変更できるサービスです。印刷済みのQRコードや設置済みのNFCタグを作り直すことなく、遷移先だけを切り替えられます。' },
+  { q: 'QRコードとNFCタグの違いは？', a: 'QRコードはカメラでスキャンして読み取る二次元バーコードです。NFCタグはスマートフォンをかざすだけで読み取れるICチップで、店頭POPや商品タグに埋め込まれます。Pivolinkでは両方のリダイレクト先を同じ管理画面で一元管理できます。' },
+  { q: 'セキュリティは大丈夫ですか？', a: 'ご安心ください。リダイレクト先の変更は、アカウントにログインした所有者本人のみが行えます。データベースレベルでの行単位セキュリティ（RLS）と、API認証の二重防御で保護されています。' },
+  { q: '無料プランでも使えますか？', a: 'はい。Freeプランではリダイレクト3件・月間1,000アクセスまで無料でご利用いただけます。クレジットカードの登録も不要です。' },
+  { q: 'QRコードを印刷した後でもリダイレクト先を変更できますか？', a: 'はい、それがPivolinkの最大の特長です。QRコード自体のURLは固定ですが、その先のリダイレクト先は管理画面からいつでも何度でも変更可能です。' },
+  { q: 'NFCタグのURLはどうやって設定しますか？', a: 'Pivolinkで発行されるリダイレクトURL（例: pivolink.com/r/xxxxx）をNFCタグに書き込むだけです。以後はPivolinkの管理画面からリダイレクト先を変更すれば、タグを書き換える必要はありません。' },
+  { q: 'スケジュール切替やA/Bテストはどのプランで使えますか？', a: 'ProプランとBusinessプランでご利用いただけます。Freeプランではデフォルトのリダイレクトのみとなります。' },
+  { q: 'プランはいつでも変更できますか？', a: 'はい、管理画面の「プラン管理」からいつでもアップグレード・ダウングレードが可能です。アップグレードは即時反映、ダウングレードは現在の請求期間終了時に反映されます。' },
+  { q: '解約はできますか？', a: 'はい、いつでも解約可能です。解約後もFreeプランとして引き続きご利用いただけます。データが削除されることはありません。' },
+]
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqItems.map(item => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+}
+
 export default function Home() {
   return (
     <div className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       {/* ヘッダー */}
       <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-3 sm:gap-5">
-            <Link href="#features" className="text-foreground/70 hover:text-foreground transition-colors font-medium text-sm hidden sm:block">
+            <Link href="#features" className="text-foreground/75 hover:text-foreground transition-colors font-medium text-sm hidden sm:block">
               機能
             </Link>
-            <Link href="#pricing" className="text-foreground/70 hover:text-foreground transition-colors font-medium text-sm hidden sm:block">
+            <Link href="#pricing" className="text-foreground/75 hover:text-foreground transition-colors font-medium text-sm hidden sm:block">
               料金
             </Link>
-            <Link href="#faq" className="text-foreground/70 hover:text-foreground transition-colors font-medium text-sm hidden sm:block">
+            <Link href="#faq" className="text-foreground/75 hover:text-foreground transition-colors font-medium text-sm hidden sm:block">
               FAQ
             </Link>
-            <Link href="/login" className="text-foreground/70 hover:text-foreground transition-colors font-medium text-sm">
+            <Link href="/login" className="text-foreground/75 hover:text-foreground transition-colors font-medium text-sm">
               ログイン
             </Link>
             <Link
@@ -53,7 +86,7 @@ export default function Home() {
             <span className="gradient-text">リダイレクト先</span>を<br />
             いつでも変更
           </h1>
-          <p className="animate-fade-in-up delay-200 text-base md:text-lg text-foreground/70 max-w-2xl mx-auto mb-12 leading-relaxed">
+          <p className="animate-fade-in-up delay-200 text-base md:text-lg text-foreground/75 max-w-2xl mx-auto mb-12 leading-relaxed">
             チラシ・名刺・パッケージのQRコードも、店頭・商品に埋め込んだNFCタグも、<br className="hidden md:block" />
             管理画面からワンクリックで遷移先を変更。再印刷・再設置は不要です。
           </p>
@@ -86,7 +119,7 @@ export default function Home() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-foreground mb-2">QRコード対応</h3>
-                <p className="text-foreground/70 leading-relaxed">チラシ・名刺・ポスター・パッケージに印刷したQRコードの遷移先を、いつでも管理画面から変更。PNG/SVGで自動生成も可能。</p>
+                <p className="text-foreground/75 leading-relaxed">チラシ・名刺・ポスター・パッケージに印刷したQRコードの遷移先を、いつでも管理画面から変更。PNG/SVGで自動生成も可能。</p>
               </div>
             </div>
           </ScrollReveal>
@@ -99,7 +132,7 @@ export default function Home() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-foreground mb-2">NFCタグ対応</h3>
-                <p className="text-foreground/70 leading-relaxed">店頭POP・商品タグ・カードに埋め込んだNFCタグのURLを後から変更。タグの書き換えや交換は一切不要です。</p>
+                <p className="text-foreground/75 leading-relaxed">店頭POP・商品タグ・カードに埋め込んだNFCタグのURLを後から変更。タグの書き換えや交換は一切不要です。</p>
               </div>
             </div>
           </ScrollReveal>
@@ -111,7 +144,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6">
           <ScrollReveal>
             <h2 className="text-3xl md:text-4xl font-extrabold text-center text-foreground mb-4 tracking-tight">3ステップで簡単運用</h2>
-            <p className="text-center text-foreground/65 mb-14 text-base">登録からURL変更まで、わずか数クリック</p>
+            <p className="text-center text-foreground/75 mb-14 text-base">登録からURL変更まで、わずか数クリック</p>
           </ScrollReveal>
           <div className="grid md:grid-cols-3 gap-8">
             {[
@@ -153,7 +186,7 @@ export default function Home() {
                   </div>
                   <div className="inline-block text-xs font-bold text-white gradient-bg px-3 py-1 rounded-full mb-3">STEP {item.step}</div>
                   <h3 className="text-xl font-bold text-foreground mb-3">{item.title}</h3>
-                  <p className="text-foreground/70 leading-relaxed">{item.desc}</p>
+                  <p className="text-foreground/75 leading-relaxed">{item.desc}</p>
                 </div>
               </ScrollReveal>
             ))}
@@ -166,7 +199,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6">
           <ScrollReveal>
             <h2 className="text-3xl md:text-4xl font-extrabold text-center text-foreground mb-4 tracking-tight">活用事例</h2>
-            <p className="text-center text-foreground/65 mb-14 text-base">業種を問わず、QR・NFCの「変えられない」を解決します</p>
+            <p className="text-center text-foreground/75 mb-14 text-base">業種を問わず、QR・NFCの「変えられない」を解決します</p>
           </ScrollReveal>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-7">
             {([
@@ -205,7 +238,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6">
           <ScrollReveal>
             <h2 className="text-3xl md:text-4xl font-extrabold text-center text-foreground mb-4 tracking-tight">充実の機能</h2>
-            <p className="text-center text-foreground/65 mb-14 text-base">QRコード・NFCタグの運用に必要な機能がすべて揃っています</p>
+            <p className="text-center text-foreground/75 mb-14 text-base">QRコード・NFCタグの運用に必要な機能がすべて揃っています</p>
           </ScrollReveal>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
@@ -225,7 +258,7 @@ export default function Home() {
                     <span className="text-xl leading-none">{f.icon}</span>
                   </div>
                   <h3 className="font-bold text-foreground text-base mb-2">{f.title}</h3>
-                  <p className="text-foreground/65 leading-relaxed">{f.desc}</p>
+                  <p className="text-foreground/75 leading-relaxed">{f.desc}</p>
                 </div>
               </ScrollReveal>
             ))}
@@ -238,7 +271,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6">
           <ScrollReveal>
             <h2 className="text-3xl md:text-4xl font-extrabold text-center text-foreground mb-4 tracking-tight">料金プラン</h2>
-            <p className="text-center text-foreground/65 mb-3 text-base">無料から始めて、必要に応じてスケールアップ</p>
+            <p className="text-center text-foreground/75 mb-3 text-base">無料から始めて、必要に応じてスケールアップ</p>
             <div className="flex justify-center mb-14">
               <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-700 px-4 py-2 rounded-full text-sm font-medium">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -297,7 +330,7 @@ export default function Home() {
                     </div>
                   )}
                   <h3 className="text-xl font-extrabold text-foreground mb-1">{plan.name}</h3>
-                  <p className="text-sm text-foreground/65 mb-5">{plan.desc}</p>
+                  <p className="text-sm text-foreground/75 mb-5">{plan.desc}</p>
                   <div className="mb-6">
                     {plan.originalPrice && (
                       <span className="text-lg text-foreground/40 line-through mr-2">{plan.originalPrice}</span>
@@ -337,47 +370,10 @@ export default function Home() {
         <div className="max-w-3xl mx-auto px-6">
           <ScrollReveal>
             <h2 className="text-3xl md:text-4xl font-extrabold text-center text-foreground mb-4 tracking-tight">よくある質問</h2>
-            <p className="text-center text-foreground/65 mb-14 text-base">ご利用前の疑問にお答えします</p>
+            <p className="text-center text-foreground/75 mb-14 text-base">ご利用前の疑問にお答えします</p>
           </ScrollReveal>
           <div className="space-y-4">
-            {[
-              {
-                q: 'Pivolinkとは何ですか？',
-                a: 'QRコードやNFCタグのリダイレクト先URLを、管理画面からいつでも変更できるサービスです。印刷済みのQRコードや設置済みのNFCタグを作り直すことなく、遷移先だけを切り替えられます。',
-              },
-              {
-                q: 'QRコードとNFCタグの違いは？',
-                a: 'QRコードはカメラでスキャンして読み取る二次元バーコードです。NFCタグはスマートフォンをかざすだけで読み取れるICチップで、店頭POPや商品タグに埋め込まれます。Pivolinkでは両方のリダイレクト先を同じ管理画面で一元管理できます。',
-              },
-              {
-                q: 'セキュリティは大丈夫ですか？第三者にURLを改ざんされませんか？',
-                a: 'ご安心ください。リダイレクト先の変更は、アカウントにログインした所有者本人のみが行えます。データベースレベルでの行単位セキュリティ（RLS）と、API認証の二重防御で保護されています。',
-              },
-              {
-                q: '無料プランでも使えますか？',
-                a: 'はい。Freeプランではリダイレクト3件・月間1,000アクセスまで無料でご利用いただけます。クレジットカードの登録も不要です。',
-              },
-              {
-                q: 'QRコードを印刷した後でもリダイレクト先を変更できますか？',
-                a: 'はい、それがPivolinkの最大の特長です。QRコード自体のURLは固定ですが、その先のリダイレクト先は管理画面からいつでも何度でも変更可能です。',
-              },
-              {
-                q: 'NFCタグのURLはどうやって設定しますか？',
-                a: 'Pivolinkで発行されるリダイレクトURL（例: pivolink.com/r/xxxxx）をNFCタグに書き込むだけです。以後はPivolinkの管理画面からリダイレクト先を変更すれば、タグを書き換える必要はありません。',
-              },
-              {
-                q: 'スケジュール切替やA/Bテストはどのプランで使えますか？',
-                a: 'ProプランとBusinessプランでご利用いただけます。Freeプランではデフォルトのリダイレクトのみとなります。',
-              },
-              {
-                q: 'プランはいつでも変更できますか？',
-                a: 'はい、管理画面の「プラン管理」からいつでもアップグレード・ダウングレードが可能です。アップグレードは即時反映、ダウングレードは現在の請求期間終了時に反映されます。',
-              },
-              {
-                q: '解約はできますか？',
-                a: 'はい、いつでも解約可能です。解約後もFreeプランとして引き続きご利用いただけます。データが削除されることはありません。',
-              },
-            ].map((item, i) => (
+            {faqItems.map((item, i) => (
               <ScrollReveal key={i} animation="fade-in-up" delay={i * 60}>
                 <details className="group bg-gradient-to-b from-slate-50/50 to-white rounded-xl border border-border card-hover">
                   <summary className="flex items-center justify-between px-6 py-5 cursor-pointer list-none">
@@ -386,7 +382,7 @@ export default function Home() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                     </svg>
                   </summary>
-                  <div className="px-6 pb-5 text-foreground/70 leading-relaxed">
+                  <div className="px-6 pb-5 text-foreground/75 leading-relaxed">
                     {item.a}
                   </div>
                 </details>

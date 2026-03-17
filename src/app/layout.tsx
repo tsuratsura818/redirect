@@ -15,6 +15,24 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Pivolink — QRコード・NFCタグのリダイレクト管理',
   description: 'Pivolink（ピボリンク）は、QRコード・NFCタグのリダイレクト先をいつでも変更できる管理サービス。印刷済みQRや設置済みNFCの遷移先をワンクリックで切替。',
+  metadataBase: new URL('https://redirect.tsuratsura.com'),
+  openGraph: {
+    title: 'Pivolink — QRコード・NFCタグのリダイレクト管理',
+    description: 'QRコード・NFCタグのリダイレクト先をいつでも変更。印刷済みQRコードの再発行不要。無料プランあり。',
+    url: 'https://redirect.tsuratsura.com',
+    siteName: 'Pivolink',
+    type: 'website',
+    locale: 'ja_JP',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Pivolink — QRコード・NFCタグのリダイレクト管理',
+    description: 'QRコード・NFCタグのリダイレクト先をいつでも変更。印刷済みQRコードの再発行不要。',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({

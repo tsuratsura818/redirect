@@ -173,7 +173,7 @@ export default function PlanClient() {
         <h2 className="text-xl font-bold text-foreground">プランを選択</h2>
         {IS_BETA && (
           <span className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 px-3 py-1 rounded-full text-xs font-medium">
-            Beta限定20%OFF
+            Beta限定 20%OFF（正式リリースまで）
           </span>
         )}
       </div>

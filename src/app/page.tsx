@@ -403,8 +403,18 @@ export default function Home() {
 
       {/* フッター */}
       <footer className="border-t border-border bg-white py-10">
-        <div className="max-w-6xl mx-auto px-6 text-center text-sm text-foreground/55">
-          &copy; 2026 Pivolink. All rights reserved.
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-sm text-foreground/55">
+              &copy; 2026 Pivolink. All rights reserved.
+            </div>
+            <nav className="flex flex-wrap justify-center gap-4 text-sm text-foreground/55">
+              <a href="/terms" className="hover:text-foreground transition-colors">利用規約</a>
+              <a href="/privacy" className="hover:text-foreground transition-colors">プライバシーポリシー</a>
+              <a href="/tokusho" className="hover:text-foreground transition-colors">特定商取引法</a>
+              <a href="/contact" className="hover:text-foreground transition-colors">お問い合わせ</a>
+            </nav>
+          </div>
         </div>
       </footer>
     </div>

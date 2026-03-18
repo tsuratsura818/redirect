@@ -1,6 +1,8 @@
 import Stripe from 'stripe'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  httpClient: Stripe.createFetchHttpClient(),
+})
 
 export const PRICE_IDS: Record<string, string | undefined> = {
   pro_monthly: process.env.STRIPE_PRO_PRICE_ID,

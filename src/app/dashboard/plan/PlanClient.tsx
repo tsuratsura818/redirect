@@ -57,8 +57,8 @@ export default function PlanClient() {
       body: JSON.stringify({ plan: planId, billing }),
     })
 
+    const result = await res.json()
     if (res.ok) {
-      const result = await res.json()
       // Stripe Checkoutにリダイレクト
       if (result.url) {
         window.location.href = result.url
@@ -68,6 +68,9 @@ export default function PlanClient() {
       setMessage(result.message)
       await fetchData()
       setTimeout(() => setMessage(''), 4000)
+    } else {
+      setMessage(`エラー: ${result.error || '処理に失敗しました'}`)
+      setTimeout(() => setMessage(''), 6000)
     }
     setChanging(null)
   }
@@ -113,7 +116,9 @@ export default function PlanClient() {
 
       {message && (
         <div className={`p-4 rounded-lg text-sm mb-6 ${
-          message.includes('キャンセル') ? 'bg-orange-50 text-orange-700' : 'bg-green-50 text-green-700'
+          message.startsWith('エラー') ? 'bg-red-50 text-red-700' :
+          message.includes('キャンセル') ? 'bg-orange-50 text-orange-700' :
+          'bg-green-50 text-green-700'
         }`}>
           {message}
         </div>

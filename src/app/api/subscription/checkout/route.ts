@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { stripe, PRICE_IDS } from '@/lib/stripe'
+import { stripe, getPriceId } from '@/lib/stripe'
 import { getUserSubscription } from '@/lib/subscription'
 import type { PlanId } from '@/lib/plans'
 import { PLANS } from '@/lib/plans'
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { plan } = await request.json() as { plan: PlanId }
+    const { plan, billing = 'monthly' } = await request.json() as { plan: PlanId; billing?: 'monthly' | 'annual' }
 
     if (!PLANS[plan]) {
       return NextResponse.json({ error: '無効なプランです' }, { status: 400 })
@@ -46,9 +46,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: 'Freeプランに変更しました' })
     }
 
-    const priceId = PRICE_IDS[plan]
+    const priceId = getPriceId(plan, billing)
     if (!priceId) {
-      return NextResponse.json({ error: '価格が設定されていません' }, { status: 400 })
+      return NextResponse.json({ error: `価格IDが未設定です (${plan}_${billing})` }, { status: 400 })
     }
 
     // 既存Stripeサブスクリプションがある場合: プラン変更（プロレーション）

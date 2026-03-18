@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { PLANS, IS_BETA, type PlanId } from '@/lib/plans'
+import { PLANS, IS_BETA, type PlanId, type BillingCycle } from '@/lib/plans'
 import type { UserSubscription } from '@/lib/subscription'
 
 interface SubscriptionData {
@@ -20,6 +20,8 @@ export default function PlanClient() {
   const [loading, setLoading] = useState(true)
   const [changing, setChanging] = useState<PlanId | null>(null)
   const [message, setMessage] = useState('')
+  const [billing, setBilling] = useState<BillingCycle>('monthly')
+  const isAnnual = billing === 'annual'
 
   const fetchData = useCallback(async () => {
     const res = await fetch('/api/subscription')
@@ -52,7 +54,7 @@ export default function PlanClient() {
     const res = await fetch('/api/subscription/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan: planId }),
+      body: JSON.stringify({ plan: planId, billing }),
     })
 
     if (res.ok) {
@@ -169,13 +171,41 @@ export default function PlanClient() {
       </div>
 
       {/* プラン一覧 */}
-      <div className="flex items-center gap-3 mb-6">
-        <h2 className="text-xl font-bold text-foreground">プランを選択</h2>
-        {IS_BETA && (
-          <span className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 px-3 py-1 rounded-full text-xs font-medium">
-            Beta限定 20%OFF（正式リリースまで）
-          </span>
-        )}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-bold text-foreground">プランを選択</h2>
+          {IS_BETA && (
+            <span className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 px-3 py-1 rounded-full text-xs font-medium">
+              Beta限定 20%OFF
+            </span>
+          )}
+        </div>
+        {/* 月額 / 年額トグル */}
+        <div className="inline-flex items-center bg-slate-100 rounded-xl p-1 gap-1 self-start">
+          <button
+            onClick={() => setBilling('monthly')}
+            className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+              billing === 'monthly'
+                ? 'bg-white text-foreground shadow-sm'
+                : 'text-foreground/55 hover:text-foreground'
+            }`}
+          >
+            月額
+          </button>
+          <button
+            onClick={() => setBilling('annual')}
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+              billing === 'annual'
+                ? 'bg-white text-foreground shadow-sm'
+                : 'text-foreground/55 hover:text-foreground'
+            }`}
+          >
+            年額
+            <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-1.5 py-0.5 rounded-full">
+              2ヶ月無料
+            </span>
+          </button>
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {(Object.values(PLANS) as (typeof PLANS)[PlanId][]).map(plan => {
@@ -201,8 +231,23 @@ export default function PlanClient() {
                 <p className="text-sm text-muted mt-1">{plan.description}</p>
               </div>
 
-              <div className="mb-6">
-                {IS_BETA && plan.betaPriceLabel ? (
+              <div className="mb-1">
+                {isAnnual && plan.annualPrice ? (
+                  <>
+                    {IS_BETA && plan.betaAnnualPriceLabel ? (
+                      <>
+                        <span className="text-lg text-foreground/40 line-through mr-2">{plan.annualPriceLabel}</span>
+                        <span className="text-3xl font-bold text-foreground">{plan.betaAnnualPriceLabel}</span>
+                        <span className="text-muted text-sm"> /年</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-3xl font-bold text-foreground">{plan.annualPriceLabel}</span>
+                        <span className="text-muted text-sm"> /年</span>
+                      </>
+                    )}
+                  </>
+                ) : IS_BETA && plan.betaPriceLabel ? (
                   <>
                     <span className="text-lg text-foreground/40 line-through mr-2">{plan.priceLabel}</span>
                     <span className="text-3xl font-bold text-foreground">{plan.betaPriceLabel}</span>
@@ -215,6 +260,13 @@ export default function PlanClient() {
                   </>
                 )}
               </div>
+              {isAnnual && plan.annualPrice ? (
+                <p className="text-xs text-emerald-600 font-medium mb-5">
+                  {IS_BETA ? plan.betaAnnualMonthlyLabel : plan.annualMonthlyLabel}/月換算
+                </p>
+              ) : (
+                <div className="mb-5" />
+              )}
 
               <ul className="space-y-2 mb-6">
                 {plan.features.map(f => (

@@ -1,4 +1,5 @@
 export type PlanId = 'free' | 'pro' | 'business'
+export type BillingCycle = 'monthly' | 'annual'
 
 export const IS_BETA = true
 
@@ -9,6 +10,13 @@ export interface PlanDefinition {
   priceLabel: string
   betaPrice?: number
   betaPriceLabel?: string
+  // 年額（2ヶ月無料 = 10ヶ月分）
+  annualPrice?: number
+  annualPriceLabel?: string
+  annualMonthlyLabel?: string   // 月換算表示用
+  betaAnnualPrice?: number
+  betaAnnualPriceLabel?: string
+  betaAnnualMonthlyLabel?: string
   description: string
   limits: {
     maxQrCodes: number
@@ -52,6 +60,12 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     priceLabel: '¥980',
     betaPrice: 780,
     betaPriceLabel: '¥780',
+    annualPrice: 9800,
+    annualPriceLabel: '¥9,800',
+    annualMonthlyLabel: '¥817',
+    betaAnnualPrice: 7800,
+    betaAnnualPriceLabel: '¥7,800',
+    betaAnnualMonthlyLabel: '¥650',
     description: '本格運用したい方に',
     limits: {
       maxQrCodes: 50,
@@ -79,6 +93,12 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     priceLabel: '¥4,980',
     betaPrice: 3980,
     betaPriceLabel: '¥3,980',
+    annualPrice: 49800,
+    annualPriceLabel: '¥49,800',
+    annualMonthlyLabel: '¥4,150',
+    betaAnnualPrice: 39800,
+    betaAnnualPriceLabel: '¥39,800',
+    betaAnnualMonthlyLabel: '¥3,316',
     description: '大規模運用・チーム向け',
     limits: {
       maxQrCodes: -1, // 無制限

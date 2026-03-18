@@ -1,11 +1,14 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import ScrollReveal from '@/components/ScrollReveal'
 import Logo from '@/components/Logo'
 import CaseStudyCard from '@/components/CaseStudyCard'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { useLanguage } from '@/i18n/LanguageProvider'
+import { IS_BETA } from '@/lib/plans'
+import type { BillingCycle } from '@/lib/plans'
 import {
   RestaurantIllust, RetailIllust, RealEstateIllust, EventIllust,
   SalonIllust, TourismIllust, ManufacturingIllust, EcIllust,
@@ -54,6 +57,8 @@ export default function LPContent() {
   const faqItems = t.faq
   const cases = t.cases
   const common = t.common
+  const [billing, setBilling] = useState<BillingCycle>('monthly')
+  const isAnnual = billing === 'annual'
 
   const featureList = [
     features.qrGen,
@@ -71,29 +76,43 @@ export default function LPContent() {
     {
       name: 'Free',
       price: '¥0',
-      originalPrice: null,
+      originalPrice: null as string | null,
+      monthlyEquiv: null as string | null,
       desc: plans.freeDesc,
       features: plans.freeFeatures,
       cta: plans.freeCta,
       popular: false,
+      isFree: true,
     },
     {
       name: 'Pro',
-      price: '¥780',
-      originalPrice: '¥980',
+      price: isAnnual
+        ? (IS_BETA ? '¥7,800' : '¥9,800')
+        : (IS_BETA ? '¥780' : '¥980'),
+      originalPrice: isAnnual
+        ? (IS_BETA ? '¥9,800' : null)
+        : (IS_BETA ? '¥980' : null),
+      monthlyEquiv: isAnnual ? (IS_BETA ? '¥650' : '¥817') : null,
       desc: plans.proDesc,
       features: plans.proFeatures,
       cta: plans.proCta,
       popular: true,
+      isFree: false,
     },
     {
       name: 'Business',
-      price: '¥3,980',
-      originalPrice: '¥4,980',
+      price: isAnnual
+        ? (IS_BETA ? '¥39,800' : '¥49,800')
+        : (IS_BETA ? '¥3,980' : '¥4,980'),
+      originalPrice: isAnnual
+        ? (IS_BETA ? '¥49,800' : null)
+        : (IS_BETA ? '¥4,980' : null),
+      monthlyEquiv: isAnnual ? (IS_BETA ? '¥3,316' : '¥4,150') : null,
       desc: plans.bizDesc,
       features: plans.bizFeatures,
       cta: plans.bizCta,
       popular: false,
+      isFree: false,
     },
   ]
 
@@ -277,7 +296,37 @@ export default function LPContent() {
         <div className="max-w-6xl mx-auto px-6">
           <ScrollReveal>
             <h2 className="text-3xl md:text-4xl font-extrabold text-center text-foreground mb-4 tracking-tight">{lp.pricingTitle}</h2>
-            <p className="text-center text-foreground/75 mb-3 text-base">{lp.pricingDesc}</p>
+            <p className="text-center text-foreground/75 mb-6 text-base">{lp.pricingDesc}</p>
+
+            {/* 月額 / 年額トグル */}
+            <div className="flex justify-center mb-6">
+              <div className="inline-flex items-center bg-slate-100 rounded-xl p-1 gap-1">
+                <button
+                  onClick={() => setBilling('monthly')}
+                  className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    billing === 'monthly'
+                      ? 'bg-white text-foreground shadow-sm'
+                      : 'text-foreground/55 hover:text-foreground'
+                  }`}
+                >
+                  {common.monthly}
+                </button>
+                <button
+                  onClick={() => setBilling('annual')}
+                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    billing === 'annual'
+                      ? 'bg-white text-foreground shadow-sm'
+                      : 'text-foreground/55 hover:text-foreground'
+                  }`}
+                >
+                  {common.annual}
+                  <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                    {common.twoMonthsFree}
+                  </span>
+                </button>
+              </div>
+            </div>
+
             <div className="flex justify-center mb-14">
               <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-700 px-4 py-2 rounded-full text-sm font-medium">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -302,20 +351,31 @@ export default function LPContent() {
                       {common.popular}
                     </div>
                   )}
-                  {plan.originalPrice && (
+                  {plan.originalPrice && !isAnnual && (
                     <div className="absolute -top-3.5 right-4 bg-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
                       20%OFF
                     </div>
                   )}
+                  {plan.originalPrice && isAnnual && (
+                    <div className="absolute -top-3.5 right-4 bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                      {common.twoMonthsFree}
+                    </div>
+                  )}
                   <h3 className="text-xl font-extrabold text-foreground mb-1">{plan.name}</h3>
                   <p className="text-sm text-foreground/75 mb-5">{plan.desc}</p>
-                  <div className="mb-6">
+                  <div className="mb-1">
                     {plan.originalPrice && (
                       <span className="text-lg text-foreground/40 line-through mr-2">{plan.originalPrice}</span>
                     )}
                     <span className="text-4xl font-extrabold text-foreground">{plan.price}</span>
-                    <span className="text-foreground/55 text-sm">{common.month}</span>
+                    <span className="text-foreground/55 text-sm">{isAnnual && !plan.isFree ? common.year : common.month}</span>
                   </div>
+                  {plan.monthlyEquiv && (
+                    <p className="text-xs text-emerald-600 font-medium mb-5">
+                      {plan.monthlyEquiv}{common.perMonth}
+                    </p>
+                  )}
+                  {!plan.monthlyEquiv && <div className="mb-5" />}
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((f, fi) => (
                       <li key={fi} className="flex items-start gap-2.5 text-sm">
@@ -327,7 +387,7 @@ export default function LPContent() {
                     ))}
                   </ul>
                   <Link
-                    href="/login?tab=signup"
+                    href={`/login?tab=signup${isAnnual ? '&billing=annual' : ''}`}
                     className={`block w-full py-3.5 rounded-xl text-center font-bold transition-all text-sm ${
                       plan.popular
                         ? 'gradient-bg text-white hover:shadow-lg hover:shadow-emerald-300/30 hover:-translate-y-0.5'

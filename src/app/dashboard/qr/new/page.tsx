@@ -53,7 +53,7 @@ export default function NewQrPage() {
           </svg>
           QR / NFC 一覧
         </Link>
-        <h1 className="text-2xl font-bold text-foreground">新規リダイレクト作成</h1>
+        <h1 className="text-2xl font-bold text-foreground">新規作成</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-card rounded-xl border border-border p-6 space-y-6">
@@ -101,7 +101,7 @@ export default function NewQrPage() {
 
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">
-            リダイレクト先URL <span className="text-danger">*</span>
+            リンク先URL <span className="text-danger">*</span>
           </label>
           <input
             type="url"
@@ -136,7 +136,7 @@ export default function NewQrPage() {
             disabled={loading}
             className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors font-medium disabled:opacity-50"
           >
-            {loading ? '作成中...' : 'リダイレクトを作成'}
+            {loading ? '作成中...' : '作成する'}
           </button>
           <Link
             href="/dashboard/qr"

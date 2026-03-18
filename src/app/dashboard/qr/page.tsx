@@ -22,7 +22,7 @@ export default async function QrListPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">QR / NFC 管理</h1>
-          <p className="text-muted text-sm mt-1">{codes.length} 件のリダイレクト</p>
+          <p className="text-muted text-sm mt-1">{codes.length} 件</p>
         </div>
         <Link
           href="/dashboard/qr/new"
@@ -37,12 +37,12 @@ export default async function QrListPage() {
 
       {codes.length === 0 ? (
         <div className="bg-card rounded-xl border border-border p-12 text-center">
-          <p className="text-muted mb-4">リダイレクトURLを作成して管理を始めましょう</p>
+          <p className="text-muted mb-4">QR / NFCを作成して管理を始めましょう</p>
           <Link
             href="/dashboard/qr/new"
             className="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-lg"
           >
-            最初のリダイレクトを作成
+            最初のQR / NFCを作成
           </Link>
         </div>
       ) : (

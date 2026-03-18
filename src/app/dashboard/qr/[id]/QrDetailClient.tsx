@@ -83,7 +83,7 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
   }
 
   const handleDelete = async () => {
-    if (!confirm('このリダイレクトを削除しますか？この操作は元に戻せません。')) return
+    if (!confirm('この設定を削除しますか？この操作は元に戻せません。')) return
     await fetch(`/api/qr/${qr.id}`, { method: 'DELETE' })
     router.push('/dashboard/qr')
   }
@@ -155,7 +155,7 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
               <p className="font-medium text-foreground">{qr.scan_count.toLocaleString()}</p>
             </div>
             <div className="col-span-2">
-              <span className="text-muted">リダイレクトURL（QR / NFCタグ共通）</span>
+              <span className="text-muted">リンクURL（QR / NFCタグ共通）</span>
               <p className="font-medium text-foreground text-xs mt-0.5 bg-gray-50 px-3 py-2 rounded-lg border border-border select-all break-all">{redirectUrl}</p>
             </div>
             <div className="col-span-2 sm:col-span-1">
@@ -266,7 +266,7 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
               onClick={handleDelete}
               className="px-4 py-2 text-sm text-danger hover:bg-red-50 rounded-lg transition-colors"
             >
-              リダイレクトを削除
+              削除する
             </button>
             <button
               onClick={handleSave}
@@ -407,7 +407,7 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">リダイレクト先URL</label>
+            <label className="block text-sm font-medium text-foreground mb-1">リンク先URL</label>
             <input
               type="url"
               value={url}
@@ -502,7 +502,7 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
       <div className="space-y-3">
         {rules.length === 0 ? (
           <div className="bg-card rounded-xl border border-border p-8 text-center text-muted">
-            ルールがありません。デフォルトURLにリダイレクトされます。
+            ルールがありません。デフォルトURLに移動します。
           </div>
         ) : (
           rules.map(rule => (
@@ -566,7 +566,7 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
 // クッションページ
 function CushionTab({ qrId, cushion, onUpdate }: { qrId: string; cushion: CushionPage | null; onUpdate: () => void }) {
   const [isActive, setIsActive] = useState(cushion?.is_active ?? false)
-  const [title, setTitle] = useState(cushion?.title ?? 'リダイレクト中...')
+  const [title, setTitle] = useState(cushion?.title ?? 'ページを移動します...')
   const [msg, setMsg] = useState(cushion?.message ?? '')
   const [btnText, setBtnText] = useState(cushion?.button_text ?? '続ける')
   const [bgColor, setBgColor] = useState(cushion?.background_color ?? '#ffffff')

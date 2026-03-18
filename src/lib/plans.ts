@@ -46,7 +46,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
       csvExport: false,
     },
     features: [
-      'QR/NFCリダイレクト 3件',
+      'QR/NFC管理 3件',
       '月間アクセス 1,000回',
       '基本アクセス解析',
       'QRコード自動生成（PNG/SVG）',
@@ -76,7 +76,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
       csvExport: true,
     },
     features: [
-      'QR/NFCリダイレクト 50件',
+      'QR/NFC管理 50件',
       '月間アクセス 50,000回',
       '詳細アクセス解析',
       'スケジュール / デバイス別振分',
@@ -109,7 +109,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
       csvExport: true,
     },
     features: [
-      'QR/NFCリダイレクト 無制限',
+      'QR/NFC管理 無制限',
       '月間アクセス 無制限',
       '詳細アクセス解析',
       '全ルール機能',

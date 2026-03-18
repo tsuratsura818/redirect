@@ -122,26 +122,27 @@ export default function LPContent() {
       <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Logo />
-          <div className="flex items-center gap-3 sm:gap-4">
-            <Link href="#features" className="text-foreground/75 hover:text-foreground transition-colors font-medium text-sm hidden sm:block">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+            <Link href="#features" className="text-foreground/75 hover:text-foreground transition-colors font-medium text-sm hidden md:block">
               {common.features}
             </Link>
-            <Link href="#pricing" className="text-foreground/75 hover:text-foreground transition-colors font-medium text-sm hidden sm:block">
+            <Link href="#pricing" className="text-foreground/75 hover:text-foreground transition-colors font-medium text-sm hidden md:block">
               {common.pricing}
             </Link>
-            <Link href="#faq" className="text-foreground/75 hover:text-foreground transition-colors font-medium text-sm hidden sm:block">
+            <Link href="#faq" className="text-foreground/75 hover:text-foreground transition-colors font-medium text-sm hidden md:block">
               {common.faq}
             </Link>
-            <Link href="/login" className="text-foreground/75 hover:text-foreground transition-colors font-medium text-sm">
+            <Link href="/login" className="text-foreground/75 hover:text-foreground transition-colors font-medium text-sm whitespace-nowrap hidden sm:block">
               {common.login}
             </Link>
             <Link
               href="/login?tab=signup"
-              className="gradient-bg text-white px-5 py-2.5 rounded-xl hover:shadow-lg hover:shadow-emerald-300/30 transition-all font-semibold text-sm"
+              className="gradient-bg text-white px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl hover:shadow-lg hover:shadow-emerald-300/30 transition-all font-semibold text-xs sm:text-sm whitespace-nowrap shrink-0"
             >
               {common.free}
             </Link>
-            <LanguageSwitcher />
+            <div className="sm:hidden"><LanguageSwitcher compact /></div>
+            <div className="hidden sm:block"><LanguageSwitcher /></div>
           </div>
         </div>
       </header>

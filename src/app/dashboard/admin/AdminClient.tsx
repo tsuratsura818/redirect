@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { AdminUser } from '@/types/database'
 
-type AdminTab = 'users' | 'contacts' | 'feedbacks'
+type AdminTab = 'users' | 'contacts' | 'feedbacks' | 'business' | 'settings'
 
 interface Stats {
   total_users: number
@@ -35,27 +35,48 @@ interface ContactMessage {
   created_at: string
 }
 
+interface BusinessMetrics {
+  planCounts: { free: number; pro: number; business: number }
+  paidActive: number
+  cancelPending: number
+  totalUsers: number
+  mrr: number
+  arr: number
+  conversionRate: number
+  churnRate: number
+  arpu: number
+  ltv: number
+  breakevenUsers: number
+  breakevenProgress: number
+  fixedCosts: { vercel: number; supabase: number; misc: number; total: number }
+  monthlyGrowth: { month: string; users: number; paid: number; cumulative: number }[]
+  profitLoss: number
+}
+
 export default function AdminClient({ currentUserId }: { currentUserId: string }) {
   const [tab, setTab] = useState<AdminTab>('users')
   const [users, setUsers] = useState<AdminUser[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [contacts, setContacts] = useState<ContactMessage[]>([])
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([])
+  const [business, setBusiness] = useState<BusinessMetrics | null>(null)
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
-    const [usersRes, statsRes, contactsRes, feedbacksRes] = await Promise.all([
+    const [usersRes, statsRes, contactsRes, feedbacksRes, bizRes] = await Promise.all([
       fetch('/api/admin/users'),
       fetch('/api/admin/stats'),
       fetch('/api/admin/contacts'),
       fetch('/api/admin/feedbacks'),
+      fetch('/api/admin/business-metrics'),
     ])
     if (usersRes.ok) setUsers(await usersRes.json())
     if (statsRes.ok) setStats(await statsRes.json())
     if (contactsRes.ok) setContacts(await contactsRes.json())
     if (feedbacksRes.ok) setFeedbacks(await feedbacksRes.json())
+    if (bizRes.ok) setBusiness(await bizRes.json())
     setLoading(false)
   }, [])
 
@@ -96,41 +117,20 @@ export default function AdminClient({ currentUserId }: { currentUserId: string }
       </div>
 
       {/* タブ */}
-      <div className="flex gap-1 border-b border-border mb-6">
-        <button
-          onClick={() => setTab('users')}
-          className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-            tab === 'users' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-foreground'
-          }`}
-        >
-          ユーザー管理
-        </button>
-        <button
-          onClick={() => setTab('contacts')}
-          className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
-            tab === 'contacts' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-foreground'
-          }`}
-        >
+      <div className="flex gap-1 border-b border-border mb-6 overflow-x-auto">
+        <TabButton active={tab === 'users'} onClick={() => setTab('users')}>ユーザー管理</TabButton>
+        <TabButton active={tab === 'business'} onClick={() => setTab('business')}>
+          経営ダッシュボード
+        </TabButton>
+        <TabButton active={tab === 'contacts'} onClick={() => setTab('contacts')} badge={contacts.filter(c => !c.is_read).length}>
           お問い合わせ
-          {contacts.filter(c => !c.is_read).length > 0 && (
-            <span className="bg-danger text-white text-xs px-1.5 py-0.5 rounded-full leading-none">
-              {contacts.filter(c => !c.is_read).length}
-            </span>
-          )}
-        </button>
-        <button
-          onClick={() => setTab('feedbacks')}
-          className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
-            tab === 'feedbacks' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-foreground'
-          }`}
-        >
+        </TabButton>
+        <TabButton active={tab === 'feedbacks'} onClick={() => setTab('feedbacks')} badge={feedbacks.filter(f => f.status === 'new').length}>
           フィードバック
-          {feedbacks.filter(f => f.status === 'new').length > 0 && (
-            <span className="bg-primary text-white text-xs px-1.5 py-0.5 rounded-full leading-none">
-              {feedbacks.filter(f => f.status === 'new').length}
-            </span>
-          )}
-        </button>
+        </TabButton>
+        <TabButton active={tab === 'settings'} onClick={() => setTab('settings')}>
+          サイト設定
+        </TabButton>
       </div>
 
       {tab === 'feedbacks' && (
@@ -139,6 +139,14 @@ export default function AdminClient({ currentUserId }: { currentUserId: string }
 
       {tab === 'contacts' && (
         <ContactsSection contacts={contacts} onUpdate={fetchData} />
+      )}
+
+      {tab === 'business' && business && (
+        <BusinessDashboard metrics={business} />
+      )}
+
+      {tab === 'settings' && (
+        <SiteSettings />
       )}
 
       {tab === 'users' && <>
@@ -216,7 +224,6 @@ export default function AdminClient({ currentUserId }: { currentUserId: string }
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
                         ) : (
                           <>
-                            {/* ロール切替 */}
                             <button
                               onClick={() => updateUser(u.id, {
                                 role: u.profile?.role === 'admin' ? 'user' : 'admin'
@@ -226,12 +233,8 @@ export default function AdminClient({ currentUserId }: { currentUserId: string }
                             >
                               {u.profile?.role === 'admin' ? '降格' : '昇格'}
                             </button>
-
-                            {/* BAN切替 */}
                             <button
-                              onClick={() => updateUser(u.id, {
-                                is_banned: !u.profile?.is_banned
-                              })}
+                              onClick={() => updateUser(u.id, { is_banned: !u.profile?.is_banned })}
                               className={`text-xs px-2 py-1 rounded border transition-colors ${
                                 u.profile?.is_banned
                                   ? 'border-green-300 text-green-700 hover:bg-green-50'
@@ -240,30 +243,22 @@ export default function AdminClient({ currentUserId }: { currentUserId: string }
                             >
                               {u.profile?.is_banned ? '解除' : 'BAN'}
                             </button>
-
-                            {/* 削除 */}
                             {confirmDelete === u.id ? (
                               <div className="flex items-center gap-1">
                                 <button
                                   onClick={() => deleteUser(u.id)}
                                   className="text-xs px-2 py-1 rounded bg-danger text-white hover:opacity-80 transition-opacity"
-                                >
-                                  確定
-                                </button>
+                                >確定</button>
                                 <button
                                   onClick={() => setConfirmDelete(null)}
                                   className="text-xs px-2 py-1 rounded border border-border hover:bg-gray-100 transition-colors"
-                                >
-                                  取消
-                                </button>
+                                >取消</button>
                               </div>
                             ) : (
                               <button
                                 onClick={() => setConfirmDelete(u.id)}
                                 className="text-xs px-2 py-1 rounded border border-red-300 text-red-600 hover:bg-red-50 transition-colors"
-                              >
-                                削除
-                              </button>
+                              >削除</button>
                             )}
                           </>
                         )}
@@ -277,6 +272,349 @@ export default function AdminClient({ currentUserId }: { currentUserId: string }
         </div>
       </div>
       </>}
+    </div>
+  )
+}
+
+// ─── 経営ダッシュボード ───────────────────────────────────────────
+
+const ROADMAP = [
+  { phase: 0, title: 'プロダクト開発・ベータリリース', detail: 'MVP完成、Supabase/Next.js構築、決済統合テスト完了', done: true },
+  { phase: 1, title: 'Stripe本番移行', detail: 'テストモード→本番切替、実際の課金開始', current: true, done: false },
+  { phase: 2, title: '有料ユーザー 10名達成', detail: 'MRR ¥7,000〜¥10,000 → 固定費をほぼカバー', milestone: 'MRR ¥10,000', done: false },
+  { phase: 3, title: 'プロダクトマーケットフィット確認', detail: '解約率5%以下、NPS計測開始、紹介経由ユーザー獲得', milestone: 'チャーン < 5%', done: false },
+  { phase: 4, title: 'ベータ終了・正規価格移行', detail: 'ベータユーザーへの移行割引提供、正規価格（Pro ¥980、Business ¥4,980）適用', milestone: 'MRR ¥50,000', done: false },
+  { phase: 5, title: '有料ユーザー 100名達成', detail: 'MRR ¥100,000超え、サービス収益化達成、機能拡張加速', milestone: 'MRR ¥100,000', done: false },
+  { phase: 6, title: 'Enterprise / API提供', detail: 'ホワイトラベル・APIアクセス・チームプラン追加、ARPU向上', milestone: 'MRR ¥300,000', done: false },
+  { phase: 7, title: '海外展開', detail: '英語UI・多通貨対応、海外マーケット参入', milestone: 'ARR ¥10M+', done: false },
+]
+
+function BusinessDashboard({ metrics }: { metrics: BusinessMetrics }) {
+  const paidTotal = metrics.planCounts.pro + metrics.planCounts.business
+  const maxGrowth = Math.max(...metrics.monthlyGrowth.map(m => m.cumulative), 1)
+
+  return (
+    <div className="space-y-8">
+
+      {/* ─── 💰 CFO視点: 収益サマリー ─── */}
+      <section>
+        <SectionHeader icon="💰" label="CFO視点" title="収益サマリー" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <MetricCard
+            label="MRR（月次経常収益）"
+            value={`¥${metrics.mrr.toLocaleString()}`}
+            sub="推定値（ベータ価格ベース）"
+            color={metrics.mrr > 0 ? 'green' : 'gray'}
+          />
+          <MetricCard
+            label="ARR（年次経常収益）"
+            value={`¥${metrics.arr.toLocaleString()}`}
+            sub="MRR × 12"
+            color="blue"
+          />
+          <MetricCard
+            label="有料ユーザー"
+            value={`${paidTotal}名`}
+            sub={`全体 ${metrics.totalUsers}名 中`}
+            color="purple"
+          />
+          <MetricCard
+            label="月次損益"
+            value={`${metrics.profitLoss >= 0 ? '+' : ''}¥${metrics.profitLoss.toLocaleString()}`}
+            sub={`固定費 ¥${metrics.fixedCosts.total.toLocaleString()}/月`}
+            color={metrics.profitLoss >= 0 ? 'green' : 'red'}
+          />
+        </div>
+
+        {/* 固定費内訳 */}
+        <div className="bg-card border border-border rounded-xl p-5">
+          <div className="text-sm font-semibold text-foreground mb-3">推定固定費内訳（月次）</div>
+          <div className="grid grid-cols-3 gap-3 text-sm mb-4">
+            <CostRow label="Vercel Pro" amount={metrics.fixedCosts.vercel} />
+            <CostRow label="Supabase Pro" amount={metrics.fixedCosts.supabase} />
+            <CostRow label="ドメイン・その他" amount={metrics.fixedCosts.misc} />
+          </div>
+          <div className="text-xs text-muted">※ Stripe手数料（3.6% + ¥40/件）は変動費のため含まず。スケール時にSupabase Proへの移行が必要</div>
+        </div>
+      </section>
+
+      {/* ─── 損益分岐点 ─── */}
+      <section>
+        <SectionHeader icon="📊" label="CFO視点" title="損益分岐点（Break-even Analysis）" />
+        <div className="bg-card border border-border rounded-xl p-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-5">
+            <div>
+              <div className="text-3xl font-bold text-foreground">{metrics.breakevenUsers}名</div>
+              <div className="text-sm text-muted mt-1">損益分岐点（必要有料ユーザー数）</div>
+            </div>
+            <div className="text-right">
+              <div className="text-lg font-semibold text-foreground">現在: {paidTotal}名</div>
+              <div className={`text-sm font-medium ${metrics.breakevenProgress >= 100 ? 'text-success' : 'text-amber-600'}`}>
+                達成率 {Math.round(metrics.breakevenProgress)}%
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gray-100 rounded-full h-4 mb-3 overflow-hidden">
+            <div
+              className={`h-4 rounded-full transition-all ${metrics.breakevenProgress >= 100 ? 'bg-success' : 'bg-primary'}`}
+              style={{ width: `${metrics.breakevenProgress}%` }}
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 mt-5 text-sm">
+            <BreakevenScenario label="Proのみの場合" users={Math.ceil(metrics.fixedCosts.total / 715)} unit="名" />
+            <BreakevenScenario label="Businessのみの場合" users={Math.ceil(metrics.fixedCosts.total / 3648)} unit="名" />
+            <BreakevenScenario label="正規価格移行後（Pro）" users={Math.ceil(metrics.fixedCosts.total / 980)} unit="名" />
+          </div>
+
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-700">
+            <strong>CFOコメント:</strong> 現在の固定費 ¥8,000/月に対し、Pro 12名 or Business 3名で収支均衡。
+            ベータ終了後に正規価格（Pro ¥980）へ移行すれば分岐点が9名に下がり、収益性が向上します。
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 📈 グロースハッカー視点 ─── */}
+      <section>
+        <SectionHeader icon="📈" label="グロースハッカー視点" title="成長・継続指標" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <MetricCard
+            label="無料→有料 転換率"
+            value={`${metrics.conversionRate.toFixed(1)}%`}
+            sub="業界平均: 2〜5%（SaaS）"
+            color={metrics.conversionRate >= 5 ? 'green' : metrics.conversionRate >= 2 ? 'yellow' : 'red'}
+          />
+          <MetricCard
+            label="月次チャーン率"
+            value={`${metrics.churnRate.toFixed(1)}%`}
+            sub="目標: 5%以下"
+            color={metrics.churnRate <= 5 ? 'green' : metrics.churnRate <= 10 ? 'yellow' : 'red'}
+          />
+          <MetricCard
+            label="ARPU（有料ユーザー単価）"
+            value={paidTotal > 0 ? `¥${Math.round(metrics.arpu).toLocaleString()}` : '-'}
+            sub="Pro/Business混合平均"
+            color="blue"
+          />
+          <MetricCard
+            label="LTV（顧客生涯価値）"
+            value={paidTotal > 0 ? `¥${Math.round(metrics.ltv).toLocaleString()}` : '-'}
+            sub="チャーン0の場合は36ヶ月試算"
+            color="purple"
+          />
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-5">
+          <div className="text-sm font-semibold text-foreground mb-1">解約待ちユーザー</div>
+          <div className="flex items-center gap-3">
+            <span className={`text-2xl font-bold ${metrics.cancelPending > 0 ? 'text-orange-600' : 'text-success'}`}>
+              {metrics.cancelPending}名
+            </span>
+            <span className="text-sm text-muted">期間終了時にFreeへ移行予定</span>
+          </div>
+          {metrics.cancelPending > 0 && (
+            <p className="mt-2 text-xs text-orange-600">
+              解約理由のヒアリング・価格見直し・機能追加で引き留めを検討してください
+            </p>
+          )}
+        </div>
+
+        <div className="mt-4 p-3 bg-emerald-50 rounded-lg text-xs text-emerald-700">
+          <strong>グロースハッカーコメント:</strong> 転換率2〜5%が業界標準。
+          まずは登録後7日以内のオンボーディング強化（使い方ガイド・メール）でFree→Pro転換を促進。
+          チャーン削減にはユーザーインタビューが最も効果的です。
+        </div>
+      </section>
+
+      {/* ─── 🎯 プロダクト戦略家視点 ─── */}
+      <section>
+        <SectionHeader icon="🎯" label="プロダクト戦略家視点" title="プラン分布・ユーザー成長" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* プラン分布 */}
+          <div className="bg-card border border-border rounded-xl p-5">
+            <div className="text-sm font-semibold text-foreground mb-4">プラン分布</div>
+            <div className="space-y-3">
+              {[
+                { label: 'Free', count: metrics.planCounts.free, color: 'bg-gray-300' },
+                { label: 'Pro', count: metrics.planCounts.pro, color: 'bg-primary' },
+                { label: 'Business', count: metrics.planCounts.business, color: 'bg-purple-500' },
+              ].map(p => (
+                <div key={p.label}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-foreground font-medium">{p.label}</span>
+                    <span className="text-muted">{p.count}名 ({metrics.totalUsers > 0 ? Math.round(p.count / metrics.totalUsers * 100) : 0}%)</span>
+                  </div>
+                  <div className="bg-gray-100 rounded-full h-2">
+                    <div
+                      className={`${p.color} rounded-full h-2 transition-all`}
+                      style={{ width: metrics.totalUsers > 0 ? `${(p.count / metrics.totalUsers) * 100}%` : '0%' }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 月次成長グラフ（簡易バーチャート） */}
+          <div className="bg-card border border-border rounded-xl p-5">
+            <div className="text-sm font-semibold text-foreground mb-4">月次累計ユーザー推移（過去6ヶ月）</div>
+            <div className="flex items-end gap-2 h-28">
+              {metrics.monthlyGrowth.map(m => (
+                <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
+                  <div
+                    className="w-full bg-primary/20 rounded-t relative group"
+                    style={{ height: `${(m.cumulative / maxGrowth) * 100}%`, minHeight: '4px' }}
+                  >
+                    <div
+                      className="w-full bg-primary rounded-t absolute bottom-0"
+                      style={{ height: `${m.cumulative > 0 ? Math.max((m.paid / m.cumulative) * 100, 0) : 0}%` }}
+                    />
+                  </div>
+                  <div className="text-xs text-muted whitespace-nowrap">{m.month.slice(5)}</div>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-4 mt-2 text-xs">
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-primary/20 inline-block" />累計ユーザー</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-primary inline-block" />うち有料</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 p-3 bg-violet-50 rounded-lg text-xs text-violet-700">
+          <strong>プロダクトコメント:</strong> Businessプランの比率が高いほど健全。
+          Free→Proの転換障壁を下げるために「QR5件まで無料試用」や「14日間Proトライアル」の導入を検討してください。
+        </div>
+      </section>
+
+      {/* ─── 🗺️ ビジネスロードマップ ─── */}
+      <section>
+        <SectionHeader icon="🗺️" label="ビジネスストラテジスト視点" title="成長ロードマップ" />
+        <div className="bg-card border border-border rounded-xl p-6">
+          <div className="relative">
+            {ROADMAP.map((item, i) => (
+              <div key={item.phase} className="flex gap-4 mb-6 last:mb-0">
+                {/* ライン */}
+                <div className="flex flex-col items-center">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold ${
+                    item.done
+                      ? 'bg-success text-white'
+                      : item.current
+                        ? 'bg-primary text-white ring-4 ring-primary/20'
+                        : 'bg-gray-100 text-muted border-2 border-border'
+                  }`}>
+                    {item.done ? '✓' : item.phase}
+                  </div>
+                  {i < ROADMAP.length - 1 && (
+                    <div className={`w-0.5 flex-1 mt-1 ${item.done ? 'bg-success' : 'bg-border'}`} style={{ minHeight: '16px' }} />
+                  )}
+                </div>
+
+                <div className="pb-2 flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <span className={`text-sm font-semibold ${item.current ? 'text-primary' : item.done ? 'text-success' : 'text-foreground'}`}>
+                      {item.title}
+                    </span>
+                    {item.current && (
+                      <span className="bg-primary text-white text-xs px-2 py-0.5 rounded-full font-medium">NOW</span>
+                    )}
+                    {item.milestone && (
+                      <span className="bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full">
+                        目標: {item.milestone}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted leading-relaxed">{item.detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4 p-3 bg-amber-50 rounded-lg text-xs text-amber-700">
+          <strong>ストラテジストコメント:</strong> フォーカスすべき最重要KPIは「有料転換数」と「チャーン率」の2つ。
+          MRR ¥10,000（損益均衡）を最初のマイルストーンとし、そこから口コミ・SEO・アフィリエイトで有機的成長を目指してください。
+          ベータ終了タイミング（Phase 4）で既存ユーザーへの価格移行コミュニケーションが最大の山場です。
+        </div>
+      </section>
+    </div>
+  )
+}
+
+// ─── サブコンポーネント ───────────────────────────────────────────
+
+function TabButton({ children, active, onClick, badge }: {
+  children: React.ReactNode
+  active: boolean
+  onClick: () => void
+  badge?: number
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 whitespace-nowrap ${
+        active ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-foreground'
+      }`}
+    >
+      {children}
+      {!!badge && badge > 0 && (
+        <span className="bg-danger text-white text-xs px-1.5 py-0.5 rounded-full leading-none">{badge}</span>
+      )}
+    </button>
+  )
+}
+
+function SectionHeader({ icon, label, title }: { icon: string; label: string; title: string }) {
+  return (
+    <div className="flex items-center gap-3 mb-4">
+      <span className="text-xl">{icon}</span>
+      <div>
+        <div className="text-xs text-muted font-medium uppercase tracking-wide">{label}</div>
+        <div className="text-base font-bold text-foreground">{title}</div>
+      </div>
+    </div>
+  )
+}
+
+function MetricCard({ label, value, sub, color }: {
+  label: string
+  value: string
+  sub: string
+  color: 'green' | 'red' | 'blue' | 'purple' | 'yellow' | 'gray'
+}) {
+  const colorMap = {
+    green: 'text-success',
+    red: 'text-danger',
+    blue: 'text-blue-600',
+    purple: 'text-purple-600',
+    yellow: 'text-amber-600',
+    gray: 'text-muted',
+  }
+  return (
+    <div className="bg-card border border-border rounded-xl p-4">
+      <div className="text-xs text-muted mb-1 leading-snug">{label}</div>
+      <div className={`text-2xl font-bold ${colorMap[color]}`}>{value}</div>
+      <div className="text-xs text-muted mt-1">{sub}</div>
+    </div>
+  )
+}
+
+function CostRow({ label, amount }: { label: string; amount: number }) {
+  return (
+    <div className="bg-gray-50 rounded-lg p-3">
+      <div className="text-xs text-muted mb-0.5">{label}</div>
+      <div className="font-semibold text-foreground">¥{amount.toLocaleString()}</div>
+    </div>
+  )
+}
+
+function BreakevenScenario({ label, users, unit }: { label: string; users: number; unit: string }) {
+  return (
+    <div className="bg-gray-50 rounded-lg p-3 text-sm">
+      <div className="text-xs text-muted mb-1">{label}</div>
+      <div className="font-bold text-foreground text-lg">{users}{unit}</div>
     </div>
   )
 }
@@ -477,3 +815,187 @@ function StatCard({ label, value, sub }: { label: string; value: number; sub?: s
     </div>
   )
 }
+
+// ─── サイト設定（OGP管理） ───────────────────────────────────────
+
+interface OgpInfo {
+  hasCustom: boolean
+  url: string | null
+}
+
+function SiteSettings() {
+  const [ogp, setOgp] = useState<OgpInfo | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [message, setMessage] = useState('')
+  const [previewTs, setPreviewTs] = useState(Date.now())
+  const [imgError, setImgError] = useState(false)
+
+  const fetchOgp = useCallback(async () => {
+    const res = await fetch('/api/admin/ogp')
+    if (res.ok) {
+      setOgp(await res.json())
+      setImgError(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchOgp() }, [fetchOgp])
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const form = new FormData()
+    form.append('file', file)
+    const res = await fetch('/api/admin/ogp', { method: 'POST', body: form })
+    const result = await res.json()
+    if (res.ok) {
+      setMessage('OGP画像をアップロードしました')
+      setPreviewTs(Date.now())
+      await fetchOgp()
+    } else {
+      setMessage(`エラー: ${result.error}`)
+    }
+    setUploading(false)
+    setTimeout(() => setMessage(''), 4000)
+    e.target.value = ''
+  }
+
+  const handleDelete = async () => {
+    if (!confirm('カスタム画像を削除して動的生成に戻しますか？')) return
+    setDeleting(true)
+    await fetch('/api/admin/ogp', { method: 'DELETE' })
+    setMessage('カスタム画像を削除しました。動的生成に戻しました。')
+    setPreviewTs(Date.now())
+    await fetchOgp()
+    setDeleting(false)
+    setTimeout(() => setMessage(''), 4000)
+  }
+
+  const ogpPreviewUrl = `/opengraph-image?t=${previewTs}`
+
+  return (
+    <div className="space-y-8 max-w-3xl">
+      <div>
+        <h2 className="text-lg font-bold text-foreground mb-1">OGP画像設定</h2>
+        <p className="text-sm text-muted">SNSシェア時・リンクプレビューに表示される画像を管理します（推奨: 1200×630px）</p>
+      </div>
+
+      {message && (
+        <div className={`p-3 rounded-lg text-sm ${message.startsWith('エラー') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+          {message}
+        </div>
+      )}
+
+      {/* 現在の画像プレビュー */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="px-5 py-3 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-foreground">現在のOGP画像プレビュー</span>
+            {ogp && (
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                ogp.hasCustom ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-600'
+              }`}>
+                {ogp.hasCustom ? 'カスタム画像' : '自動生成'}
+              </span>
+            )}
+          </div>
+          <a
+            href={ogpPreviewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-primary hover:underline"
+          >
+            別タブで開く
+          </a>
+        </div>
+        <div className="p-4 bg-gray-50">
+          {imgError ? (
+            <div
+              className="w-full rounded-lg border border-border bg-gray-100 flex flex-col items-center justify-center gap-3 text-muted"
+              style={{ aspectRatio: '1200/630' }}
+            >
+              <svg className="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p className="text-sm">OGP画像の生成中または読み込みに失敗しました</p>
+              <button
+                onClick={() => { setImgError(false); setPreviewTs(Date.now()) }}
+                className="text-xs px-3 py-1.5 rounded border border-border hover:bg-gray-200 transition-colors"
+              >再試行</button>
+            </div>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={previewTs}
+              src={ogpPreviewUrl}
+              alt="OGP preview"
+              className="w-full rounded-lg border border-border shadow-sm"
+              style={{ aspectRatio: '1200/630', objectFit: 'cover' }}
+              onError={() => setImgError(true)}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* アップロード */}
+      <div className="bg-card border border-border rounded-xl p-5">
+        <div className="text-sm font-semibold text-foreground mb-3">カスタム画像に差し替える</div>
+        <p className="text-xs text-muted mb-4">PNG / JPG、推奨サイズ 1200×630px。アップロード後に即時反映されます。</p>
+        <label className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm cursor-pointer transition-colors ${
+          uploading ? 'bg-gray-100 text-gray-400 pointer-events-none' : 'bg-primary text-white hover:bg-primary-dark'
+        }`}>
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+          {uploading ? 'アップロード中...' : '画像を選択してアップロード'}
+          <input type="file" accept="image/png,image/jpeg" className="hidden" onChange={handleUpload} disabled={uploading} />
+        </label>
+      </div>
+
+      {/* カスタム削除 */}
+      {ogp?.hasCustom && (
+        <div className="bg-card border border-border rounded-xl p-5">
+          <div className="text-sm font-semibold text-foreground mb-1">自動生成に戻す</div>
+          <p className="text-xs text-muted mb-4">カスタム画像を削除して、ブランドカラーの自動生成OGPに戻します。</p>
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="px-4 py-2 rounded-lg border border-red-300 text-red-600 text-sm hover:bg-red-50 transition-colors disabled:opacity-50"
+          >
+            {deleting ? '削除中...' : 'カスタム画像を削除'}
+          </button>
+        </div>
+      )}
+
+      {/* SNSプレビュー確認ツール */}
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-5">
+        <div className="text-sm font-semibold text-blue-800 mb-2">OGPデバッグツール</div>
+        <div className="flex flex-wrap gap-3">
+          <a
+            href={`https://cards-dev.twitter.com/validator`}
+            target="_blank" rel="noopener noreferrer"
+            className="text-xs px-3 py-2 rounded border border-blue-200 text-blue-700 hover:bg-blue-100 transition-colors"
+          >
+            X (Twitter) Card Validator
+          </a>
+          <a
+            href={`https://developers.facebook.com/tools/debug/?q=${encodeURIComponent('https://redirect.tsuratsura.com')}`}
+            target="_blank" rel="noopener noreferrer"
+            className="text-xs px-3 py-2 rounded border border-blue-200 text-blue-700 hover:bg-blue-100 transition-colors"
+          >
+            Facebook OGP Debugger
+          </a>
+          <a
+            href={`https://search.google.com/test/rich-results?url=${encodeURIComponent('https://redirect.tsuratsura.com')}`}
+            target="_blank" rel="noopener noreferrer"
+            className="text-xs px-3 py-2 rounded border border-blue-200 text-blue-700 hover:bg-blue-100 transition-colors"
+          >
+            Google リッチリザルト
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+

@@ -7,11 +7,11 @@ export const metadata: Metadata = {
 }
 
 const rows = [
-  { label: '販売業者', value: '【運営者名を記載】' },
-  { label: '運営統括責任者', value: '【責任者名を記載】' },
-  { label: '所在地', value: '【所在地を記載】' },
-  { label: '電話番号', value: '【電話番号を記載】（お問い合わせはフォームよりお願いします）' },
-  { label: 'メールアドレス', value: '【メールアドレスを記載】' },
+  { label: '販売業者', value: '株式会社TSURATSURA' },
+  { label: '運営統括責任者', value: '株式会社TSURATSURA 代表取締役' },
+  { label: '所在地', value: '〒543-0075 大阪府大阪市天王寺区夕陽丘町4-2 MetoroPorte四天王寺前夕陽丘Ⅲ 7号室' },
+  { label: '電話番号', value: '080-6224-1704（お問い合わせはフォームよりお願いします）' },
+  { label: 'メールアドレス', value: 'お問い合わせフォームよりご連絡ください' },
   { label: 'サービスURL', value: 'https://redirect.tsuratsura.com' },
   { label: '販売価格', value: 'Free: ¥0 / Pro: ¥780（税込）/月（通常¥980、Beta期間20%OFF） / Business: ¥3,980（税込）/月（通常¥4,980、Beta期間20%OFF）' },
   { label: '支払方法', value: 'クレジットカード（Stripe経由）' },
@@ -45,10 +45,6 @@ export default function TokushoPage() {
             </div>
           ))}
         </div>
-
-        <p className="text-xs text-muted mt-4">
-          ※【】内の項目は運営者情報を確定後に更新されます。
-        </p>
 
         <div className="mt-12 pt-6 border-t border-border flex gap-4 text-sm text-muted">
           <Link href="/terms" className="hover:text-foreground transition-colors">利用規約</Link>

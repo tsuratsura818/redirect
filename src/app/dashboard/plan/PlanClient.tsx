@@ -12,6 +12,7 @@ interface SubscriptionData {
     qr_codes: number
     scans_this_month: number
   }
+  isAdmin: boolean
 }
 
 export default function PlanClient() {
@@ -22,6 +23,7 @@ export default function PlanClient() {
   const [message, setMessage] = useState('')
   const [billing, setBilling] = useState<BillingCycle>('monthly')
   const isAnnual = billing === 'annual'
+  const [overriding, setOverriding] = useState<PlanId | null>(null)
 
   const fetchData = useCallback(async () => {
     const res = await fetch('/api/subscription')
@@ -75,6 +77,25 @@ export default function PlanClient() {
     setChanging(null)
   }
 
+  const handleOverridePlan = async (planId: PlanId) => {
+    setOverriding(planId)
+    const res = await fetch('/api/admin/override-plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan: planId }),
+    })
+    const result = await res.json()
+    if (res.ok) {
+      await fetchData()
+      setMessage(`[管理者] ${PLANS[planId].name}プランに切替しました`)
+      setTimeout(() => setMessage(''), 4000)
+    } else {
+      setMessage(`エラー: ${result.error}`)
+      setTimeout(() => setMessage(''), 6000)
+    }
+    setOverriding(null)
+  }
+
   const handleManageBilling = async () => {
     const res = await fetch('/api/subscription/portal', { method: 'POST' })
     if (res.ok) {
@@ -96,6 +117,7 @@ export default function PlanClient() {
   const currentPlan = data.subscription.plan
   const limits = data.plan.limits
   const hasStripe = !!data.subscription.stripe_customer_id
+  const isAdminUser = data.isAdmin
 
   return (
     <div>
@@ -174,6 +196,35 @@ export default function PlanClient() {
           )}
         </div>
       </div>
+
+      {/* 管理者専用: 即時プラン切替 */}
+      {isAdminUser && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span className="text-sm font-semibold text-amber-700">管理者モード — 即時プラン切替</span>
+          </div>
+          <p className="text-xs text-amber-600 mb-4">Stripe決済を介さずDBを直接更新します。不具合再現・テスト用途のみ使用してください。</p>
+          <div className="flex flex-wrap gap-2">
+            {(Object.values(PLANS) as (typeof PLANS)[PlanId][]).map(plan => (
+              <button
+                key={plan.id}
+                onClick={() => handleOverridePlan(plan.id)}
+                disabled={overriding !== null || plan.id === currentPlan}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
+                  plan.id === currentPlan
+                    ? 'bg-amber-200 text-amber-700 cursor-default'
+                    : 'bg-amber-600 text-white hover:bg-amber-700'
+                }`}
+              >
+                {overriding === plan.id ? '切替中...' : plan.id === currentPlan ? `${plan.name} (現在)` : `→ ${plan.name}`}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* プラン一覧 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getUserSubscription } from '@/lib/subscription'
 import { PLANS } from '@/lib/plans'
+import { isAdmin } from '@/lib/admin'
 
 // 現在のサブスクリプション情報を取得
 export async function GET() {
@@ -38,6 +39,8 @@ export async function GET() {
       scanCount = count || 0
     }
 
+    const adminFlag = await isAdmin(user.id)
+
     return NextResponse.json({
       subscription,
       plan,
@@ -45,6 +48,7 @@ export async function GET() {
         qr_codes: qrCount || 0,
         scans_this_month: scanCount,
       },
+      isAdmin: adminFlag,
     })
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Internal Server Error'

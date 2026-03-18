@@ -20,6 +20,24 @@ export default function Logo({ size = 'sm', className = '' }: Props) {
         >
           PIVO<span style={{ color: '#10b981' }}>LINK</span>
         </span>
+        <span
+          style={{
+            fontFamily: "'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif",
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            color: '#10b981',
+            background: 'rgba(16,185,129,0.1)',
+            border: '1px solid rgba(16,185,129,0.3)',
+            borderRadius: '4px',
+            padding: '2px 5px',
+            marginLeft: '0.5rem',
+            letterSpacing: '0.02em',
+            alignSelf: 'flex-start',
+            marginTop: '4px',
+          }}
+        >
+          β
+        </span>
       </div>
     )
   }
@@ -38,6 +56,24 @@ export default function Logo({ size = 'sm', className = '' }: Props) {
         }}
       >
         PIVO<span style={{ color: '#10b981' }}>LINK</span>
+      </span>
+      <span
+        style={{
+          fontFamily: "'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif",
+          fontSize: '0.6rem',
+          fontWeight: 700,
+          color: '#10b981',
+          background: 'rgba(16,185,129,0.1)',
+          border: '1px solid rgba(16,185,129,0.3)',
+          borderRadius: '3px',
+          padding: '1px 4px',
+          marginLeft: '0.35rem',
+          letterSpacing: '0.02em',
+          alignSelf: 'flex-start',
+          marginTop: '2px',
+        }}
+      >
+        β
       </span>
     </div>
   )

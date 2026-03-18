@@ -407,7 +407,7 @@ export default function PhAssetsPage() {
             <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 10, paddingLeft: 4 }}>
               {card.label} — 1270 × 760px
             </div>
-            <div style={{ outline: '2px solid rgba(16,185,129,0.3)', borderRadius: 2 }}>
+            <div data-card={card.id} style={{ outline: '2px solid rgba(16,185,129,0.3)', borderRadius: 2 }}>
               {card.component}
             </div>
           </div>

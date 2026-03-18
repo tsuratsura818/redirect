@@ -184,8 +184,8 @@ export default function LPContent() {
       {/* QR & NFC 両対応バナー */}
       <section className="max-w-6xl mx-auto px-6 -mt-10 relative z-10 pb-8">
         <div className="grid md:grid-cols-2 gap-6">
-          <ScrollReveal animation="slide-in-left">
-            <div className="bg-card rounded-2xl p-8 border border-border shadow-lg shadow-black/5 card-hover flex items-start gap-5">
+          <ScrollReveal animation="slide-in-left" className="h-full">
+            <div className="bg-card rounded-2xl p-8 border border-border shadow-lg shadow-black/5 card-hover flex items-start gap-5 h-full">
               <div className="w-14 h-14 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-xl flex items-center justify-center shrink-0 text-primary animate-float">
                 <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
@@ -197,8 +197,8 @@ export default function LPContent() {
               </div>
             </div>
           </ScrollReveal>
-          <ScrollReveal animation="slide-in-right" delay={150}>
-            <div className="bg-card rounded-2xl p-8 border border-border shadow-lg shadow-black/5 card-hover flex items-start gap-5">
+          <ScrollReveal animation="slide-in-right" delay={150} className="h-full">
+            <div className="bg-card rounded-2xl p-8 border border-border shadow-lg shadow-black/5 card-hover flex items-start gap-5 h-full">
               <div className="w-14 h-14 bg-gradient-to-br from-teal-100 to-cyan-200 rounded-xl flex items-center justify-center shrink-0 text-accent animate-float" style={{ animationDelay: '1.5s' }}>
                 <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -226,8 +226,8 @@ export default function LPContent() {
               { step: '2', title: lp.step2Title, desc: lp.step2Desc },
               { step: '3', title: lp.step3Title, desc: lp.step3Desc },
             ].map((item, i) => (
-              <ScrollReveal key={item.step} animation="scale-in" delay={i * 150}>
-                <div className="bg-gradient-to-b from-slate-50 to-white rounded-2xl p-8 border border-border card-hover text-center">
+              <ScrollReveal key={item.step} animation="scale-in" delay={i * 150} className="h-full">
+                <div className="bg-gradient-to-b from-slate-50 to-white rounded-2xl p-8 border border-border card-hover text-center h-full flex flex-col">
                   <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl flex items-center justify-center mx-auto mb-5 text-primary">
                     {i === 0 && <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>}
                     {i === 1 && <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>}

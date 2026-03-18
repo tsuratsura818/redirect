@@ -6,10 +6,14 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import Logo from '@/components/Logo'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { useLanguage } from '@/i18n/LanguageProvider'
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { t } = useLanguage()
+  const lt = t.login
   const [isSignUp, setIsSignUp] = useState(searchParams.get('tab') === 'signup')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -30,14 +34,14 @@ function LoginForm() {
         setLoading(false)
         return
       }
-      setError('確認メールを送信しました。メールを確認してください。')
+      setError(lt.confirmEmailSent)
       setLoading(false)
       return
     }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
-      setError('メールアドレスまたはパスワードが正しくありません')
+      setError(lt.invalidCredentials)
       setLoading(false)
       return
     }
@@ -49,10 +53,14 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex-1" />
           <Link href="/">
             <Logo />
           </Link>
+          <div className="flex-1 flex justify-end">
+            <LanguageSwitcher />
+          </div>
         </div>
 
         <div className="bg-card rounded-2xl shadow-xl border border-border p-8">
@@ -63,7 +71,7 @@ function LoginForm() {
                 !isSignUp ? 'bg-white text-foreground shadow-sm' : 'text-muted'
               }`}
             >
-              ログイン
+              {lt.loginTab}
             </button>
             <button
               onClick={() => setIsSignUp(true)}
@@ -71,14 +79,14 @@ function LoginForm() {
                 isSignUp ? 'bg-white text-foreground shadow-sm' : 'text-muted'
               }`}
             >
-              新規登録
+              {lt.signupTab}
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
-                メールアドレス
+                {lt.email}
               </label>
               <input
                 type="email"
@@ -91,7 +99,7 @@ function LoginForm() {
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
-                パスワード
+                {lt.password}
               </label>
               <input
                 type="password"
@@ -100,13 +108,13 @@ function LoginForm() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-border bg-white focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                placeholder="6文字以上"
+                placeholder={lt.passwordHint}
               />
             </div>
 
             {error && (
               <div className={`text-sm p-3 rounded-lg ${
-                error.includes('確認メール')
+                error === lt.confirmEmailSent
                   ? 'bg-green-50 text-green-700'
                   : 'bg-red-50 text-red-700'
               }`}>
@@ -119,7 +127,7 @@ function LoginForm() {
               disabled={loading}
               className="w-full py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
             >
-              {loading ? '処理中...' : isSignUp ? 'アカウント作成' : 'ログイン'}
+              {loading ? t.common.processing : isSignUp ? lt.signupBtn : lt.loginBtn}
             </button>
           </form>
         </div>

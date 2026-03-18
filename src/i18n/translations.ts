@@ -56,7 +56,7 @@ const translations = {
       qrTitle: 'QRコード対応',
       qrDesc: 'チラシ・名刺・パッケージに印刷したQRコードの遷移先を、管理画面からいつでも変更できます。PNG/SVGで高品質なQRコードを自動生成。',
       nfcTitle: 'NFCタグ対応',
-      nfcDesc: '店頭POP・商品タグ・カードに埋め込んだNFCタグのURLを後から自由に変更できます。タグの書き換えや交換は一切不要です。',
+      nfcDesc: '店頭POP・商品タグ・カードのNFCタグURLを、管理画面からいつでも変更できます。タグの書き換えや交換は一切不要です。',
       stepsTitle: '3ステップで簡単運用',
       stepsDesc: '登録からURL変更まで、わずか数クリック',
       step1Title: 'リンクURLを作成',

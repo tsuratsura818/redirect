@@ -193,7 +193,7 @@ export default function LPContent() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-foreground mb-2">{lp.qrTitle}</h3>
-                <p className="text-foreground/75 leading-relaxed">{lp.qrDesc}</p>
+                <p className="text-foreground/75 leading-relaxed text-pretty">{lp.qrDesc}</p>
               </div>
             </div>
           </ScrollReveal>
@@ -206,7 +206,7 @@ export default function LPContent() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-foreground mb-2">{lp.nfcTitle}</h3>
-                <p className="text-foreground/75 leading-relaxed">{lp.nfcDesc}</p>
+                <p className="text-foreground/75 leading-relaxed text-pretty">{lp.nfcDesc}</p>
               </div>
             </div>
           </ScrollReveal>
@@ -235,7 +235,7 @@ export default function LPContent() {
                   </div>
                   <div className="inline-block text-xs font-bold text-white gradient-bg px-3 py-1 rounded-full mb-3">STEP {item.step}</div>
                   <h3 className="text-xl font-bold text-foreground mb-3">{item.title}</h3>
-                  <p className="text-foreground/75 leading-relaxed">{item.desc}</p>
+                  <p className="text-foreground/75 leading-relaxed text-pretty">{item.desc}</p>
                 </div>
               </ScrollReveal>
             ))}

@@ -34,6 +34,12 @@ function LoginForm() {
         setLoading(false)
         return
       }
+      // 新規登録通知（ベストエフォート）
+      fetch('/api/notify/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      }).catch(() => {})
       setError(lt.confirmEmailSent)
       setLoading(false)
       return

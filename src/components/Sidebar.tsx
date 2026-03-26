@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/Logo'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { useLanguage } from '@/i18n/LanguageProvider'
+import { Capacitor } from '@capacitor/core'
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -14,6 +15,7 @@ export default function Sidebar() {
   const { t } = useLanguage()
   const sb = t.sidebar
   const [isAdmin, setIsAdmin] = useState(false)
+  const isNative = Capacitor.isNativePlatform()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
@@ -79,7 +81,8 @@ export default function Sidebar() {
         </svg>
       ),
     },
-    {
+    // Apple審査対策: ネイティブアプリでは課金導線を非表示
+    ...(!isNative ? [{
       label: sb.plan,
       href: '/dashboard/plan',
       icon: (
@@ -87,7 +90,7 @@ export default function Sidebar() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
         </svg>
       ),
-    },
+    }] : []),
     {
       label: 'QRスキャン',
       href: '/dashboard/scan',

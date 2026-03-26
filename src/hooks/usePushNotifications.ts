@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { Capacitor } from '@capacitor/core'
 import { usePlatform } from './usePlatform'
 import { registerPush, isPushSupported } from '@/lib/capacitor/push'
 import { createClient } from '@/lib/supabase/client'
@@ -46,8 +47,7 @@ export function usePushNotifications(): UsePushReturn {
       onRegistration: async (t) => {
         setToken(t.value)
         setIsRegistered(true)
-        // Supabaseにトークンを保存
-        const platform = (await import('@capacitor/core')).Capacitor.getPlatform()
+        const platform = Capacitor.getPlatform()
         await saveToken(t.value, platform)
       },
       onRegistrationError: () => {

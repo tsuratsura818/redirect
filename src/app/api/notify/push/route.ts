@@ -13,15 +13,15 @@ export async function POST(request: NextRequest) {
 
     const { userId, title, body, data } = await request.json()
 
-    // 自分自身への通知、または管理者からの通知のみ許可
-    const targetUserId = userId ?? user.id
+    // 他ユーザーへの通知は管理者のみ許可
+    const targetUserId = typeof userId === 'string' && userId.length > 0 ? userId : user.id
     if (targetUserId !== user.id) {
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('role')
         .eq('id', user.id)
         .single()
-      if (profile?.role !== 'admin') {
+      if (!profile || profile.role !== 'admin') {
         return NextResponse.json({ error: '権限がありません' }, { status: 403 })
       }
     }

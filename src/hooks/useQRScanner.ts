@@ -25,6 +25,7 @@ export function useQRScanner(): UseQRScannerReturn {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const animationRef = useRef<number | null>(null)
+  const lastScanRef = useRef<number>(0)
 
   const stopScan = useCallback(() => {
     if (animationRef.current) {
@@ -64,7 +65,18 @@ export function useQRScanner(): UseQRScannerReturn {
       setIsScanning(true)
 
       const scan = () => {
-        if (!videoRef.current || !canvasRef.current) return
+        if (!videoRef.current || !canvasRef.current) {
+          animationRef.current = requestAnimationFrame(scan)
+          return
+        }
+
+        // 約15fps にスロットリング（低スペック端末対策）
+        const now = performance.now()
+        if (now - lastScanRef.current < 66) {
+          animationRef.current = requestAnimationFrame(scan)
+          return
+        }
+        lastScanRef.current = now
 
         const video = videoRef.current
         const canvas = canvasRef.current
@@ -91,7 +103,6 @@ export function useQRScanner(): UseQRScannerReturn {
             stopScan()
             return
           }
-          // Pivolink以外のURL
           setDetectedUrl(code.data)
         }
 

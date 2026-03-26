@@ -45,7 +45,8 @@ export async function sendPushNotification(
       success: response.successCount,
       failure: response.failureCount,
     }
-  } catch {
+  } catch (err) {
+    console.error('[FCM] sendEachForMulticast failed:', err instanceof Error ? err.message : err)
     return { success: 0, failure: tokens.length }
   }
 }

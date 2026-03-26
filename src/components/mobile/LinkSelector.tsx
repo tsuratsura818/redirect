@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 interface Link {
@@ -17,46 +17,72 @@ interface LinkSelectorProps {
 export default function LinkSelector({ onSelect }: LinkSelectorProps) {
   const [links, setLinks] = useState<Link[]>([])
   const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(false)
   const [search, setSearch] = useState('')
 
   useEffect(() => {
     const fetchLinks = async () => {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) { setFetchError(true); setLoading(false); return }
 
-      const { data } = await supabase
-        .from('qr_codes')
-        .select('id, slug, label, redirect_url')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
+        const { data, error } = await supabase
+          .from('qr_codes')
+          .select('id, slug, label, redirect_url')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
 
-      if (data) {
-        setLinks(
-          data.map((d) => ({
-            id: d.id,
-            slug: d.slug,
-            label: d.label || d.slug,
-            redirectUrl: d.redirect_url,
-          }))
-        )
+        if (error) { setFetchError(true); setLoading(false); return }
+
+        if (data) {
+          setLinks(
+            data.map((d) => ({
+              id: d.id,
+              slug: d.slug,
+              label: d.label || d.slug,
+              redirectUrl: d.redirect_url,
+            }))
+          )
+        }
+      } catch {
+        setFetchError(true)
       }
       setLoading(false)
     }
     fetchLinks()
   }, [])
 
-  const filtered = links.filter(
-    (l) =>
-      l.label.toLowerCase().includes(search.toLowerCase()) ||
-      l.slug.toLowerCase().includes(search.toLowerCase())
+  const filtered = useMemo(
+    () => {
+      const q = search.toLowerCase()
+      return links.filter(
+        (l) => l.label.toLowerCase().includes(q) || l.slug.toLowerCase().includes(q)
+      )
+    },
+    [links, search]
   )
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <span className="sr-only">リンクを読み込み中...</span>
+      </div>
+    )
+  }
+
+  if (fetchError) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-sm text-red-600">リンクの取得に失敗しました</p>
+        <button
+          onClick={() => { setFetchError(false); setLoading(true); location.reload() }}
+          className="mt-2 text-xs text-blue-600 underline"
+        >
+          再読み込み
+        </button>
       </div>
     )
   }

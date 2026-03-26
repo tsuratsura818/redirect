@@ -27,6 +27,12 @@ export default function QRScanner() {
     <div className="flex flex-col items-center gap-4 p-4">
       <h2 className="text-lg font-bold">QRコードスキャナー</h2>
 
+      <div role="status" aria-live="polite" className="sr-only">
+        {isScanning && 'スキャン中...'}
+        {detectedSlug && 'Pivolinkリンクを検出しました'}
+        {error && error}
+      </div>
+
       {error && (
         <div className="w-full p-3 bg-red-50 text-red-700 rounded-lg text-sm">
           {error}

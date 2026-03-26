@@ -38,19 +38,23 @@ export default function SettingsPage() {
 
   const updatePref = useCallback(
     async (key: keyof NotificationPrefs, value: boolean) => {
-      setPrefs((prev) => ({ ...prev, [key]: value }))
+      const prev = { ...prefs }
+      setPrefs((p) => ({ ...p, [key]: value }))
       setSaving(true)
       try {
-        await fetch('/api/notification-preferences', {
+        const res = await fetch('/api/notification-preferences', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ [key]: value }),
         })
+        if (!res.ok) setPrefs(prev)
+      } catch {
+        setPrefs(prev)
       } finally {
         setSaving(false)
       }
     },
-    []
+    [prefs]
   )
 
   if (loading) {
@@ -138,6 +142,9 @@ export default function SettingsPage() {
                 <p className="text-xs text-gray-500">{item.desc}</p>
               </div>
               <button
+                role="switch"
+                aria-checked={prefs[item.key]}
+                aria-label={item.label}
                 onClick={() => updatePref(item.key, !prefs[item.key])}
                 disabled={saving}
                 className={`relative w-11 h-6 rounded-full transition-colors ${

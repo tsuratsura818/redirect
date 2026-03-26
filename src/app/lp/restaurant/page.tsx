@@ -14,6 +14,7 @@ export default function RestaurantLP() {
       headline={'テーブルのQRコード、\n毎回貼り替えてませんか？'}
       subheadline="季節メニュー・クーポン・レビュー誘導。Pivolinkなら一度貼れば、リンク先だけ管理画面で変更。貼り替え作業ゼロ。"
       heroColor="bg-gradient-to-br from-orange-500 to-red-600"
+      accentColor="orange"
       painTitle="飲食店のQRコード、こんな悩みありませんか？"
       painPoints={[
         '季節メニューが変わるたびにテーブルのQRシールを全席貼り替え',

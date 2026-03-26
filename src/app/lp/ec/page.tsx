@@ -14,6 +14,7 @@ export default function EcLP() {
       headline={'同梱物のQRコード、\n使い捨てにしてませんか？'}
       subheadline="レビュー誘導・クーポン配布・SNSフォロー誘導。A/Bテストで効果を比較し、最適な施策をデータで選ぶ。パッケージの刷り直し不要。"
       heroColor="bg-gradient-to-br from-violet-500 to-purple-700"
+      accentColor="violet"
       painTitle="ECショップのQRコード、こんな悩みありませんか？"
       painPoints={[
         '商品同梱のQRが古いキャンペーンページに飛ぶ',

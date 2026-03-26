@@ -14,6 +14,7 @@ export default function RealEstateLP() {
       headline={'成約済み物件のチラシ、\nまだ捨ててますか？'}
       subheadline="チラシのQRコードを次の物件情報に差し替えるだけ。印刷し直し不要。看板・パンフ・名刺のQRも後から自由に変更。"
       heroColor="bg-gradient-to-br from-teal-500 to-emerald-700"
+      accentColor="teal"
       painTitle="不動産業界のQRコード、こんな悩みありませんか？"
       painPoints={[
         '成約済み物件のチラシが街中に残り、QRがリンク切れのまま',

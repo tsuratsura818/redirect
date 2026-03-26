@@ -14,6 +14,7 @@ export default function EventLP() {
       headline={'イベント1回で、\nQRコードを使い捨てにしない。'}
       subheadline="開催前は予約ページ → 当日はタイムテーブル → 終了後はアーカイブ動画。1つのQRコードが、イベントの前・中・後を繋ぎます。"
       heroColor="bg-gradient-to-br from-pink-500 to-rose-600"
+      accentColor="pink"
       painTitle="イベント・展示会のQRコード、こんな悩みありませんか？"
       painPoints={[
         'ポスターのQRがイベント終了後にリンク切れのまま街中に残る',

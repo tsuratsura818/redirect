@@ -9,7 +9,7 @@ export interface NFCTag {
 }
 
 // byte配列からURLを復元（NDEF URIレコード）
-function decodeNdefUriPayload(payload: number[]): string {
+export function decodeNdefUriPayload(payload: number[]): string {
   if (payload.length < 2) return ''
   // URI prefix map (NFC Forum URI Record Type Definition)
   const prefixes: Record<number, string> = {
@@ -26,7 +26,7 @@ function decodeNdefUriPayload(payload: number[]): string {
 }
 
 // URLをNDEF URIレコード用のbyte配列に変換
-function encodeNdefUriPayload(url: string): number[] {
+export function encodeNdefUriPayload(url: string): number[] {
   const prefixes: Array<[string, number]> = [
     ['https://www.', 0x02],
     ['http://www.', 0x01],

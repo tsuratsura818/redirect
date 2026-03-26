@@ -11,7 +11,9 @@
     "cap:sync": "npx cap sync",
     "cap:open:android": "npx cap open android",
     "cap:run:android": "npx cap run android",
-    "mobile:dev": "next build && npx cap sync && npx cap run android"
+    "mobile:dev": "next build && npx cap sync && npx cap run android",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@capacitor/android": "^8.2.0",
@@ -51,6 +53,7 @@
     "eslint-config-next": "16.1.6",
     "puppeteer": "^24.39.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.2"
   }
 }

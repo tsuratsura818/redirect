@@ -1,8 +1,19 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { Capacitor } from '@capacitor/core'
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics'
 import { usePlatform } from './usePlatform'
 import { isNFCSupported, startNFCScan, writeNFCTag, isPivolinkURL } from '@/lib/capacitor/nfc'
+
+async function hapticFeedback(type: 'success' | 'error' | 'tap') {
+  if (!Capacitor.isNativePlatform()) return
+  try {
+    if (type === 'success') await Haptics.notification({ type: NotificationType.Success })
+    else if (type === 'error') await Haptics.notification({ type: NotificationType.Error })
+    else await Haptics.impact({ style: ImpactStyle.Light })
+  } catch { /* ハプティクス非対応端末 */ }
+}
 
 type NFCStatus = 'idle' | 'scanning' | 'writing' | 'success' | 'error'
 
@@ -43,18 +54,18 @@ export function useNFC(): UseNFCReturn {
     setDetectedSlug(null)
 
     const stop = await startNFCScan((tag) => {
-      // タグのNDEFレコードからURLを取得
       for (const record of tag.records) {
         const slug = isPivolinkURL(record.payload)
         if (slug) {
           setDetectedSlug(slug)
           setStatus('success')
+          hapticFeedback('success')
           return
         }
       }
-      // Pivolink URLが見つからない場合
       setDetectedSlug(null)
       setStatus('idle')
+      hapticFeedback('tap')
     })
 
     if (!stop) {
@@ -79,9 +90,11 @@ export function useNFC(): UseNFCReturn {
     const success = await writeNFCTag(redirectUrl)
     if (success) {
       setStatus('success')
+      hapticFeedback('success')
     } else {
       setStatus('error')
       setError('NFCタグへの書き込みに失敗しました。タグをかざし直してください。')
+      hapticFeedback('error')
     }
     return success
   }, [])

@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useNFC } from '@/hooks/useNFC'
+import { useAppReview } from '@/hooks/useAppReview'
 import LinkSelector from './LinkSelector'
 import NFCWriteStatus from './NFCWriteStatus'
 
@@ -12,10 +13,15 @@ interface SelectedLink {
   redirectUrl: string
 }
 
+const STEPS = ['select', 'write', 'result'] as const
+type Step = typeof STEPS[number]
+const STEP_LABELS: Record<Step, string> = { select: 'リンクを選択', write: 'タグにかざす', result: '完了' }
+
 export default function NFCWriter() {
   const { isSupported, status, error, writeTag, reset } = useNFC()
+  const { trackSuccess } = useAppReview()
   const [selectedLink, setSelectedLink] = useState<SelectedLink | null>(null)
-  const [step, setStep] = useState<'select' | 'write' | 'result'>('select')
+  const [step, setStep] = useState<Step>('select')
 
   const handleSelect = useCallback((link: SelectedLink) => {
     setSelectedLink(link)
@@ -28,6 +34,7 @@ export default function NFCWriter() {
     const success = await writeTag(pivolinkUrl)
     if (success) {
       setStep('result')
+      trackSuccess()
     }
   }, [selectedLink, writeTag])
 
@@ -45,26 +52,24 @@ export default function NFCWriter() {
 
       {/* ステップインジケーター */}
       <div className="flex items-center gap-2 mb-2">
-        {(['select', 'write', 'result'] as const).map((s, i) => (
+        {STEPS.map((s, i) => (
           <div key={s} className="flex items-center gap-2">
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
                 step === s
                   ? 'bg-blue-600 text-white'
-                  : i < ['select', 'write', 'result'].indexOf(step)
+                  : i < STEPS.indexOf(step)
                     ? 'bg-green-500 text-white'
                     : 'bg-gray-200 text-gray-500'
               }`}
             >
               {i + 1}
             </div>
-            {i < 2 && <div className="w-8 h-0.5 bg-gray-200" />}
+            {i < STEPS.length - 1 && <div className="w-8 h-0.5 bg-gray-200" />}
           </div>
         ))}
         <div className="ml-2 text-xs text-gray-500">
-          {step === 'select' && 'リンクを選択'}
-          {step === 'write' && 'タグにかざす'}
-          {step === 'result' && '完了'}
+          {STEP_LABELS[step]}
         </div>
       </div>
 

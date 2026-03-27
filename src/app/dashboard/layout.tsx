@@ -1,10 +1,6 @@
 import type { Metadata } from 'next'
-import dynamic from 'next/dynamic'
 import Sidebar from '@/components/Sidebar'
-
-const MobileNav = dynamic(() => import('@/components/mobile/MobileNav'), {
-  ssr: false,
-})
+import MobileNav from '@/components/mobile/MobileNav'
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },

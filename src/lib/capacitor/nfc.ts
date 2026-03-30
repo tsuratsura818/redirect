@@ -1,6 +1,24 @@
 import { Capacitor } from '@capacitor/core'
-import { CapacitorNfc } from '@capgo/capacitor-nfc'
-import type { NfcTag, NdefRecord } from '@capgo/capacitor-nfc'
+
+// @capgo/capacitor-nfc の型をランタイム互換で定義（v7/v8両対応）
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let CapacitorNfc: any = null
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  CapacitorNfc = require('@capgo/capacitor-nfc').CapacitorNfc
+} catch { /* Web環境では未ロード */ }
+
+interface NfcTag {
+  id?: number[]
+  ndefMessage?: Array<{ tnf: number; type: number[]; id: number[]; payload: number[] }>
+}
+
+interface NdefRecord {
+  tnf: number
+  type: number[]
+  id: number[]
+  payload: number[]
+}
 
 // 統一型
 export interface NFCTag {
@@ -51,10 +69,17 @@ function toNFCTag(raw: NfcTag): NFCTag {
 }
 
 export async function isNFCSupported(): Promise<boolean> {
-  if (!Capacitor.isNativePlatform()) return false
+  if (!Capacitor.isNativePlatform() || !CapacitorNfc) return false
   try {
-    const { supported } = await CapacitorNfc.isSupported()
-    return supported
+    if (typeof CapacitorNfc.isSupported === 'function') {
+      const { supported } = await CapacitorNfc.isSupported()
+      return supported
+    }
+    if (typeof CapacitorNfc.getStatus === 'function') {
+      const { status } = await CapacitorNfc.getStatus()
+      return status === 'NFC_OK'
+    }
+    return false
   } catch {
     return false
   }
@@ -63,10 +88,10 @@ export async function isNFCSupported(): Promise<boolean> {
 export async function startNFCScan(
   onTagDetected: (tag: NFCTag) => void
 ): Promise<(() => void) | null> {
-  if (!Capacitor.isNativePlatform()) return null
+  if (!Capacitor.isNativePlatform() || !CapacitorNfc) return null
 
   try {
-    const listener = await CapacitorNfc.addListener('ndefDiscovered', (event) => {
+    const listener = await CapacitorNfc.addListener('ndefDiscovered', (event: { tag: NfcTag }) => {
       onTagDetected(toNFCTag(event.tag))
     })
     await CapacitorNfc.startScanning()
@@ -81,7 +106,7 @@ export async function startNFCScan(
 }
 
 export async function writeNFCTag(url: string): Promise<boolean> {
-  if (!Capacitor.isNativePlatform()) return false
+  if (!Capacitor.isNativePlatform() || !CapacitorNfc) return false
 
   try {
     const payload = encodeNdefUriPayload(url)

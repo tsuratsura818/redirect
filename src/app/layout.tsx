@@ -20,6 +20,10 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
+  icons: {
+    icon: '/pivofavicon.png',
+    apple: '/pivofavicon.png',
+  },
   title: 'Pivolink — QRコード・NFCタグのリダイレクト管理',
   description: 'Pivolink（ピボリンク）は、QRコード・NFCタグのリダイレクト先をいつでも変更できる管理サービス。印刷済みQRや設置済みNFCの遷移先をワンクリックで切替。',
   metadataBase: new URL('https://redirect.tsuratsura.com'),

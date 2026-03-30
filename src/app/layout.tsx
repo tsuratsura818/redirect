@@ -34,13 +34,13 @@ export const metadata: Metadata = {
     siteName: 'Pivolink',
     type: 'website',
     locale: 'ja_JP',
-    images: [{ url: '/ogp.png', width: 1200, height: 630, alt: 'Pivolink — QRの飛び先、いつでも変更。' }],
+    images: [{ url: '/pivo_ogp.jpg', width: 1200, height: 630, alt: 'Pivolink — QRの飛び先、いつでも変更。' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Pivolink — QRコード・NFCタグのリダイレクト管理',
     description: 'QRコード・NFCタグのリダイレクト先をいつでも変更。印刷済みQRコードの再発行不要。',
-    images: ['/ogp.png'],
+    images: ['/pivo_ogp.jpg'],
   },
   robots: {
     index: true,

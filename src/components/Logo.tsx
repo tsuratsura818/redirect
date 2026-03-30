@@ -6,8 +6,8 @@ interface Props {
 }
 
 export default function Logo({ size = 'sm', className = '' }: Props) {
-  const height = size === 'lg' ? 72 : 44
-  const width = size === 'lg' ? 274 : 167
+  const height = size === 'lg' ? 90 : 56
+  const width = size === 'lg' ? 342 : 213
 
   return (
     <div className={`flex items-center ${className}`}>

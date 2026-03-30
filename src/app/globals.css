@@ -142,6 +142,9 @@ body {
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
+.safe-area-main-top {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 4rem);
+}
 
 /* ボトムシートスライドアップアニメーション */
 @keyframes slide-up {

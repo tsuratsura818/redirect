@@ -196,7 +196,7 @@ export default function Sidebar() {
   return (
     <>
       {/* モバイルヘッダー */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-card border-b border-border px-4 py-3 flex items-center justify-between gap-2">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-card border-b border-border px-4 py-3 safe-area-top flex items-center justify-between gap-2">
         <Link href="/dashboard" className="shrink-0">
           <Logo size="sm" />
         </Link>

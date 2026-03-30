@@ -9,35 +9,38 @@ importers:
   .:
     dependencies:
       '@capacitor/android':
-        specifier: ^8.2.0
-        version: 8.2.0(@capacitor/core@8.2.0)
+        specifier: ^7.6.1
+        version: 7.6.1(@capacitor/core@7.6.1)
       '@capacitor/app':
-        specifier: ^8.0.1
-        version: 8.0.1(@capacitor/core@8.2.0)
+        specifier: ^7.1.0
+        version: 7.1.0(@capacitor/core@7.6.1)
       '@capacitor/camera':
-        specifier: ^8.0.2
-        version: 8.0.2(@capacitor/core@8.2.0)
+        specifier: ^7.0.3
+        version: 7.0.3(@capacitor/core@7.6.1)
       '@capacitor/core':
-        specifier: ^8.2.0
-        version: 8.2.0
+        specifier: ^7.6.1
+        version: 7.6.1
       '@capacitor/filesystem':
-        specifier: ^8.1.2
-        version: 8.1.2(@capacitor/core@8.2.0)
+        specifier: ^7.0.1
+        version: 7.0.1(@capacitor/core@7.6.1)
       '@capacitor/haptics':
-        specifier: ^8.0.1
-        version: 8.0.1(@capacitor/core@8.2.0)
+        specifier: ^7.0.1
+        version: 7.0.1(@capacitor/core@7.6.1)
+      '@capacitor/ios':
+        specifier: ^7.6.1
+        version: 7.6.1(@capacitor/core@7.6.1)
       '@capacitor/push-notifications':
-        specifier: ^8.0.2
-        version: 8.0.2(@capacitor/core@8.2.0)
+        specifier: ^7.0.2
+        version: 7.0.2(@capacitor/core@7.6.1)
       '@capacitor/share':
-        specifier: ^8.0.1
-        version: 8.0.1(@capacitor/core@8.2.0)
+        specifier: 7.0.1
+        version: 7.0.1(@capacitor/core@7.6.1)
       '@capacitor/status-bar':
-        specifier: ^8.0.1
-        version: 8.0.1(@capacitor/core@8.2.0)
+        specifier: 7.0.1
+        version: 7.0.1(@capacitor/core@7.6.1)
       '@capgo/capacitor-nfc':
-        specifier: ^8.0.18
-        version: 8.0.18(@capacitor/core@8.2.0)
+        specifier: ^7.2.0
+        version: 7.2.0(@capacitor/core@7.6.1)
       '@supabase/ssr':
         specifier: ^0.9.0
         version: 0.9.0(@supabase/supabase-js@2.99.2)
@@ -79,8 +82,8 @@ importers:
         version: 2.0.9
     devDependencies:
       '@capacitor/cli':
-        specifier: ^8.2.0
-        version: 8.2.0
+        specifier: ^7.6.1
+        version: 7.6.1
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.2.1
@@ -119,7 +122,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.1.2
-        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@20.19.37)(vite@8.0.3(@types/node@20.19.37)(jiti@2.6.1))
+        version: 4.1.2(@opentelemetry/api@1.9.1)(@types/node@20.19.37)(vite@8.0.3(@emnapi/core@1.9.0)(@emnapi/runtime@1.9.0)(@types/node@20.19.37)(jiti@2.6.1))
 
 packages:
 
@@ -194,61 +197,63 @@ packages:
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
 
-  '@capacitor/android@8.2.0':
-    resolution: {integrity: sha512-XLm5OsWLPfXQxDxzFS7SOdMEgGvW+2c7TGLXkTR2cSKdkWK5Abns4imlT5qghKYhjM9r74IrDkBWg/9ALUGNKQ==}
+  '@capacitor/android@7.6.1':
+    resolution: {integrity: sha512-wjK2FloJSp5eVqy/DecRA4zBuGhe/pY8pkkU5+G1mfBFqrmmuXJJIBdKgd2/iqyWhsp89LRZMmHV8EEDXYPqPg==}
     peerDependencies:
-      '@capacitor/core': ^8.2.0
+      '@capacitor/core': ^7.6.0
 
-  '@capacitor/app@8.0.1':
-    resolution: {integrity: sha512-yeG3yyA0ETKqvgqexwHMBlmVOF13A1hRXzv/km0Ptv5TrNIZvZJK4MTI3uiqvnbHrzoJGP5DwWAjEXEfi90v3Q==}
+  '@capacitor/app@7.1.0':
+    resolution: {integrity: sha512-W7m09IWrUjZbo7AKeq+rc/KyucxrJekTBg0l4QCm/yDtCejE3hebxp/W2esU26KKCzMc7H3ClkUw32E9lZkwRA==}
     peerDependencies:
-      '@capacitor/core': '>=8.0.0'
+      '@capacitor/core': '>=7.0.0'
 
-  '@capacitor/camera@8.0.2':
-    resolution: {integrity: sha512-v2BsKFjJSg0dMl/UO7jEvrAvjChCGrzQG5jx4yN2t8LnC7eFDh0YkSg1t+AMNveSDSKCvAsTk/JUzzr5VAvzmg==}
+  '@capacitor/camera@7.0.3':
+    resolution: {integrity: sha512-DFNmX75JkLa+TSvxCnQp1zB7kUN7Euq6Hmcd8sX5bHM1+SyYFyEf35xm4wp7bfPZE7oS+x9fjSx7WdExTWw1Hg==}
     peerDependencies:
-      '@capacitor/core': '>=8.0.0'
+      '@capacitor/core': '>=7.0.0'
 
-  '@capacitor/cli@8.2.0':
-    resolution: {integrity: sha512-1cMEk0d/I6tl1U+v/lnJR5Oylpx8ZBIHrvQxD5zK0MkjYOUyQAAGJgh97rkhGJqjAUvrGpa8H4BmyhNQN9a17A==}
-    engines: {node: '>=22.0.0'}
+  '@capacitor/cli@7.6.1':
+    resolution: {integrity: sha512-MdmelaYbwWldKlNxiLOhfHV8F8hoM6bIHPRB/+k81FTQoOqq3HYIdHVMZVl7s2800ubNnr4lSP3FevxU20lDew==}
+    engines: {node: '>=20.0.0'}
     hasBin: true
 
-  '@capacitor/core@8.2.0':
-    resolution: {integrity: sha512-oKaoNeNtH2iIZMDFVrb1atoyRECDGHcfLMunJ5KWN8DtvpVBeeA4c41e20NTuhMxw1cSYbpq2PV2hb+/9CJxlQ==}
+  '@capacitor/core@7.6.1':
+    resolution: {integrity: sha512-nsNouCMxgYenyemy20sZwZYMtFi93LSZVWm2KqHTYIPIDgwx24+PzwHIdRQBZdK7hpvD5jQEhWuo/QyLLnAyBQ==}
 
-  '@capacitor/filesystem@8.1.2':
-    resolution: {integrity: sha512-doaaMfGoFR2hWU6aV6u83I+5ZsGyJVq+Gz4r9lMpJzUKMm1eMu0hLnFdV1aXZlU9FlK/RndFrVD8oRZfNOqWgQ==}
+  '@capacitor/filesystem@7.0.1':
+    resolution: {integrity: sha512-dxuKNLFoUejm7tBKkQPs1j7+BLpDh5JKPSVu7nT8jgCbA/KXt5FoCLiepfkjWkYfq60X0JNFzGnIquc5FPOLzQ==}
     peerDependencies:
-      '@capacitor/core': '>=8.0.0'
+      '@capacitor/core': '>=7.0.0'
 
-  '@capacitor/haptics@8.0.1':
-    resolution: {integrity: sha512-8v8rowLBMeb3CryqoQvXndwyUsoi4pPXf0qFw7IGA4D32Uk7+K6juN2SjRowqunoovkvvbFmU9TD7JIAz2zmFw==}
+  '@capacitor/haptics@7.0.1':
+    resolution: {integrity: sha512-ewZmspE5krgDUj5ZvUDcfNZvgerAIr+3bDSk6DLzyvBZ/dYmr/tMLu5H6WtYaaKYZJ32aZAudGpIal5epDyBYA==}
     peerDependencies:
-      '@capacitor/core': '>=8.0.0'
+      '@capacitor/core': '>=7.0.0'
 
-  '@capacitor/push-notifications@8.0.2':
-    resolution: {integrity: sha512-mej8Eh4EU4JXbaeyMX2l+4NNK6IdY5iRsEXpBOTHLD29fuCACBP7kOJTiJv6piw134zdlbFH0rR+sDKHIiFOFg==}
+  '@capacitor/ios@7.6.1':
+    resolution: {integrity: sha512-53Pf2Fz6Pnll4ciHl+Z7wM/Xvo8urcSWGrqexwSdhXuDGfb1bZrkv0CxWMg8h1EFmMzJadYkINrS3LkG3lgJWg==}
     peerDependencies:
-      '@capacitor/core': '>=8.0.0'
+      '@capacitor/core': ^7.6.0
 
-  '@capacitor/share@8.0.1':
-    resolution: {integrity: sha512-3cSBKBCJVon54rKDROP2rqGyeGks4pBh9TbaEk9S375Kbek/ZHe72N50zIa0Vn9Eac/SuhwgehO/mmA4CsUOiw==}
+  '@capacitor/push-notifications@7.0.2':
+    resolution: {integrity: sha512-naw1R61V0qlEBa4CsF7+w3ay7V1PdZ4bQ1cJum+lgZB/yz3ASb6fRHm5GPjJFgTR9ET8zN0Q9y7lfgMTBgDOiA==}
     peerDependencies:
-      '@capacitor/core': '>=8.0.0'
+      '@capacitor/core': '>=7.0.0'
 
-  '@capacitor/status-bar@8.0.1':
-    resolution: {integrity: sha512-OR59dlbwvmrV5dKsC9lvwv48QaGbqcbSTBpk+9/WXWxXYSdXXdzJZU9p8oyNPAkuJhCdnSa3XmU43fZRPBJJ5w==}
+  '@capacitor/share@7.0.1':
+    resolution: {integrity: sha512-7GAtWrb2inEWohC8E7mx38qAX6D9yqPDDnUtJaZ8JRpo15jjFRS40Cx388M8h4NlBWjV5NU3qf1sHXnyOBSJ5g==}
     peerDependencies:
-      '@capacitor/core': '>=8.0.0'
+      '@capacitor/core': '>=7.0.0'
 
-  '@capacitor/synapse@1.0.4':
-    resolution: {integrity: sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw==}
-
-  '@capgo/capacitor-nfc@8.0.18':
-    resolution: {integrity: sha512-UeaWWZdHjoiFTd+XH1h3APKRdaGp8RjCyHfRH1PqXLkV10SKRZv1EsUGvJzSwUiPLu7Z1nqOZtwwXVx7Eha9NA==}
+  '@capacitor/status-bar@7.0.1':
+    resolution: {integrity: sha512-iDv3mXYo9CdxYRVwt3/pRyuk25p7Sn4GfaS/zMZyVIqTzsvKLCIIH3GdKK+ta+nsNcAVpCw/t5jFEBt1D18ctA==}
     peerDependencies:
-      '@capacitor/core': '>=8.0.0'
+      '@capacitor/core': '>=7.0.0'
+
+  '@capgo/capacitor-nfc@7.2.0':
+    resolution: {integrity: sha512-lYMlogAlUG3j1HmieOdFan4SNOnTbTvZ7BMYQmyhnfU9810aip9oPh6CYVXO/2ecZXW03ATTmSKtr4Ci8DpW2Q==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
 
   '@emnapi/core@1.9.0':
     resolution: {integrity: sha512-0DQ98G9ZQZOxfUcQn1waV2yS8aWdZ6kJMbYCJB3oUBecjWYO1fqJ+a1DRfPF3O5JEkwqwP1A9QEN/9mYm2Yd0w==}
@@ -593,8 +598,11 @@ packages:
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
 
-  '@napi-rs/wasm-runtime@1.1.1':
-    resolution: {integrity: sha512-p64ah1M1ld8xjWv3qbvFwHiFVWrq1yFvV4f7w+mzaqiR4IlSgkqhcRdHwsGgomwzBH51sRY4NEowLxnaBjcW/A==}
+  '@napi-rs/wasm-runtime@1.1.2':
+    resolution: {integrity: sha512-sNXv5oLJ7ob93xkZ1XnxisYhGYXfaG9f65/ZgYuAu3qt7b3NadcOEhLvx28hv31PgX8SZJRYrAIPQilQmFpLVw==}
+    peerDependencies:
+      '@emnapi/core': ^1.7.1
+      '@emnapi/runtime': ^1.7.1
 
   '@next/env@16.1.6':
     resolution: {integrity: sha512-N1ySLuZjnAtN3kFnwhAwPvZah8RJxKasD7x1f8shFqhncnWZn4JMfg37diLNuoHsLAlrDfM3g4mawVdtAG8XLQ==}
@@ -1256,6 +1264,7 @@ packages:
   '@xmldom/xmldom@0.8.11':
     resolution: {integrity: sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version has critical issues, please update to the latest version
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -3892,19 +3901,19 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@capacitor/android@8.2.0(@capacitor/core@8.2.0)':
+  '@capacitor/android@7.6.1(@capacitor/core@7.6.1)':
     dependencies:
-      '@capacitor/core': 8.2.0
+      '@capacitor/core': 7.6.1
 
-  '@capacitor/app@8.0.1(@capacitor/core@8.2.0)':
+  '@capacitor/app@7.1.0(@capacitor/core@7.6.1)':
     dependencies:
-      '@capacitor/core': 8.2.0
+      '@capacitor/core': 7.6.1
 
-  '@capacitor/camera@8.0.2(@capacitor/core@8.2.0)':
+  '@capacitor/camera@7.0.3(@capacitor/core@7.6.1)':
     dependencies:
-      '@capacitor/core': 8.2.0
+      '@capacitor/core': 7.6.1
 
-  '@capacitor/cli@8.2.0':
+  '@capacitor/cli@7.6.1':
     dependencies:
       '@ionic/cli-framework-output': 2.2.8
       '@ionic/utils-subprocess': 3.0.1
@@ -3926,36 +3935,37 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@capacitor/core@8.2.0':
+  '@capacitor/core@7.6.1':
     dependencies:
       tslib: 2.8.1
 
-  '@capacitor/filesystem@8.1.2(@capacitor/core@8.2.0)':
+  '@capacitor/filesystem@7.0.1(@capacitor/core@7.6.1)':
     dependencies:
-      '@capacitor/core': 8.2.0
-      '@capacitor/synapse': 1.0.4
+      '@capacitor/core': 7.6.1
 
-  '@capacitor/haptics@8.0.1(@capacitor/core@8.2.0)':
+  '@capacitor/haptics@7.0.1(@capacitor/core@7.6.1)':
     dependencies:
-      '@capacitor/core': 8.2.0
+      '@capacitor/core': 7.6.1
 
-  '@capacitor/push-notifications@8.0.2(@capacitor/core@8.2.0)':
+  '@capacitor/ios@7.6.1(@capacitor/core@7.6.1)':
     dependencies:
-      '@capacitor/core': 8.2.0
+      '@capacitor/core': 7.6.1
 
-  '@capacitor/share@8.0.1(@capacitor/core@8.2.0)':
+  '@capacitor/push-notifications@7.0.2(@capacitor/core@7.6.1)':
     dependencies:
-      '@capacitor/core': 8.2.0
+      '@capacitor/core': 7.6.1
 
-  '@capacitor/status-bar@8.0.1(@capacitor/core@8.2.0)':
+  '@capacitor/share@7.0.1(@capacitor/core@7.6.1)':
     dependencies:
-      '@capacitor/core': 8.2.0
+      '@capacitor/core': 7.6.1
 
-  '@capacitor/synapse@1.0.4': {}
-
-  '@capgo/capacitor-nfc@8.0.18(@capacitor/core@8.2.0)':
+  '@capacitor/status-bar@7.0.1(@capacitor/core@7.6.1)':
     dependencies:
-      '@capacitor/core': 8.2.0
+      '@capacitor/core': 7.6.1
+
+  '@capgo/capacitor-nfc@7.2.0(@capacitor/core@7.6.1)':
+    dependencies:
+      '@capacitor/core': 7.6.1
 
   '@emnapi/core@1.9.0':
     dependencies:
@@ -4349,7 +4359,7 @@ snapshots:
       '@tybys/wasm-util': 0.10.1
     optional: true
 
-  '@napi-rs/wasm-runtime@1.1.1':
+  '@napi-rs/wasm-runtime@1.1.2(@emnapi/core@1.9.0)(@emnapi/runtime@1.9.0)':
     dependencies:
       '@emnapi/core': 1.9.0
       '@emnapi/runtime': 1.9.0
@@ -4501,9 +4511,12 @@ snapshots:
   '@rolldown/binding-openharmony-arm64@1.0.0-rc.12':
     optional: true
 
-  '@rolldown/binding-wasm32-wasi@1.0.0-rc.12':
+  '@rolldown/binding-wasm32-wasi@1.0.0-rc.12(@emnapi/core@1.9.0)(@emnapi/runtime@1.9.0)':
     dependencies:
-      '@napi-rs/wasm-runtime': 1.1.1
+      '@napi-rs/wasm-runtime': 1.1.2(@emnapi/core@1.9.0)(@emnapi/runtime@1.9.0)
+    transitivePeerDependencies:
+      - '@emnapi/core'
+      - '@emnapi/runtime'
     optional: true
 
   '@rolldown/binding-win32-arm64-msvc@1.0.0-rc.12':
@@ -4907,13 +4920,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@4.1.2(vite@8.0.3(@types/node@20.19.37)(jiti@2.6.1))':
+  '@vitest/mocker@4.1.2(vite@8.0.3(@emnapi/core@1.9.0)(@emnapi/runtime@1.9.0)(@types/node@20.19.37)(jiti@2.6.1))':
     dependencies:
       '@vitest/spy': 4.1.2
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 8.0.3(@types/node@20.19.37)(jiti@2.6.1)
+      vite: 8.0.3(@emnapi/core@1.9.0)(@emnapi/runtime@1.9.0)(@types/node@20.19.37)(jiti@2.6.1)
 
   '@vitest/pretty-format@4.1.2':
     dependencies:
@@ -7107,7 +7120,7 @@ snapshots:
       glob: 13.0.6
       package-json-from-dist: 1.0.1
 
-  rolldown@1.0.0-rc.12:
+  rolldown@1.0.0-rc.12(@emnapi/core@1.9.0)(@emnapi/runtime@1.9.0):
     dependencies:
       '@oxc-project/types': 0.122.0
       '@rolldown/pluginutils': 1.0.0-rc.12
@@ -7124,9 +7137,12 @@ snapshots:
       '@rolldown/binding-linux-x64-gnu': 1.0.0-rc.12
       '@rolldown/binding-linux-x64-musl': 1.0.0-rc.12
       '@rolldown/binding-openharmony-arm64': 1.0.0-rc.12
-      '@rolldown/binding-wasm32-wasi': 1.0.0-rc.12
+      '@rolldown/binding-wasm32-wasi': 1.0.0-rc.12(@emnapi/core@1.9.0)(@emnapi/runtime@1.9.0)
       '@rolldown/binding-win32-arm64-msvc': 1.0.0-rc.12
       '@rolldown/binding-win32-x64-msvc': 1.0.0-rc.12
+    transitivePeerDependencies:
+      - '@emnapi/core'
+      - '@emnapi/runtime'
 
   run-parallel@1.2.0:
     dependencies:
@@ -7650,22 +7666,25 @@ snapshots:
       d3-time: 3.1.0
       d3-timer: 3.0.1
 
-  vite@8.0.3(@types/node@20.19.37)(jiti@2.6.1):
+  vite@8.0.3(@emnapi/core@1.9.0)(@emnapi/runtime@1.9.0)(@types/node@20.19.37)(jiti@2.6.1):
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
       postcss: 8.5.8
-      rolldown: 1.0.0-rc.12
+      rolldown: 1.0.0-rc.12(@emnapi/core@1.9.0)(@emnapi/runtime@1.9.0)
       tinyglobby: 0.2.15
     optionalDependencies:
       '@types/node': 20.19.37
       fsevents: 2.3.3
       jiti: 2.6.1
+    transitivePeerDependencies:
+      - '@emnapi/core'
+      - '@emnapi/runtime'
 
-  vitest@4.1.2(@opentelemetry/api@1.9.1)(@types/node@20.19.37)(vite@8.0.3(@types/node@20.19.37)(jiti@2.6.1)):
+  vitest@4.1.2(@opentelemetry/api@1.9.1)(@types/node@20.19.37)(vite@8.0.3(@emnapi/core@1.9.0)(@emnapi/runtime@1.9.0)(@types/node@20.19.37)(jiti@2.6.1)):
     dependencies:
       '@vitest/expect': 4.1.2
-      '@vitest/mocker': 4.1.2(vite@8.0.3(@types/node@20.19.37)(jiti@2.6.1))
+      '@vitest/mocker': 4.1.2(vite@8.0.3(@emnapi/core@1.9.0)(@emnapi/runtime@1.9.0)(@types/node@20.19.37)(jiti@2.6.1))
       '@vitest/pretty-format': 4.1.2
       '@vitest/runner': 4.1.2
       '@vitest/snapshot': 4.1.2
@@ -7682,7 +7701,7 @@ snapshots:
       tinyexec: 1.0.4
       tinyglobby: 0.2.15
       tinyrainbow: 3.1.0
-      vite: 8.0.3(@types/node@20.19.37)(jiti@2.6.1)
+      vite: 8.0.3(@emnapi/core@1.9.0)(@emnapi/runtime@1.9.0)(@types/node@20.19.37)(jiti@2.6.1)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@opentelemetry/api': 1.9.1

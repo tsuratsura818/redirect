@@ -65,7 +65,7 @@ export async function postToX(text: string): Promise<XPostResult> {
     return { success: false, error: 'X API credentials not configured' }
   }
 
-  const url = 'https://api.x.com/2/tweets'
+  const url = 'https://api.twitter.com/2/tweets'
   const method = 'POST'
   const timestamp = Math.floor(Date.now() / 1000).toString()
   const nonce = generateNonce()
@@ -97,8 +97,11 @@ export async function postToX(text: string): Promise<XPostResult> {
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      const errorMsg = errorData?.detail || errorData?.title || `HTTP ${response.status}`
+      const errorText = await response.text().catch(() => '{}')
+      console.error('[X API Error]', response.status, errorText)
+      let errorData: Record<string, string> = {}
+      try { errorData = JSON.parse(errorText) } catch { /* */ }
+      const errorMsg = errorData?.detail || errorData?.title || `HTTP ${response.status}: ${errorText.substring(0, 200)}`
       return { success: false, error: errorMsg }
     }
 

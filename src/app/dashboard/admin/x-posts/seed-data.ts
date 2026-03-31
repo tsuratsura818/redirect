@@ -5,1476 +5,1002 @@ interface SeedPost {
   hashtags: string[]
 }
 
+const BASE = 'https://redirect.tsuratsura.com'
+const LP = `${BASE}/lp`
+const LP_REST = `${LP}/restaurant`
+const LP_RE = `${LP}/realestate`
+const LP_EC = `${LP}/ec`
+const LP_EVT = `${LP}/event`
+
 export const SEED_POSTS: SeedPost[] = [
-  // ===== カテゴリA: サービス紹介・基本価値（#1-15） =====
+  // ===== A: サービス紹介（日本語 #1-15） =====
   {
     post_number: 1,
     category: 'service_intro',
-    hashtags: ['Pivolink', 'QRコード'],
+    hashtags: ['Pivolink', 'QRコード', 'NFCタグ'],
     content: `印刷したQRコード、URLが変わったらどうしますか？
 
 答え：刷り直さなくていい。
 
-Pivolink（ピボリンク）は、印刷済みQRコード・設置済みNFCタグのリンク先を管理画面からいつでも変更できるサービスです。
+Pivolinkなら、印刷済みQRコード・設置済みNFCタグのリンク先を管理画面からいつでも変更できます。
 
 無料プランあり。今すぐ始められます。
-https://redirect.tsuratsura.com
+${BASE}
 
-#Pivolink #QRコード`,
+#Pivolink #QRコード #NFCタグ #DX`,
   },
   {
     post_number: 2,
     category: 'service_intro',
-    hashtags: ['Pivolink', 'QRコード', 'DX'],
+    hashtags: ['Pivolink', 'QRコード', 'リダイレクト'],
     content: `「QRコードは印刷したら変えられない」
 
-その常識、もう古いです。
+それ、もう過去の話です。
 
-Pivolinkなら、印刷後でもリンク先を自由に変更。
-再印刷ゼロ。コスト削減。即時反映。
+Pivolinkを使えば、QRコードの中身はそのまま、飛び先だけを自由に変更。印刷コストゼロで、キャンペーンもメニューも自在に切替。
 
-https://redirect.tsuratsura.com
-#Pivolink #QRコード #DX`,
+${BASE}
+
+#Pivolink #QRコード #リダイレクト #コスト削減`,
   },
   {
     post_number: 3,
     category: 'service_intro',
-    hashtags: ['Pivolink', '販促'],
-    content: `Pivolinkの仕組みはシンプルです。
+    hashtags: ['Pivolink', 'NFCタグ', 'NFC'],
+    content: `NFCタグ、貼ったら終わりだと思ってませんか？
 
-① Pivolinkでリンクを発行
-② そのURLでQRコードを印刷
-③ キャンペーンが変わったら、管理画面でリンク先を変更
+Pivolinkなら：
+✅ タグの飛び先をいつでも変更
+✅ アクセス解析でタッチ数を把握
+✅ 時間帯・デバイス別に振り分け
 
-QRコード自体はそのまま。リンク先だけが変わる。
-再印刷も再設置も不要です。
+1枚数十円のNFCタグが、永久に使えるマーケティングツールに。
 
-#Pivolink #販促`,
+${BASE}
+
+#Pivolink #NFCタグ #NFC #スマートタグ`,
   },
   {
     post_number: 4,
     category: 'service_intro',
-    hashtags: ['Pivolink', 'QRコード'],
-    content: `名刺に印刷したQRコード、
-チラシに載せたQRコード、
-パッケージに印刷したQRコード。
+    hashtags: ['Pivolink', 'QRコード', 'アクセス解析'],
+    content: `QRコード、何回スキャンされたか知ってますか？
 
-全部、リンク先を後から変えられます。
+Pivolinkなら：
+📊 日別・時間帯別アクセス数
+📱 デバイス・OS・ブラウザ別分析
+🌍 地域別データ
 
-それがPivolinkです。
-https://redirect.tsuratsura.com
+「なんとなく」を「データで」に変えましょう。
 
-#Pivolink #QRコード`,
+${BASE}
+
+#Pivolink #QRコード #アクセス解析 #マーケティング`,
   },
   {
     post_number: 5,
     category: 'service_intro',
-    hashtags: ['Pivolink', 'マーケティング'],
-    content: `QRコードを「使い捨て」にしていませんか？
+    hashtags: ['Pivolink', 'QRコード', 'ABテスト'],
+    content: `同じQRコードで、A/Bテストができるって知ってました？
 
-Pivolinkを使えば、一度印刷したQRコードが
-ずっと使える「資産」に変わります。
+Pivolinkなら、1つのQRで複数のURLにトラフィックを分割。
 
-キャンペーンが変わっても、サイトを移行しても、
-管理画面からワンクリックで切り替え。
+「LP-AとLP-B、どっちが効く？」をリアルタイムで検証。
 
-#Pivolink #マーケティング`,
+印刷物のA/Bテスト、始めませんか？
+
+${BASE}
+
+#Pivolink #QRコード #ABテスト #マーケティング #CRO`,
   },
   {
     post_number: 6,
     category: 'service_intro',
-    hashtags: ['Pivolink', 'SaaS'],
-    content: `Pivolinkでできること：
+    hashtags: ['Pivolink', 'QRコード', 'スケジュール'],
+    content: `QRコードのリンク先、時間で自動切替できます。
 
-・リンク先の即時変更
-・スケジュール切替（自動で日時指定変更）
-・デバイス別振分（iOS/Android/PC）
-・A/Bテスト
-・クッションページ表示
-・アクセス解析
-・変更履歴の完全ログ
+例えば：
+🌅 朝 → モーニングメニュー
+🌞 昼 → ランチメニュー
+🌙 夜 → ディナーメニュー
 
-無料で3リンクまで使えます。
+1枚のQRで、時間帯に合わせた最適な体験を。
 
-#Pivolink #SaaS`,
+${LP_REST}
+
+#Pivolink #QRコード #スケジュール #飲食店DX`,
   },
   {
     post_number: 7,
     category: 'service_intro',
-    hashtags: ['Pivolink', 'QRコード', 'DX'],
-    content: `「え、QRコードのリンク先って後から変えられるの？」
+    hashtags: ['Pivolink', 'NFCタグ', 'QRコード', '無料'],
+    content: `Pivolink、無料で始められます。
 
-はい、変えられます。
+🆓 Freeプラン：5リンクまで
+💼 Pro：¥980/月（無制限）
+🏢 Business：¥4,980/月（チーム管理・API）
 
-Pivolinkは印刷済みのQRコード・設置済みのNFCタグのリダイレクト先を、管理画面から何度でも変更できるサービスです。
+まずは無料で試して、効果を実感してから拡張。
 
-#Pivolink #QRコード #DX`,
+${BASE}/login
+
+#Pivolink #QRコード #NFCタグ #無料 #SaaS`,
   },
   {
     post_number: 8,
     category: 'service_intro',
-    hashtags: ['Pivolink'],
-    content: `QRコードの"もったいない"を解決するサービスを作りました。
+    hashtags: ['Pivolink', 'QRコード', 'デバイス別'],
+    content: `同じQRコードなのに、iPhoneとAndroidで違うページに飛ばせます。
 
-・キャンペーン終了後のQR → リンク切れ
-・サイトリニューアル後のQR → 404エラー
-・売切れ商品のNFC → 存在しないページ
+✅ iPhone → App Storeへ
+✅ Android → Google Playへ
+✅ PC → Webサイトへ
 
-Pivolinkなら、全部管理画面から修正できます。
+デバイス別リダイレクト、Pivolinkなら設定3分。
 
-#Pivolink`,
+${BASE}
+
+#Pivolink #QRコード #デバイス別 #アプリ誘導`,
   },
   {
     post_number: 9,
     category: 'service_intro',
-    hashtags: ['Pivolink', 'インバウンド', '観光DX'],
-    content: `Pivolinkは日本語・英語・中国語に対応。
+    hashtags: ['Pivolink', 'QRコード', 'クッションページ'],
+    content: `QRコードの飛び先が変わったこと、ユーザーに伝えたい？
 
-インバウンド向けの観光案内、多言語ECサイトへの誘導にもそのまま使えます。
+Pivolinkの「クッションページ」機能：
+📢 リダイレクト前にお知らせを表示
+🎨 ロゴ・メッセージをカスタマイズ
+⏱️ 自動転送の秒数を設定
 
-https://redirect.tsuratsura.com
+サイト移転、キャンペーン終了のお知らせに最適。
 
-#Pivolink #インバウンド #観光DX`,
+${BASE}
+
+#Pivolink #QRコード #クッションページ`,
   },
   {
     post_number: 10,
     category: 'service_intro',
-    hashtags: ['Pivolink', 'SaaS'],
-    content: `Pivolinkの料金：
+    hashtags: ['Pivolink', 'QRコード', 'NFCタグ', '多言語'],
+    content: `外国人観光客が増えている今、QRコードも多言語対応しませんか？
 
-Free：¥0（3リンク / 月1,000アクセス）
-Pro：¥780（50リンク / 月50,000アクセス）
-Business：¥3,980（無制限）
+Pivolinkなら：
+🇯🇵 日本語ユーザー → 日本語ページ
+🇺🇸 英語ユーザー → 英語ページ
+🇨🇳 中国語ユーザー → 中国語ページ
 
-※ベータ特別価格。Freeプランはカード登録不要。
+1枚のQRで、世界中のお客様に最適な体験を。
 
-#Pivolink #SaaS`,
+${BASE}
+
+#Pivolink #QRコード #NFCタグ #インバウンド #多言語`,
   },
+
+  // ===== B: 課題提起・共感（日本語 #11-25） =====
   {
     post_number: 11,
-    category: 'service_intro',
-    hashtags: ['Pivolink', 'NFC', 'NFCタグ'],
-    content: `NFCタグの書き換え作業、もうやめませんか？
+    category: 'pain_point',
+    hashtags: ['Pivolink', 'QRコード', 'コスト削減'],
+    content: `QRコードの印刷代、年間いくらかかってますか？
 
-PivolinkのURLをNFCに1回書き込めば、
-あとは管理画面からリンク先を変えるだけ。
+キャンペーンごとに新しいQR → チラシ再印刷 → 配布…
 
-物理的な作業ゼロで、遷移先を何度でも更新。
+Pivolinkなら、1回印刷したQRの飛び先を何度でも変更。印刷コストをゼロに。
 
-#Pivolink #NFC #NFCタグ`,
+年間の削減効果、業種別に計算してみました👇
+${LP}
+
+#Pivolink #QRコード #コスト削減 #印刷費`,
   },
   {
     post_number: 12,
-    category: 'service_intro',
-    hashtags: ['Pivolink'],
-    content: `Pivolink = Pivot + Link
+    category: 'pain_point',
+    hashtags: ['Pivolink', 'QRコード', 'リンク切れ'],
+    content: `キャンペーン終了後のQRコード、放置してませんか？
 
-「ピボット」のように、リンク先を軽やかに切り替える。
+お客様がスキャンしたら404エラー…
 
-印刷したQRコードのURLを、あとから自由に。
-https://redirect.tsuratsura.com
+それ、ブランドイメージを損なってます。
 
-#Pivolink`,
+Pivolinkなら終了後もリンク先を変更可能。次のキャンペーンページや通常サイトに転送。
+
+${BASE}
+
+#Pivolink #QRコード #リンク切れ #ブランド`,
   },
   {
     post_number: 13,
-    category: 'service_intro',
-    hashtags: ['Pivolink', 'QRコード', '販促'],
-    content: `QRコードにまつわる3大ストレス：
+    category: 'pain_point',
+    hashtags: ['Pivolink', 'NFCタグ', 'NFC'],
+    content: `店頭のNFCタグ、お客さんがタッチしたら404。
 
-1. URLが変わったら刷り直し
-2. キャンペーン終了後にリンク切れ
-3. 効果測定ができない
+❌ キャンペーン終了後のリンク切れ
+❌ サイトリニューアル後のURL変更
+❌ 担当者が退職して誰も管理してない
 
-Pivolinkは3つとも解決します。
+全部Pivolinkで解決できます。
 
-#Pivolink #QRコード #販促`,
+${BASE}
+
+#Pivolink #NFCタグ #NFC #リンク切れ #店舗DX`,
   },
   {
     post_number: 14,
-    category: 'service_intro',
-    hashtags: ['Pivolink'],
-    content: `「Pivolinkってつまり何？」
+    category: 'pain_point',
+    hashtags: ['Pivolink', 'QRコード', '飲食店'],
+    content: `飲食店あるある：
 
-→ QRコード・NFCタグの"リモコン"です。
+「メニュー変わったからQRシール全席貼り替え…」
 
-物理的に印刷・設置したものはそのまま。
-リンク先だけを、いつでもどこからでも操作できます。
+100席あったら100枚。それを季節ごとに。
 
-#Pivolink`,
+Pivolinkなら管理画面で1クリック。全席のQRが新メニューに切り替わります。
+
+詳しくはこちら👇
+${LP_REST}
+
+#Pivolink #QRコード #飲食店 #飲食店DX #メニュー`,
   },
   {
     post_number: 15,
-    category: 'service_intro',
-    hashtags: ['Pivolink'],
-    content: `Pivolink、始め方は3ステップ：
+    category: 'pain_point',
+    hashtags: ['Pivolink', 'QRコード', '不動産'],
+    content: `不動産あるある：
 
-1. 無料アカウント作成（メールだけでOK）
-2. リンクを発行してQRコードをダウンロード
-3. チラシやパッケージに印刷
+成約済み物件のチラシが街中に残ってる。
 
-あとはリンク先を変えたいときに管理画面を開くだけ。
+お客様がQRスキャン → 「この物件は掲載終了しました」
 
-https://redirect.tsuratsura.com
-#Pivolink`,
+Pivolinkなら、成約後にリンク先を類似物件ページに自動切替。チラシが無駄にならない。
+
+${LP_RE}
+
+#Pivolink #QRコード #不動産 #不動産DX #物件`,
   },
-
-  // ===== カテゴリB: 課題提起・共感系（#16-30） =====
   {
     post_number: 16,
     category: 'pain_point',
-    hashtags: ['Pivolink', '印刷コスト削減'],
-    content: `キャンペーンが変わるたびにQRコード入りのチラシを全部刷り直してる会社、まだありますか？
+    hashtags: ['Pivolink', 'QRコード', 'EC'],
+    content: `ECあるある：
 
-...たぶんあると思います。
+商品パッケージのQR → サイトリニューアル → リンク切れ
 
-その費用と手間、Pivolinkで0円にできます。
+出荷済みの商品は回収できない。
 
-#Pivolink #印刷コスト削減`,
+Pivolinkなら、パッケージのQRはそのまま、飛び先だけ新サイトに変更。
+
+年間約53万円の損失を防げます👇
+${LP_EC}
+
+#Pivolink #QRコード #EC #ECサイト #通販`,
   },
   {
     post_number: 17,
     category: 'pain_point',
-    hashtags: ['Pivolink', 'QRコード'],
-    content: `あるある：
-名刺のQRコード → 旧サイトに飛ぶ
-商品同梱のQR → 終了したキャンペーンページ
-店頭POP → 404エラー
+    hashtags: ['Pivolink', 'QRコード', 'イベント'],
+    content: `イベントあるある：
 
-全部「印刷した後に変えられない」のが原因です。
+告知チラシのQR → 当日は？ → 終了後は？
 
-#Pivolink #QRコード`,
+全部同じURL、全部同じページ…もったいない。
+
+Pivolinkなら：
+📢 開催前 → 告知ページ
+📋 当日 → タイムテーブル
+📸 終了後 → アーカイブ
+
+自動切替で1枚のQRが3倍働く。
+${LP_EVT}
+
+#Pivolink #QRコード #イベント #展示会`,
   },
   {
     post_number: 18,
     category: 'pain_point',
-    hashtags: ['Pivolink', '業務効率化'],
-    content: `「QRコードのリンク先が変わったんですけど...」
-「じゃあチラシ5000枚刷り直しですね」
+    hashtags: ['Pivolink', 'NFCタグ', 'NFC', '名刺'],
+    content: `NFC名刺、作ったけど転職したら？
 
-この会話、もうなくしませんか？
+普通のNFC名刺 → 書き換えるか捨てるしかない
 
-#Pivolink #業務効率化`,
+Pivolink × NFC名刺：
+✅ 転職しても名刺はそのまま
+✅ リンク先だけ新しいプロフィールに変更
+✅ 名刺のタッチ数も計測
+
+${BASE}
+
+#Pivolink #NFCタグ #NFC #名刺 #NFC名刺`,
   },
   {
     post_number: 19,
     category: 'pain_point',
-    hashtags: ['Pivolink', 'NFC', 'DX'],
-    content: `NFCタグを100個設置した施設で、URLを変更することに。
+    hashtags: ['Pivolink', 'QRコード', '効果測定'],
+    content: `チラシにQRコード載せてるけど、効果わかってますか？
 
-選択肢A：100個全部書き換え（半日作業）
-選択肢B：Pivolinkで管理画面からワンクリック（3秒）
+「何枚配って」「何回スキャンされたか」
 
-どちらを選びますか？
+これが分からないと、次の施策が打てない。
 
-#Pivolink #NFC #DX`,
+Pivolinkなら全スキャンを自動計測。日別・地域別・デバイス別で分析。
+
+${BASE}
+
+#Pivolink #QRコード #効果測定 #マーケティング #データ分析`,
   },
   {
     post_number: 20,
     category: 'pain_point',
-    hashtags: ['Pivolink', '販促'],
-    content: `【実はめちゃくちゃもったいない話】
+    hashtags: ['Pivolink', 'QRコード', '看板'],
+    content: `看板のQRコード、最後に更新したのいつですか？
 
-印刷済みチラシのQRコード。
-キャンペーン終了後、そのチラシはまだ世の中にあります。
+看板は高い。QR付きならなおさら。
 
-でもリンク先は死んでる。
+でもリンク先が古いまま放置されてるケース、実は多い。
 
-Pivolinkなら次のキャンペーンに差し替えるだけ。
+Pivolinkなら看板を作り直さず、リンク先だけ最新に。
 
-#Pivolink #販促`,
+${BASE}
+
+#Pivolink #QRコード #看板 #店舗 #コスト削減`,
   },
+
+  // ===== C: 業種別ユースケース（日本語 #21-35） =====
   {
     post_number: 21,
-    category: 'pain_point',
-    hashtags: ['Pivolink', 'EC'],
-    content: `EC事業者あるある：
+    category: 'use_case',
+    hashtags: ['Pivolink', 'QRコード', '飲食店', 'NFCタグ'],
+    content: `【飲食店のPivolink活用】
 
-商品ページのURL変更
-→ パッケージのQRコードが全部リンク切れ
-→ 在庫のパッケージ全部シール貼り替え
-→ コストと時間が飛んでいく
+🍽️ テーブルQR → 季節メニューを自動切替
+⭐ レビュー誘導のA/Bテスト
+📊 どの席からのスキャンが多いか分析
+🏪 多店舗のQRを一括管理
 
-#Pivolink なら管理画面で即解決。`,
+年間約5.5万円のコスト削減＋作業時間8時間節約。
+
+詳しくは👇
+${LP_REST}
+
+#Pivolink #QRコード #飲食店 #NFCタグ #飲食店DX`,
   },
   {
     post_number: 22,
-    category: 'pain_point',
-    hashtags: ['Pivolink', 'DX'],
-    content: `「サイトリニューアルしたいけど、名刺のQRコードが...」
+    category: 'use_case',
+    hashtags: ['Pivolink', 'QRコード', '不動産'],
+    content: `【不動産のPivolink活用】
 
-そう言ってリニューアルを先延ばしにしてませんか？
+🏠 成約済み → 類似物件ページに自動切替
+🪧 看板QR → 物件変更時にURL更新
+📈 エリア別のスキャン効果を測定
+🔄 チラシを再利用（印刷コスト削減）
 
-Pivolinkを使えば、名刺はそのまま。URLだけ切り替えられます。
+年間約38.5万円のコスト削減。
 
-#Pivolink #DX`,
+詳しくは👇
+${LP_RE}
+
+#Pivolink #QRコード #不動産 #不動産DX #物件情報`,
   },
   {
     post_number: 23,
-    category: 'pain_point',
-    hashtags: ['Pivolink', 'NFC'],
-    content: `店頭のNFCタグ、お客さんがタッチしたら404。
+    category: 'use_case',
+    hashtags: ['Pivolink', 'QRコード', 'EC', '通販'],
+    content: `【EC・通販のPivolink活用】
 
-これ、お客さんは「この店ちゃんとしてないな」と思います。
+📦 同梱QRでA/Bテスト（レビュー vs クーポン）
+🔗 パッケージQR → サイト移行に追従
+📊 どの商品のQRが一番スキャンされるか
+💰 年間約53万円のコスト削減
 
-たった1つのリンク切れが、ブランドイメージを傷つける。
-管理できる仕組み、持ってますか？
+詳しくは👇
+${LP_EC}
 
-#Pivolink #NFC`,
+#Pivolink #QRコード #EC #ECサイト #通販 #Eコマース`,
   },
   {
     post_number: 24,
-    category: 'pain_point',
-    hashtags: ['Pivolink', 'コスト削減'],
-    content: `QRコードの印刷代、年間いくらかかってますか？
+    category: 'use_case',
+    hashtags: ['Pivolink', 'QRコード', 'イベント', '展示会'],
+    content: `【イベント・展示会のPivolink活用】
 
-仮にチラシ5000枚 × 年4回キャンペーン = 2万枚
+🎪 開催前→当日→終了後を自動切替
+🎫 ポスターQRを次回イベントで再利用
+📊 来場者のスキャン傾向を分析
+📱 NFC wristbandで来場者体験向上
 
-Pivolinkなら1回の印刷で済みます。
-年間の印刷コスト、最大75%カットも可能。
+年間約26万円のコスト削減。
 
-#Pivolink #コスト削減`,
+詳しくは👇
+${LP_EVT}
+
+#Pivolink #QRコード #イベント #展示会 #イベントDX`,
   },
   {
     post_number: 25,
-    category: 'pain_point',
-    hashtags: ['Pivolink', '飲食店経営'],
-    content: `季節ごとにメニューが変わる飲食店さん。
-テーブルのQRコードを毎回貼り替えてませんか？
+    category: 'use_case',
+    hashtags: ['Pivolink', 'QRコード', 'ホテル', '旅館'],
+    content: `【ホテル・旅館のPivolink活用】
 
-春メニュー → 夏メニュー → 秋メニュー → 冬メニュー
+🛏️ 客室QR → 季節の観光案内に切替
+🍳 朝食メニュー / ディナーメニューを時間で自動切替
+📶 NFCタグでWi-Fi接続案内
+🌐 外国人ゲスト → 英語ページに自動振分
 
-Pivolinkならスケジュール設定で自動切替。
-一度貼れば、あとは放っておくだけ。
+${BASE}
 
-#Pivolink #飲食店経営`,
+#Pivolink #QRコード #ホテル #旅館 #インバウンド #観光DX`,
   },
   {
     post_number: 26,
-    category: 'pain_point',
-    hashtags: ['Pivolink', '製造業'],
-    content: `「リコール発生！パッケージのQRコードを告知ページに切り替えて！」
+    category: 'use_case',
+    hashtags: ['Pivolink', 'QRコード', '美容院', 'サロン'],
+    content: `【美容院・サロンのPivolink活用】
 
-普通：パッケージ回収 → 刷り直し → 数週間
-Pivolink：管理画面でURL変更 → 即時反映
+💇 カウンターNFC → 予約ページ直結
+🎁 名刺QR → 月替わりクーポンページ
+⭐ 施術後にレビュー誘導QR
+📊 どの導線が予約に繋がってるか分析
 
-緊急時の初動スピードが変わります。
+${BASE}
 
-#Pivolink #製造業`,
+#Pivolink #QRコード #美容院 #サロン #美容室 #NFCタグ`,
   },
   {
     post_number: 27,
-    category: 'pain_point',
-    hashtags: ['Pivolink', '不動産'],
-    content: `不動産あるある：
+    category: 'use_case',
+    hashtags: ['Pivolink', 'QRコード', '製造業', '工場'],
+    content: `【製造業のPivolink活用】
 
-成約済み物件のチラシが街中に残ってる
-→ QR読み取り → 「この物件は掲載終了しました」
+🏭 製品QR → マニュアルページ（バージョン更新に対応）
+🔧 設備NFCタグ → 点検記録フォーム
+📋 安全教育資料のQR → 最新版に自動更新
+📊 どの資料がよく参照されてるか分析
 
-もったいなくないですか？
-次の物件情報に差し替えれば、チラシが再び働きます。
+${BASE}
 
-#Pivolink #不動産`,
+#Pivolink #QRコード #製造業 #工場 #NFCタグ #DX`,
   },
   {
     post_number: 28,
-    category: 'pain_point',
-    hashtags: ['Pivolink', 'マーケティング'],
-    content: `マーケ担当の本音：
+    category: 'use_case',
+    hashtags: ['Pivolink', 'QRコード', 'クリニック', '病院'],
+    content: `【クリニック・病院のPivolink活用】
 
-「どのQRコードが何回スキャンされたか分からない」
-「チラシとWebの効果を紐づけられない」
-「でもGAだけじゃQR経由って分からない」
+🏥 受付QR → 問診票フォーム
+💊 薬袋QR → 服薬説明ページ
+📅 予約システムへの導線
+🌐 外国人患者 → 英語説明に自動切替
 
-Pivolinkのアクセス解析なら、全部見えます。
+${BASE}
 
-#Pivolink #マーケティング`,
+#Pivolink #QRコード #クリニック #病院 #医療DX`,
   },
   {
     post_number: 29,
-    category: 'pain_point',
-    hashtags: ['Pivolink', 'BtoB', '展示会'],
-    content: `展示会のパンフレットに載せたQRコード。
+    category: 'use_case',
+    hashtags: ['Pivolink', 'QRコード', '教育', '学校'],
+    content: `【教育機関のPivolink活用】
 
-展示会が終わっても、そのパンフは相手のデスクにある。
-半年後に読み取ったら...リンク切れ。
+🎓 オープンキャンパスQR → 開催前/当日/事後で自動切替
+📚 教材QR → 補足資料を随時更新
+👨‍👩‍👧 保護者向け配布物QR → 最新のお知らせに
+📊 どの配布物のQRがよく読まれてるか分析
 
-展示会後こそ営業チャンス。
-Pivolinkでリンクを生かし続けましょう。
+${BASE}
 
-#Pivolink #BtoB #展示会`,
+#Pivolink #QRコード #教育 #学校 #教育DX`,
   },
   {
     post_number: 30,
-    category: 'pain_point',
-    hashtags: ['Pivolink'],
-    content: `「QRコードなんてどこも一緒でしょ？」
+    category: 'use_case',
+    hashtags: ['Pivolink', 'QRコード', '自治体', '行政'],
+    content: `【自治体・行政のPivolink活用】
 
-いいえ、違います。
+🏛️ 広報誌QR → 最新の行政情報に自動更新
+🗑️ ゴミ分別QR → 地区別ルール変更に対応
+🚌 バス停NFC → リアルタイム時刻表
+🌐 多言語対応で在留外国人にも
 
-ほとんどのQR生成ツールは「作って終わり」。
-Pivolinkは「作ってから始まる」。
+${BASE}
 
-リンク先変更、スケジュール切替、A/Bテスト、解析。
-QRコードが"運用できる資産"に変わります。
-
-#Pivolink`,
+#Pivolink #QRコード #自治体 #行政DX #NFCタグ`,
   },
 
-  // ===== カテゴリC: 業種別ユースケース（#31-50） =====
+  // ===== D: 機能Tips（日本語 #31-40） =====
   {
     post_number: 31,
-    category: 'use_case',
-    hashtags: ['Pivolink', '飲食店経営', 'QRコード'],
-    content: `飲食店のPivolink活用例：
+    category: 'feature_tips',
+    hashtags: ['Pivolink', 'QRコード', 'Tips'],
+    content: `💡 Pivolink Tips：有効期限設定
 
-・テーブルQR → 季節メニューに自動切替
-・レジ横NFC → 今月のクーポンページ
-・テイクアウト袋QR → レビュー依頼 or 次回割引
+QRコードに有効期限を設定できます。
 
-1回の設置で、ずっと使い回せます。
+期限切れ → 自動で別ページにリダイレクト
 
-#Pivolink #飲食店経営 #QRコード`,
+キャンペーン終了後の対応を自動化。人手ゼロ。
+
+${BASE}
+
+#Pivolink #QRコード #Tips #自動化`,
   },
   {
     post_number: 32,
-    category: 'use_case',
-    hashtags: ['Pivolink', 'ホテル', '観光DX'],
-    content: `ホテル・旅館のPivolink活用例：
+    category: 'feature_tips',
+    hashtags: ['Pivolink', 'QRコード', 'Tips', '変更履歴'],
+    content: `💡 Pivolink Tips：変更履歴
 
-・客室NFC → 季節の観光案内（春:花見/夏:海/秋:紅葉/冬:温泉）
-・ロビーQR → 今月のイベント情報
-・チェックイン案内 → 多言語ページ自動振分
+「前のURL何だっけ？」
 
-NFCの貼り替え作業、ゼロにできます。
+Pivolinkは全変更を自動記録。
 
-#Pivolink #ホテル #観光DX`,
+✅ いつ変更したか
+✅ 誰が変更したか
+✅ 変更前のURL
+
+いつでもロールバック可能。安心して運用できます。
+
+${BASE}
+
+#Pivolink #QRコード #Tips #変更履歴`,
   },
   {
     post_number: 33,
-    category: 'use_case',
-    hashtags: ['Pivolink', '不動産'],
-    content: `不動産会社のPivolink活用例：
+    category: 'feature_tips',
+    hashtags: ['Pivolink', 'NFCタグ', 'NFC', 'Tips'],
+    content: `💡 NFCタグの選び方
 
-・物件チラシQR → 成約後は次の物件に差し替え
-・看板QR → 完売後は新規分譲地に切替
-・名刺QR → 担当物件一覧（常に最新に更新）
+Pivolinkで使うなら：
+📏 NTAG213（144バイト）で十分
+💰 1枚30円〜100円
+🔒 書き込みロック機能で誤上書き防止
+📱 iPhone 7以降 / Android 5以降対応
 
-チラシの刷り直し、0回に。
+タグは安い。Pivolinkと組み合わせれば、永久に使えるツールに。
 
-#Pivolink #不動産`,
+${BASE}
+
+#Pivolink #NFCタグ #NFC #NTAG213 #スマートタグ`,
   },
+
+  // ===== E: 豆知識（日本語 #34-40） =====
   {
     post_number: 34,
-    category: 'use_case',
-    hashtags: ['Pivolink', 'EC'],
-    content: `EC・通販のPivolink活用例：
+    category: 'knowledge',
+    hashtags: ['QRコード', 'NFCタグ', '豆知識'],
+    content: `【豆知識】QRコード vs NFCタグ
 
-・商品同梱QR → レビュー誘導 / クーポン配布をA/Bテスト
-・パッケージQR → 商品ページ移行時も自動追従
-・ダンボール印刷QR → キャンペーンに合わせて都度変更
+QRコード：
+📸 カメラで読み取り
+📏 距離OK（ポスター・チラシ向き）
+💰 印刷コストのみ
 
-同梱物のQR、使い捨てにしてませんか？
+NFCタグ：
+📱 かざすだけ（カメラ不要）
+📏 近距離（テーブル・カウンター向き）
+💰 1枚30円〜
 
-#Pivolink #EC`,
+どちらもPivolinkで管理できます👇
+${BASE}
+
+#QRコード #NFCタグ #NFC #豆知識`,
   },
   {
     post_number: 35,
-    category: 'use_case',
-    hashtags: ['Pivolink', '製造業', 'QRコード'],
-    content: `製造業のPivolink活用例：
+    category: 'knowledge',
+    hashtags: ['QRコード', '豆知識', 'デザイン'],
+    content: `【豆知識】QRコードにロゴを入れても読めるの？
 
-・製品パッケージQR → 取扱説明書（PDF更新時も追従）
-・リコール時 → 緊急告知ページに即切替
-・製品ラベルNFC → ロット別の品質情報ページ
+答え：読めます。
 
-パッケージの刷り直し不要。管理画面で即対応。
+QRコードにはエラー訂正機能があり、面積の最大30%まで隠しても読み取り可能。
 
-#Pivolink #製造業 #QRコード`,
+ブランドロゴ入りQRコードで、デザイン性と機能性を両立しましょう。
+
+#QRコード #豆知識 #デザイン #ブランディング`,
   },
+
+  // ===== F: 英語投稿（#36-60） =====
   {
     post_number: 36,
-    category: 'use_case',
-    hashtags: ['Pivolink', '美容室', 'サロン経営'],
-    content: `美容院・サロンのPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'NFCtag'],
+    content: `Printed a QR code, but the URL changed?
 
-・ショップカードQR → 予約ページ（システム変更時も追従）
-・店頭POP → 今月のキャンペーン
-・レシートQR → 次回割引クーポン → 翌月は別のクーポンに自動切替
+Don't reprint. Just redirect.
 
-常に最新の情報にリンクし続けます。
+Pivolink lets you change where your QR codes & NFC tags point — anytime, from a simple dashboard.
 
-#Pivolink #美容室 #サロン経営`,
+Free plan available.
+${BASE}
+
+#Pivolink #QRCode #NFCtag #DX #MarTech`,
   },
   {
     post_number: 37,
-    category: 'use_case',
-    hashtags: ['Pivolink', 'イベント'],
-    content: `イベント主催者のPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'Marketing'],
+    content: `"QR codes are permanent once printed."
 
-・ポスターQR → イベント詳細ページ
-・入場チケットQR → 当日タイムテーブル → 終了後はアーカイブ動画へ
-・スポンサーブースNFC → 企業ページ（開催後は成果レポートに切替）
+Not anymore.
 
-1回のイベントで終わらせない。
+With Pivolink, one QR code can point to different URLs over time. Change campaigns, menus, and promotions — without reprinting.
 
-#Pivolink #イベント`,
+${BASE}
+
+#Pivolink #QRCode #Marketing #PrintMedia`,
   },
   {
     post_number: 38,
-    category: 'use_case',
-    hashtags: ['Pivolink', '観光DX', 'インバウンド'],
-    content: `観光・自治体のPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'NFCtag', 'NFC'],
+    content: `NFC tags: set it and forget it?
 
-・観光看板QR → 季節別おすすめスポット
-・パンフQR → デバイス別言語振分（iOS→英語/Android→中国語）
-・スタンプラリーNFC → 今年のルートに毎年更新
+Not with Pivolink.
 
-多言語対応 × スケジュール切替で観光DX。
+✅ Change the destination anytime
+✅ Track tap analytics
+✅ Route by device (iOS/Android)
 
-#Pivolink #観光DX #インバウンド`,
+One NFC tag. Infinite possibilities.
+
+${BASE}
+
+#Pivolink #NFCtag #NFC #SmartTag #IoT`,
   },
   {
     post_number: 39,
-    category: 'use_case',
-    hashtags: ['Pivolink', '教育DX'],
-    content: `学校・教育機関のPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'Restaurant'],
+    content: `Restaurant owners: still replacing QR stickers every season?
 
-・学校案内パンフQR → 最新の学校情報に常時更新
-・掲示板QR → 今月の行事予定
-・学園祭ポスターQR → 当日マップ → 終了後はフォトギャラリーへ
+With Pivolink:
+🍽️ Auto-switch menus by time of day
+⭐ A/B test review pages
+📊 Track which tables scan most
 
-年度が変わっても、QRはそのまま。
+Save $500+/year on printing alone.
 
-#Pivolink #教育DX`,
+${LP_REST}
+
+#Pivolink #QRCode #Restaurant #FoodTech`,
   },
   {
     post_number: 40,
-    category: 'use_case',
-    hashtags: ['Pivolink', 'クリニック'],
-    content: `クリニックのPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'RealEstate'],
+    content: `Real estate agents: your sold property flyers are still out there.
 
-・診察券QR → Web予約ページ（システム変更にも追従）
-・院内ポスターQR → 今月の健康情報
-・待合室NFC → 問診票フォーム（季節に応じた内容に切替）
+Customers scan the QR → 404 error.
 
-患者さんの「リンクが開かない」をゼロに。
+With Pivolink, redirect sold listings to similar properties automatically.
 
-#Pivolink #クリニック`,
+Save $3,000+/year on flyer reprints.
+
+${LP_RE}
+
+#Pivolink #QRCode #RealEstate #PropTech`,
   },
   {
     post_number: 41,
-    category: 'use_case',
-    hashtags: ['Pivolink', 'アパレル', 'ファッション'],
-    content: `アパレルのPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'Ecommerce'],
+    content: `E-commerce brands: what happens when you redesign your website?
 
-・商品タグQR → コーディネート提案ページ
-・ショッパー（紙袋）QR → 今季コレクション → 来季はNewコレへ
-・店頭POP NFC → セール情報 → 通常期はブランドストーリーへ
+Every QR code on every shipped package → broken link.
 
-タグも袋も、次のシーズンでまた活きる。
+Pivolink keeps your package QR codes alive. Update the destination, not the packaging.
 
-#Pivolink #アパレル #ファッション`,
+${LP_EC}
+
+#Pivolink #QRCode #Ecommerce #DTC #PackagingDesign`,
   },
   {
     post_number: 42,
-    category: 'use_case',
-    hashtags: ['Pivolink', '食品メーカー'],
-    content: `食品メーカーのPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'Events'],
+    content: `Event organizers: one QR code, three phases.
 
-・ペットボトルラベルQR → キャンペーン応募ページ
-  → 終了後は商品情報ページへ自動切替
-・パッケージQR → レシピ動画（季節ごとに更新）
-・アレルギー表示更新 → 管理画面で即反映
+📢 Before: event info & registration
+📋 During: live schedule & maps
+📸 After: photos & recordings
 
-#Pivolink #食品メーカー`,
+Pivolink auto-switches by date. No manual updates.
+
+${LP_EVT}
+
+#Pivolink #QRCode #Events #EventTech #Conferences`,
   },
   {
     post_number: 43,
-    category: 'use_case',
-    hashtags: ['Pivolink', 'フィットネス', 'ジム'],
-    content: `ジム・フィットネスのPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'ABtest'],
+    content: `Did you know? You can A/B test with a single QR code.
 
-・マシンのNFCタグ → 使い方動画（機種更新時もURL変更不要）
-・入口QR → 今月のレッスンスケジュール
-・会員カードQR → マイページ（システム移行にも追従）
+Pivolink splits traffic between multiple URLs automatically.
 
-#Pivolink #フィットネス #ジム`,
+Test landing pages, offers, and CTAs — all from one printed QR.
+
+${BASE}
+
+#Pivolink #QRCode #ABtest #CRO #GrowthHacking`,
   },
   {
     post_number: 44,
-    category: 'use_case',
-    hashtags: ['Pivolink', '自動車'],
-    content: `自動車ディーラーのPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'Analytics'],
+    content: `How many times was your QR code scanned?
 
-・展示車のQR → 詳細スペックページ（在庫入替で自動切替）
-・チラシQR → 今月のフェア情報
-・アフターサービスQR → 車検予約 / リコール情報
+Most businesses have no idea.
 
-展示車が変わっても、QRは貼り替え不要。
+Pivolink tracks:
+📊 Daily/hourly scans
+📱 Device & browser breakdown
+🌍 Geographic data
 
-#Pivolink #自動車`,
+Turn printed media into measurable marketing.
+
+${BASE}
+
+#Pivolink #QRCode #Analytics #DataDriven #MarTech`,
   },
   {
     post_number: 45,
-    category: 'use_case',
-    hashtags: ['Pivolink', '物流', 'DX'],
-    content: `物流・倉庫のPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'NFC', 'Free'],
+    content: `Pivolink pricing:
 
-・倉庫内NFCタグ → 作業手順書（改訂時もURL変更不要）
-・配送伝票QR → 荷物追跡ページ
-・コンテナNFC → 内容物リスト（積替え時に更新）
+🆓 Free: up to 5 links
+💼 Pro: $7/mo (unlimited links)
+🏢 Business: $35/mo (team + API)
 
-現場のNFC書き換え作業をゼロに。
+Start free. Scale when you're ready.
 
-#Pivolink #物流 #DX`,
+${BASE}
+
+#Pivolink #QRCode #NFC #SaaS #Free #Startup`,
   },
   {
     post_number: 46,
-    category: 'use_case',
-    hashtags: ['Pivolink', 'BtoB', '営業'],
-    content: `法人営業のPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'NFCTag', 'BusinessCard'],
+    content: `NFC business cards + Pivolink = future-proof networking.
 
-・名刺QR → ポートフォリオ（実績が増えたら即更新）
-・提案書QR → 詳細資料ページ（提出後もアップデート可能）
-・展示会パンフQR → 展示会後は個別面談予約ページへ
+Change jobs? Update the destination.
+New portfolio? Switch the link.
 
-名刺が「最新の営業ツール」で在り続けます。
+Your card stays the same. The destination evolves with you.
 
-#Pivolink #BtoB #営業`,
+${BASE}
+
+#Pivolink #NFCTag #BusinessCard #Networking #NFC`,
   },
   {
     post_number: 47,
-    category: 'use_case',
-    hashtags: ['Pivolink', '飲食チェーン'],
-    content: `飲食チェーンのPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'Hotel'],
+    content: `Hotels: one QR code in every room.
 
-本部が一括でリンク先を管理
-→ 全店舗のQRコードを同時に更新
+🛏️ Spring → cherry blossom tour guide
+☀️ Summer → beach activities
+🍁 Fall → harvest festival info
+❄️ Winter → ski resort packages
 
-新メニューリリース → 全店のテーブルQRが一斉切替
-キャンペーン開始 → 全店のPOPが一斉にLP誘導
+Auto-switch by season. Never reprint.
 
-店舗ごとの貼り替え作業ゼロ。
+${BASE}
 
-#Pivolink #飲食チェーン`,
+#Pivolink #QRCode #Hotel #Hospitality #Tourism`,
   },
   {
     post_number: 48,
-    category: 'use_case',
-    hashtags: ['Pivolink', '出版', 'メディア'],
-    content: `出版社のPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'DeviceRouting'],
+    content: `Same QR code. Different destinations by device.
 
-・書籍内QR → 読者特典ページ（増刷時もQR変更不要）
-・雑誌広告QR → 広告主のLPを掲載号ごとに切替
-・新聞折込QR → 毎週のおすすめ記事ページ
+📱 iPhone → App Store
+🤖 Android → Google Play
+💻 Desktop → Website
 
-紙媒体 × デジタルの連携が劇的にスムーズに。
+Smart device routing with Pivolink.
 
-#Pivolink #出版 #メディア`,
+${BASE}
+
+#Pivolink #QRCode #DeviceRouting #AppMarketing #DeepLink`,
   },
   {
     post_number: 49,
-    category: 'use_case',
-    hashtags: ['Pivolink', 'ブライダル'],
-    content: `ブライダル・冠婚葬祭のPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'Sustainability'],
+    content: `Sustainability tip: Stop reprinting.
 
-・招待状QR → 会場案内 → 当日はライブ配信 → 後日はフォトアルバム
-・式場パンフQR → 今月のフェア情報
-・引出物QR → お礼メッセージ → 後日は新居報告ページへ
+Every QR code change = new flyers, stickers, packaging.
 
-1つのQRで、イベントの前・中・後を繋ぐ。
+With Pivolink, update the destination digitally. Keep the physical materials.
 
-#Pivolink #ブライダル`,
+Less waste. Less cost. Better marketing.
+
+${BASE}
+
+#Pivolink #QRCode #Sustainability #GreenBusiness #ESG`,
   },
   {
     post_number: 50,
-    category: 'use_case',
-    hashtags: ['Pivolink', '行政DX', '自治体'],
-    content: `行政・公共施設のPivolink活用例：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'Healthcare'],
+    content: `Healthcare: QR codes that stay current.
 
-・広報誌QR → 手続き案内（制度変更時にURL更新不要）
-・公共施設NFC → 利用ガイド（改修時に自動更新）
-・防災看板QR → 通常時は避難マップ → 災害時は緊急情報ページ
+🏥 Waiting room QR → patient intake form
+💊 Prescription label → medication guide
+📅 Appointment scheduling link
+🌐 Auto-translate for international patients
 
-市民が「情報が古い」と困ることをなくす。
+${BASE}
 
-#Pivolink #行政DX #自治体`,
+#Pivolink #QRCode #Healthcare #HealthTech #MedTech`,
   },
-
-  // ===== カテゴリD: 機能紹介・Tips（#51-65） =====
   {
     post_number: 51,
-    category: 'feature_tips',
-    hashtags: ['Pivolink', '販促'],
-    content: `Pivolinkの「スケジュール切替」機能：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'Education'],
+    content: `Schools & universities: dynamic QR codes for education.
 
-日時を指定して、リンク先を自動で切り替え。
+🎓 Open day QR → pre-event / day-of / post-event
+📚 Textbook QR → always-updated supplementary materials
+👨‍👩‍👧 Parent handouts → latest announcements
 
-例：
-3/1 0:00 → 春キャンペーンLP
-6/1 0:00 → 夏キャンペーンLP
+${BASE}
 
-設定しておけば、あとは何もしなくてOK。
-手動切替の"忘れ"もゼロに。
-
-#Pivolink #販促`,
+#Pivolink #QRCode #Education #EdTech #University`,
   },
   {
     post_number: 52,
-    category: 'feature_tips',
-    hashtags: ['Pivolink', 'QRコード'],
-    content: `Pivolinkの「デバイス別振分」機能：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'Manufacturing'],
+    content: `Manufacturing: QR codes on products that never go stale.
 
-同じQRコードをスキャンしても：
-・iPhoneユーザー → App Store
-・Androidユーザー → Google Play
-・PCユーザー → Webサイト
+🏭 Product QR → latest manual version
+🔧 Equipment NFC → maintenance log
+📋 Safety docs → always up-to-date
 
-1つのQRコードで、全デバイスに最適な体験を。
+${BASE}
 
-#Pivolink #QRコード`,
+#Pivolink #QRCode #Manufacturing #Industry40 #NFC`,
   },
   {
     post_number: 53,
-    category: 'feature_tips',
-    hashtags: ['Pivolink', 'マーケティング'],
-    content: `PivolinkのA/Bテスト機能：
+    category: 'english',
+    hashtags: ['Pivolink', 'NFCTag', 'RetailTech'],
+    content: `Retail stores: NFC tags that work harder.
 
-1つのQRコードで2つのURLにトラフィックを分割。
+👕 Product NFC → styling suggestions
+💳 Counter NFC → loyalty program signup
+🎁 Seasonal promotions → auto-switch by date
 
-例：
-URL-A（商品ページ）：70%
-URL-B（LP）：30%
+One tag. Always relevant.
 
-どちらがコンバージョン高いか、リアルデータで検証。
-チラシの効果測定がついにできる。
+${BASE}
 
-#Pivolink #マーケティング`,
+#Pivolink #NFCTag #RetailTech #Retail #SmartStore`,
   },
   {
     post_number: 54,
-    category: 'feature_tips',
-    hashtags: ['Pivolink'],
-    content: `Pivolinkの「クッションページ」機能：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'Signage'],
+    content: `That QR code on your signage — when was it last updated?
 
-QRを読み取った後、リダイレクト先に飛ぶ前にお知らせを表示。
+Signs are expensive. QR-enabled signs, even more so.
 
-活用例：
-・「このQRは外部サイトに遷移します」の注意書き
-・期間限定クーポンコードの表示
-・アンケートへの協力依頼
+Don't rebuild the sign. Just update the link.
 
-#Pivolink`,
+Pivolink: change the destination, keep the sign.
+
+${BASE}
+
+#Pivolink #QRCode #Signage #OOH #DigitalSignage`,
   },
   {
     post_number: 55,
-    category: 'feature_tips',
-    hashtags: ['Pivolink', 'マーケティング'],
-    content: `Pivolinkのアクセス解析：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'Startup'],
+    content: `Building a startup? Here's a growth hack:
 
-・日別スキャン数の推移グラフ
-・デバイス別（iOS / Android / PC）
-・OS別 / ブラウザ別
-・時間帯別アクセス
+Put QR codes everywhere — business cards, stickers, packaging.
 
-「このチラシ、何回スキャンされた？」が一目瞭然。
-オフライン施策の効果測定に。
+When your landing page changes (it will), just update Pivolink. No reprints.
 
-#Pivolink #マーケティング`,
+Your early marketing materials never expire.
+
+${BASE}
+
+#Pivolink #QRCode #Startup #GrowthHack #Marketing`,
   },
+
+  // ===== G: エンゲージメント・CTA（日本語 #56-60） =====
   {
     post_number: 56,
-    category: 'feature_tips',
-    hashtags: ['Pivolink', '業務効率化'],
-    content: `Pivolinkの変更履歴機能：
+    category: 'engagement',
+    hashtags: ['Pivolink', 'QRコード', 'NFCタグ'],
+    content: `QRコード活用してる方に質問です🙋
 
-いつ・誰が・どのURLに変更したかを完全ログ。
+どんなシーンで使ってますか？
 
-「あのリンク、誰がいつ変更した？」
-→ 履歴を見れば一発で分かります。
+1️⃣ チラシ・パンフレット
+2️⃣ 名刺
+3️⃣ 商品パッケージ
+4️⃣ 店頭POP・看板
+5️⃣ その他（リプで教えてください！）
 
-チーム運用でのトラブル防止に。
-
-#Pivolink #業務効率化`,
+#Pivolink #QRコード #NFCタグ #アンケート`,
   },
   {
     post_number: 57,
-    category: 'feature_tips',
-    hashtags: ['Pivolink'],
-    content: `Pivolinkの有効期限設定：
+    category: 'engagement',
+    hashtags: ['Pivolink', 'QRコード'],
+    content: `Pivolink、β版公開中です🎉
 
-リンクに期限を設定 → 期限切れ後はフォールバックURLへ自動転送。
+現在の機能：
+✅ QRリダイレクト管理
+✅ NFC対応
+✅ スケジュール切替
+✅ A/Bテスト
+✅ アクセス解析
 
-例：
-キャンペーンQR → 3/31まで応募ページ → 4/1から通常サイトへ
+無料プランで試せます。フィードバック大歓迎！
 
-「期限切れのリンクが404」を防ぎます。
+${BASE}
 
-#Pivolink`,
+#Pivolink #QRコード #βテスト #フィードバック募集`,
   },
   {
     post_number: 58,
-    category: 'feature_tips',
-    hashtags: ['Pivolink', 'QRコード'],
-    content: `PivolinkのQRコード生成：
+    category: 'campaign',
+    hashtags: ['Pivolink', 'QRコード', 'NFCタグ'],
+    content: `📢 Pivolink 無料プラン、5リンクまで使い放題。
 
-リンクを作ると、QRコードが自動で生成されます。
+「ちょっと試したい」にぴったり。
 
-・PNG形式（Web・印刷用）
-・SVG形式（高解像度・拡大しても劣化なし）
+✅ QRコード自動生成
+✅ リダイレクト変更し放題
+✅ アクセス解析付き
 
-ダウンロードしてそのまま入稿可能。
-別のQR生成ツールは不要です。
+クレジットカード不要。30秒で始められます👇
+${BASE}/login
 
-#Pivolink #QRコード`,
+#Pivolink #QRコード #NFCタグ #無料 #SaaS`,
   },
   {
     post_number: 59,
-    category: 'feature_tips',
-    hashtags: ['Pivolink'],
-    content: `【Pivolink Tips】スラッグの命名、おすすめルール：
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode'],
+    content: `🗓️ Pivolink weekly tip:
 
-redirect.tsuratsura.com/r/ の後ろは自由に設定可能。
+Schedule your QR code redirects in advance.
 
-例：
-/r/spring-2026 → 2026年春キャンペーン
-/r/menu → メニューページ
-/r/review → レビューページ
+Monday → Sale page
+Weekend → Regular page
 
-分かりやすいスラッグにすると管理が楽です。
+Set it once. Pivolink handles the rest.
 
-#Pivolink`,
+${BASE}
+
+#Pivolink #QRCode #WeeklyTip #MarketingTips`,
   },
   {
     post_number: 60,
-    category: 'feature_tips',
-    hashtags: ['Pivolink', 'NFC'],
-    content: `【Pivolink Tips】NFCタグ運用のコツ：
-
-NFCタグにPivolinkのURLを1回書き込んだら、
-以後の変更は全て管理画面から。
-
-ポイント：
-・タグに書くURL: redirect.tsuratsura.com/r/your-slug
-・リンク先の変更: 管理画面でワンクリック
-・タグの物理的な書き換え: 不要
-
-#Pivolink #NFC`,
-  },
-  {
-    post_number: 61,
-    category: 'feature_tips',
-    hashtags: ['Pivolink', 'チラシ'],
-    content: `【Tips】チラシにQRを載せるときの鉄則：
-
-1. QRの近くに「読み取るとこうなる」を明記
-2. スラッグは短く覚えやすく
-3. QRコードの周囲に余白を確保（読み取り精度UP）
-4. Pivolinkで発行 → 後からリンク先変更可能
-
-4番目がミソです。
-
-#Pivolink #チラシ`,
-  },
-  {
-    post_number: 62,
-    category: 'feature_tips',
-    hashtags: ['Pivolink', 'EC'],
-    content: `【Tips】A/Bテストの賢い使い方：
-
-「商品同梱QRでレビューを増やしたい」
-
-URL-A: レビュー依頼ページ（50%）
-URL-B: 次回10%OFFクーポン（50%）
-
-→ 2週間後にデータ比較
-→ 効果が高い方に100%切替
-
-印刷コストゼロで施策検証。
-
-#Pivolink #EC`,
-  },
-  {
-    post_number: 63,
-    category: 'feature_tips',
-    hashtags: ['Pivolink'],
-    content: `【Tips】緊急時こそPivolinkが活きる：
-
-商品リコール → 告知ページに即切替
-サーバー障害 → メンテナンスページに一時変更
-イベント中止 → 返金案内ページに差替え
-
-管理画面にログイン → URL変更 → 即時反映。
-
-対応スピードが企業の信頼を守ります。
-
-#Pivolink`,
-  },
-  {
-    post_number: 64,
-    category: 'feature_tips',
-    hashtags: ['Pivolink'],
-    content: `【Tips】クッションページの活用アイデア：
-
-・「公式LINEを友だち追加すると特典あり！」→ LINEへ誘導
-・「この先は外部サイトです」→ 安心感の提供
-・「アンケートに答えてクーポンGET」→ 回答率UP
-
-リダイレクト前の"1画面"で、もう1アクション。
-
-#Pivolink`,
-  },
-  {
-    post_number: 65,
-    category: 'feature_tips',
-    hashtags: ['Pivolink', 'マーケティング'],
-    content: `【Tips】アクセス解析の見るべきポイント：
-
-・スキャン数が急増した日 → 配布日の効果測定
-・デバイス比率 → ターゲット層の確認
-・時間帯 → 最もスキャンされる時間の把握
-
-「チラシ配布日の翌日にスキャンが集中」
-→ 即日ではなく持ち帰り後に読み取る傾向
-
-#Pivolink #マーケティング`,
-  },
-
-  // ===== カテゴリE: 豆知識・教育系（#66-75） =====
-  {
-    post_number: 66,
-    category: 'knowledge',
-    hashtags: ['Pivolink', 'QRコード'],
-    content: `【豆知識】QRコードの寿命は？
-
-QRコード自体に寿命はありません。
-問題は「リンク先の寿命」。
-
-URLが変わった瞬間、QRコードは使えなくなる。
-
-Pivolinkはリンク先を管理するので、
-QRコードの実質的な寿命を「無期限」にできます。
-
-#Pivolink #QRコード`,
-  },
-  {
-    post_number: 67,
-    category: 'knowledge',
-    hashtags: ['QRコード', 'NFC'],
-    content: `【知っておきたい】QRコードとNFCタグの違い：
-
-QRコード → カメラで読み取り、距離OK、印刷コスト安
-NFCタグ → スマホをかざす、近距離限定、タグ単価あり
-
-共通の課題：「一度設置したら変更できない」
-
-→ Pivolinkなら、どちらもリンク先を自由に変更。
-
-#QRコード #NFC`,
-  },
-  {
-    post_number: 68,
-    category: 'knowledge',
-    hashtags: ['Pivolink', 'QRコード'],
-    content: `日本のQRコード利用率は世界トップクラス。
-
-消費者は「QRを読み取る」行為に慣れています。
-
-つまり、QRコードを活用したマーケティングは
-「読み取ってもらえる確率が高い」ということ。
-
-あとは中身（リンク先）を最適化するだけ。
-
-#Pivolink #QRコード`,
-  },
-  {
-    post_number: 69,
-    category: 'knowledge',
-    hashtags: ['Pivolink', 'SEO'],
-    content: `【意外と知らない】リダイレクトの種類：
-
-301 → 恒久的な転送（SEO評価も移転）
-302 → 一時的な転送（元URLの評価を維持）
-307 → 一時的な転送（POSTも維持）
-
-Pivolinkは用途に応じて最適なリダイレクトを実行。
-マーケティングの細部まで配慮しています。
-
-#Pivolink #SEO`,
-  },
-  {
-    post_number: 70,
-    category: 'knowledge',
-    hashtags: ['Pivolink', 'QRコード', 'マーケティング'],
-    content: `【数字で見るQRコードの現在地】
-
-・日本のQRコード決済利用者：約7,000万人
-・世界のQRコード市場：2026年に約$35B
-・消費者の60%以上がQR読み取り経験あり
-
-QRコードはもはやインフラ。
-その「中身の管理」に目を向ける時期です。
-
-#Pivolink #QRコード #マーケティング`,
-  },
-  {
-    post_number: 71,
-    category: 'knowledge',
-    hashtags: ['Pivolink'],
-    content: `QRコードを「動的」にする方法は2つ：
-
-① 短縮URLサービス → 安いが機能不足
-② Pivolink → リダイレクト管理に特化
-
-Pivolinkが短縮URLと違うのは：
-・スケジュール切替
-・デバイス別振分
-・A/Bテスト
-・クッションページ
-・アクセス解析
-
-#Pivolink`,
-  },
-  {
-    post_number: 72,
-    category: 'knowledge',
-    hashtags: ['Pivolink', 'NFC'],
-    content: `NFCタグの意外な活用先：
-
-・ホテルの客室案内（テーブルに貼付）
-・工場の機械メンテナンス記録（機器に貼付）
-・ワインボトルの産地証明（ラベル内蔵）
-・美術館の作品解説（展示台に埋込）
-
-全てに共通：「情報は更新される」
-NFCの中身を変えるより、リンク先を変える方が賢い。
-
-#Pivolink #NFC`,
-  },
-  {
-    post_number: 73,
-    category: 'knowledge',
-    hashtags: ['Pivolink', 'O2O', 'マーケティング'],
-    content: `オフラインとオンラインを繋ぐ「O2O」の鍵はQRコード。
-
-でも、従来のQRコードは：
-× 効果測定ができない
-× リンク切れのリスク
-× A/Bテストができない
-
-Pivolinkを挟むだけで全部解決。
-
-#Pivolink #O2O #マーケティング`,
-  },
-  {
-    post_number: 74,
-    category: 'knowledge',
-    hashtags: ['Pivolink', 'QRコード'],
-    content: `QRコード活用で失敗する3大パターン：
-
-1. リンク先が404 → 信頼失墜
-2. キャンペーン終了後も古い情報に飛ぶ → 機会損失
-3. 効果が計測できない → PDCAが回せない
-
-3つとも、Pivolink導入で解決します。
-
-#Pivolink #QRコード`,
-  },
-  {
-    post_number: 75,
-    category: 'knowledge',
-    hashtags: ['Pivolink', 'QRコード', 'トレンド'],
-    content: `2026年、QRコード市場のトレンド：
-
-・パッケージ × QR（食品のトレーサビリティ）
-・NFC × リテール（タッチで即座に情報取得）
-・ダイナミックQR（リンク先を動的に変更）
-
-3つ目の「ダイナミックQR」、
-まさにPivolinkが提供している機能です。
-
-#Pivolink #QRコード #トレンド`,
-  },
-
-  // ===== カテゴリF: キャンペーン・CTA（#76-85） =====
-  {
-    post_number: 76,
-    category: 'campaign',
-    hashtags: ['Pivolink'],
-    content: `【ベータ特典】
-今なら全有料プラン20%OFF。
-
-Pro: ¥980 → ¥780/月
-Business: ¥4,980 → ¥3,980/月
-
-Freeプランも3リンクまで無料。
-カード登録不要で今すぐ始められます。
-
-https://redirect.tsuratsura.com
-
-#Pivolink`,
-  },
-  {
-    post_number: 77,
-    category: 'campaign',
-    hashtags: ['Pivolink'],
-    content: `Pivolinkの無料プラン、こんな方におすすめ：
-
-・まずは1つQRコードを試してみたい
-・個人の名刺にQRをつけたい
-・小規模店舗で1-2個だけ使いたい
-
-3リンク / 月1,000アクセスまで無料。
-カード登録不要。メールだけでOK。
-
-https://redirect.tsuratsura.com
-
-#Pivolink`,
-  },
-  {
-    post_number: 78,
-    category: 'campaign',
-    hashtags: ['Pivolink', 'コスト削減'],
-    content: `「Pivolinkって具体的にいくら得するの？」
-
-仮に：
-・チラシ5,000枚 × 印刷費10円 = 50,000円/回
-・年4回キャンペーン = 200,000円
-
-Pivolink Pro（年額¥9,360）で印刷を1回に減らせば、
-年間約15万円の削減。ROI、すぐ出ます。
-
-#Pivolink #コスト削減`,
-  },
-  {
-    post_number: 79,
-    category: 'campaign',
-    hashtags: ['Pivolink'],
-    content: `「無料ツールでQRコード作ればいいじゃん」
-
-はい、作るだけなら無料ツールで十分です。
-
-でもこんなことが必要なら、Pivolinkの出番：
-・リンク先を後から変えたい
-・いつ何回スキャンされたか知りたい
-・A/Bテストで効果を比較したい
-
-「作る」と「運用する」は別物です。
-
-#Pivolink`,
-  },
-  {
-    post_number: 80,
-    category: 'campaign',
-    hashtags: ['Pivolink'],
-    content: `今日からPivolinkを始めたら、
-明日にはQRコードを印刷に出せます。
-
-1. アカウント作成（1分）
-2. リンク発行（30秒）
-3. QRコードをダウンロード（10秒）
-
-あとは印刷屋さんに入稿するだけ。
-
-https://redirect.tsuratsura.com
-
-#Pivolink`,
-  },
-  {
-    post_number: 81,
-    category: 'campaign',
-    hashtags: ['Pivolink'],
-    content: `Pivolink、こんな規模感の方に使っていただいてます：
-
-・個人事業主（名刺・ショップカード）
-・中小企業（チラシ・パンフレット・展示会）
-・チェーン店（全店舗のQR一括管理）
-・メーカー（パッケージ・製品ラベル）
-
-規模を問わず、QRコードを使うなら。
-
-#Pivolink`,
-  },
-  {
-    post_number: 82,
-    category: 'campaign',
-    hashtags: ['Pivolink', '販促'],
-    content: `来月のキャンペーン、チラシの入稿締め切りが迫ってる？
-
-大丈夫、PivolinkのURLでQRコードを作れば
-キャンペーン内容が確定してなくても入稿できます。
-
-リンク先は後から設定すればOK。
-
-「入稿に間に合わない」ストレスから解放。
-
-#Pivolink #販促`,
-  },
-  {
-    post_number: 83,
-    category: 'campaign',
-    hashtags: ['Pivolink'],
-    content: `年額プランなら、さらに約17%OFF。
-
-Pro 年額: ¥7,800（月額換算 ¥650）
-Business 年額: ¥39,800（月額換算 ¥3,317）
-
-QRコード・NFCタグを年間通して使うなら、
-年額プランが断然お得です。
-
-#Pivolink`,
-  },
-  {
-    post_number: 84,
-    category: 'campaign',
-    hashtags: ['Pivolink'],
-    content: `Pivolink、フィードバック大歓迎です。
-
-「こんな機能がほしい」
-「ここが使いにくい」
-「この業界でこう使いたい」
-
-ベータ版だからこそ、皆さんの声で進化します。
-サービス内のお問い合わせ or このアカウントへのDMで。
-
-#Pivolink`,
-  },
-  {
-    post_number: 85,
-    category: 'campaign',
-    hashtags: ['Pivolink'],
-    content: `Pivolinkを試すのに理由は要りません。
-
-無料
-カード登録不要
-1分で始められる
-3リンクまで使える
-
-「ちょっと試してみよう」で始めた方が、
-一番長く使い続けてくれています。
-
-https://redirect.tsuratsura.com
-
-#Pivolink`,
-  },
-
-  // ===== カテゴリG: 信頼構築・エンゲージメント（#86-100） =====
-  {
-    post_number: 86,
-    category: 'engagement',
-    hashtags: ['Pivolink', 'スタートアップ'],
-    content: `Pivolinkを作ったきっかけ：
-
-キャンペーンが変わるたびにQRコードを刷り直す。
-NFCタグを毎月書き換える。
-
-「これ、リンク先だけ変えればいいのでは？」
-
-そう思ったのが開発のきっかけでした。
-
-#Pivolink #スタートアップ`,
-  },
-  {
-    post_number: 87,
-    category: 'engagement',
-    hashtags: ['Pivolink', '大阪', 'スタートアップ'],
-    content: `Pivolinkは大阪発のSaaSです。
-
-株式会社TSURATSURAが開発・運営しています。
-小さなチームですが、ユーザーの声を素早く反映して
-日々プロダクトを改善しています。
-
-#Pivolink #大阪 #スタートアップ`,
-  },
-  {
-    post_number: 88,
-    category: 'engagement',
-    hashtags: ['Pivolink', 'QRコード'],
-    content: `「QRコードのリンク先を変えたい」
-
-この検索をしたことがある方、
-Pivolinkはまさにあなたのために作りました。
-
-https://redirect.tsuratsura.com
-
-#Pivolink #QRコード`,
-  },
-  {
-    post_number: 89,
-    category: 'engagement',
-    hashtags: ['Pivolink'],
-    content: `Pivolinkの開発で大切にしていること：
-
-・シンプルに使えること
-・必要な機能が揃っていること
-・余計な機能で迷わせないこと
-
-「説明書なしで使える」が目標です。
-
-#Pivolink`,
-  },
-  {
-    post_number: 90,
-    category: 'engagement',
-    hashtags: ['Pivolink', 'QRコード'],
-    content: `質問です。
-
-あなたの会社で、QRコードを使っている場所はいくつありますか？
-
-・名刺
-・チラシ
-・パンフレット
-・パッケージ
-・店頭POP
-・看板
-
-それぞれ、リンク先が変わったらどうしますか？
-
-#Pivolink #QRコード`,
-  },
-  {
-    post_number: 91,
-    category: 'engagement',
-    hashtags: ['Pivolink'],
-    content: `Pivolinkのユーザーから嬉しい声：
-
-「展示会のパンフに載せたQRを、展示会後に自社サイトに切り替えたら、そこから問い合わせが来た」
-
-印刷物を"使い捨て"にしない。
-それだけで、販促効果が延長されます。
-
-#Pivolink`,
-  },
-  {
-    post_number: 92,
-    category: 'engagement',
-    hashtags: ['Pivolink'],
-    content: `今後のPivolink開発ロードマップ：
-
-・カスタムドメイン（独自ドメインでリダイレクト）
-・チーム管理（メンバー招待・権限設定）
-・API提供（外部システム連携）
-・Slack / メール通知連携
-
-ご要望があればお気軽にDMを。
-
-#Pivolink`,
-  },
-  {
-    post_number: 93,
-    category: 'engagement',
-    hashtags: ['Pivolink', 'マーケティング'],
-    content: `「QRコードってどうやって効果測定するの？」
-
-これ、よく聞かれます。
-
-答え：PivolinkのQRコードなら、
-管理画面で全部見えます。
-
-・何回スキャンされたか
-・どのデバイスからか
-・いつスキャンされたか
-
-紙媒体の効果測定、できます。
-
-#Pivolink #マーケティング`,
-  },
-  {
-    post_number: 94,
-    category: 'engagement',
-    hashtags: ['Pivolink'],
-    content: `Pivolinkは「ないと困る」より「あると全然違う」系のツールです。
-
-QRコードはPivolinkなしでも作れる。
-でも一度使うと、もうPivolinkなしには戻れない。
-
-それくらい「当たり前のもったいない」を解消します。
-
-#Pivolink`,
-  },
-  {
-    post_number: 95,
-    category: 'engagement',
-    hashtags: ['Pivolink', 'QRコード'],
-    content: `毎週金曜に、Pivolinkの活用Tipsを投稿します。
-
-業種別の使い方、設定のコツ、マーケティングへの応用など。
-
-フォローしておくと、QRコード・NFCタグ活用の
-アイデアが毎週届きます。
-
-#Pivolink #QRコード`,
-  },
-  {
-    post_number: 96,
-    category: 'engagement',
-    hashtags: ['Pivolink'],
-    content: `Pivolinkを使い始めて最初に感じること：
-
-「あ、今まで刷り直してたのは何だったんだ」
-
-そう思っていただけたら、私たちの勝ちです。
-
-#Pivolink`,
-  },
-  {
-    post_number: 97,
-    category: 'engagement',
-    hashtags: ['Pivolink'],
-    content: `個人的に一番好きな機能は「スケジュール切替」。
-
-設定したら忘れていい。
-指定日時に勝手にリンク先が切り替わる。
-
-「キャンペーン始まったのにURL変えるの忘れてた！」
-が、物理的に起こらなくなります。
-
-#Pivolink`,
-  },
-  {
-    post_number: 98,
-    category: 'engagement',
-    hashtags: ['Pivolink'],
-    content: `PivolinkのFreeプラン、意外と使えます。
-
-3リンクあれば：
-① 名刺のQR
-② 店舗のPOP
-③ SNSプロフィールリンク
-
-この3つだけでも「後から変更できる安心感」は絶大。
-
-#Pivolink`,
-  },
-  {
-    post_number: 99,
-    category: 'engagement',
-    hashtags: ['Pivolink', 'QRコード', 'NFC'],
-    content: `このアカウントでは以下を発信します：
-
-・QRコード / NFCタグの活用ノウハウ
-・Pivolinkの新機能・アップデート情報
-・業種別の導入事例
-・マーケティング × テクノロジーのTips
-
-QRコード・NFCを活用したい方、フォローお願いします。
-
-#Pivolink #QRコード #NFC`,
-  },
-  {
-    post_number: 100,
-    category: 'engagement',
-    hashtags: ['Pivolink'],
-    content: `最後まで読んでくださった方へ。
-
-Pivolinkは、まだベータ版です。
-でも、使っていただければ「これ、なんで今までなかったの？」と思っていただける自信があります。
-
-QRコードを"使い捨て"にしない世界を、一緒に。
-
-https://redirect.tsuratsura.com
-
-#Pivolink`,
+    category: 'english',
+    hashtags: ['Pivolink', 'QRCode', 'NFC'],
+    content: `🚀 Pivolink is in beta — and it's free to try.
+
+✅ Dynamic QR code management
+✅ NFC tag read/write
+✅ Schedule-based redirects
+✅ A/B testing
+✅ Access analytics
+
+No credit card required.
+${BASE}
+
+#Pivolink #QRCode #NFC #Beta #SaaS #Startup`,
   },
 ]

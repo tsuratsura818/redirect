@@ -39,7 +39,9 @@ export async function POST(request: NextRequest) {
       .eq('id', id)
 
     // X APIに投稿
+    console.log('[x-post] Attempting to post, X_API_KEY present:', !!process.env.X_API_KEY, 'X_ACCESS_TOKEN present:', !!process.env.X_ACCESS_TOKEN)
     const result = await postToX(post.content)
+    console.log('[x-post] Result:', JSON.stringify(result))
 
     if (result.success) {
       await admin

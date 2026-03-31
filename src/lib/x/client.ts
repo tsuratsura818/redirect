@@ -49,8 +49,9 @@ function generateSignature(
 }
 
 function buildAuthHeader(params: OAuthParams): string {
-  const entries = Object.entries(params)
-    .map(([k, v]) => `${encodeURIComponent(k)}="${encodeURIComponent(v)}"`)
+  const entries = Object.keys(params)
+    .sort()
+    .map((k) => `${encodeURIComponent(k)}="${encodeURIComponent(params[k as keyof OAuthParams] ?? '')}"`)
     .join(', ')
   return `OAuth ${entries}`
 }

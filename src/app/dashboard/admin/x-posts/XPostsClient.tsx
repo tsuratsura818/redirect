@@ -102,7 +102,7 @@ export default function XPostsClient() {
       showMessage('success', `投稿成功: ${data.url}`)
       fetchPosts()
     } else {
-      showMessage('error', `投稿失敗: ${data.error}`)
+      showMessage('error', `投稿失敗: ${data.error} (HTTP ${res.status})`)
       fetchPosts()
     }
   }

@@ -11,6 +11,7 @@ import { useAccount } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useJpycPayment } from '@/hooks/useJpycPayment';
 import { useJpycBalance } from '@/hooks/useJpycBalance';
+import { Web3Provider } from '@/components/providers/Web3Provider';
 import { JpycPlanCard } from './JpycPlanCard';
 import { JpycBalanceDisplay } from './JpycBalanceDisplay';
 import { JPYC_PRICING, formatJpyc } from '@/lib/jpyc/pricing';
@@ -20,7 +21,16 @@ interface JpycPaymentFlowProps {
   plan: JpycPlan;
 }
 
+// Web3Providerでラップするエントリーポイント
 export function JpycPaymentFlow({ plan }: JpycPaymentFlowProps) {
+  return (
+    <Web3Provider>
+      <JpycPaymentFlowInner plan={plan} />
+    </Web3Provider>
+  );
+}
+
+function JpycPaymentFlowInner({ plan }: JpycPaymentFlowProps) {
   const [period, setPeriod] = useState<JpycPeriod>('1m');
   const { isConnected } = useAccount();
   const { balance, isLoading: balanceLoading } = useJpycBalance();

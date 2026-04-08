@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { PLANS, IS_BETA, type PlanId, type BillingCycle } from '@/lib/plans'
 import type { UserSubscription } from '@/lib/subscription'
+import { PaymentMethodSelector } from '@/components/payment/PaymentMethodSelector'
+import type { JpycPlan } from '@/types/jpyc'
 
 interface SubscriptionData {
   subscription: UserSubscription
@@ -24,6 +26,7 @@ export default function PlanClient() {
   const [billing, setBilling] = useState<BillingCycle>('monthly')
   const isAnnual = billing === 'annual'
   const [overriding, setOverriding] = useState<PlanId | null>(null)
+  const [jpycPlan, setJpycPlan] = useState<PlanId | null>(null)
 
   const fetchData = useCallback(async () => {
     const res = await fetch('/api/subscription')
@@ -160,6 +163,21 @@ export default function PlanClient() {
           <div className="text-sm text-muted mb-1">現在のプラン</div>
           <div className="text-2xl font-bold text-primary">{PLANS[currentPlan].name}</div>
           <div className="text-sm text-muted mt-1">{PLANS[currentPlan].priceLabel}/月</div>
+          {data.subscription.payment_method === 'jpyc' && (
+            <div className="mt-3 rounded-lg border border-teal-200 bg-teal-50 p-3 dark:border-teal-800 dark:bg-teal-950">
+              <p className="text-xs font-medium text-teal-800 dark:text-teal-200">JPYC決済</p>
+              {data.subscription.jpyc_expires_at && (
+                <p className="text-xs text-teal-600 dark:text-teal-400">
+                  有効期限: {new Date(data.subscription.jpyc_expires_at).toLocaleDateString('ja-JP')}
+                </p>
+              )}
+              {data.subscription.jpyc_amount && (
+                <p className="text-xs text-teal-600 dark:text-teal-400">
+                  支払額: {data.subscription.jpyc_amount.toLocaleString()} JPYC
+                </p>
+              )}
+            </div>
+          )}
         </div>
         <div className="bg-card rounded-xl border border-border p-6">
           <div className="text-sm text-muted mb-1">QR / NFC 使用数</div>
@@ -339,9 +357,31 @@ export default function PlanClient() {
                 <div className="w-full py-2.5 text-center rounded-lg border-2 border-primary text-primary font-medium text-sm">
                   現在のプラン
                 </div>
+              ) : jpycPlan === plan.id && (plan.id === 'pro' || plan.id === 'business') ? (
+                <div className="space-y-3">
+                  <PaymentMethodSelector
+                    plan={plan.id as JpycPlan}
+                    onStripeCheckout={() => {
+                      setJpycPlan(null)
+                      handleChangePlan(plan.id)
+                    }}
+                  />
+                  <button
+                    onClick={() => setJpycPlan(null)}
+                    className="w-full py-1.5 text-xs text-muted hover:text-foreground transition-colors"
+                  >
+                    キャンセル
+                  </button>
+                </div>
               ) : (
                 <button
-                  onClick={() => handleChangePlan(plan.id)}
+                  onClick={() => {
+                    if (isUpgrade && (plan.id === 'pro' || plan.id === 'business')) {
+                      setJpycPlan(plan.id)
+                    } else {
+                      handleChangePlan(plan.id)
+                    }
+                  }}
                   disabled={changing !== null}
                   className={`w-full py-2.5 rounded-lg font-medium text-sm transition-colors disabled:opacity-50 ${
                     isUpgrade

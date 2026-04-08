@@ -328,12 +328,20 @@ export default function LPContent() {
               </div>
             </div>
 
-            <div className="flex justify-center mb-14">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mb-14">
               <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-700 px-4 py-2 rounded-full text-sm font-medium">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 {lp.betaBanner}
+              </div>
+              <div className="inline-flex items-center gap-2 bg-teal-50 border border-teal-200 text-teal-700 px-4 py-2 rounded-full text-sm font-medium">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+                  <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
+                  <path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z" />
+                </svg>
+                JPYC（ステーブルコイン）決済対応
               </div>
             </div>
           </ScrollReveal>
@@ -397,6 +405,11 @@ export default function LPContent() {
                   >
                     {plan.cta}
                   </Link>
+                  {!plan.isFree && (
+                    <p className="mt-2 text-center text-[11px] text-teal-600 font-medium">
+                      JPYC決済も利用可能（前払い割引あり）
+                    </p>
+                  )}
                 </div>
               </ScrollReveal>
             ))}

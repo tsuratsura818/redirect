@@ -6,12 +6,17 @@ export interface UserSubscription {
   id: string
   user_id: string
   plan: PlanId
-  status: 'active' | 'canceled' | 'past_due'
+  status: 'active' | 'canceled' | 'past_due' | 'expired'
   stripe_customer_id: string | null
   stripe_subscription_id: string | null
   current_period_start: string | null
   current_period_end: string | null
   cancel_at_period_end: boolean
+  payment_method: 'stripe' | 'jpyc'
+  jpyc_tx_hash: string | null
+  jpyc_amount: number | null
+  jpyc_paid_at: string | null
+  jpyc_expires_at: string | null
   created_at: string
   updated_at: string
 }

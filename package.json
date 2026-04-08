@@ -30,11 +30,14 @@
     "@capacitor/share": "7.0.1",
     "@capacitor/status-bar": "7.0.1",
     "@capgo/capacitor-nfc": "^7.2.0",
+    "@rainbow-me/rainbowkit": "^2.2.10",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.99.2",
+    "@tanstack/react-query": "^5.96.2",
     "date-fns": "^4.1.0",
     "firebase-admin": "^13.7.0",
     "jsqr": "^1.4.0",
+    "lucide-react": "^1.7.0",
     "nanoid": "^5.1.7",
     "next": "16.1.6",
     "qrcode": "^1.5.4",
@@ -42,7 +45,9 @@
     "react-dom": "19.2.3",
     "recharts": "^3.8.0",
     "stripe": "^20.4.1",
-    "ua-parser-js": "^2.0.9"
+    "ua-parser-js": "^2.0.9",
+    "viem": "^2.47.10",
+    "wagmi": "^2.19.5"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.6.1",

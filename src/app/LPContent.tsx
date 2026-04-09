@@ -9,25 +9,21 @@ import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { useLanguage } from '@/i18n/LanguageProvider'
 import { IS_BETA } from '@/lib/plans'
 import type { BillingCycle } from '@/lib/plans'
-import {
-  RestaurantIllust, RetailIllust, RealEstateIllust, EventIllust,
-  SalonIllust, TourismIllust, ManufacturingIllust, EcIllust,
-  GymIllust, PublisherIllust, EducationIllust, HotelIllust,
-} from '@/components/CaseIllustrations'
+import Image from 'next/image'
 
-const caseIllustrations = [
-  <RestaurantIllust key="restaurant" />,
-  <RetailIllust key="retail" />,
-  <RealEstateIllust key="realestate" />,
-  <EventIllust key="event" />,
-  <SalonIllust key="salon" />,
-  <TourismIllust key="tourism" />,
-  <ManufacturingIllust key="manufacturing" />,
-  <EcIllust key="ec" />,
-  <GymIllust key="gym" />,
-  <PublisherIllust key="publisher" />,
-  <EducationIllust key="education" />,
-  <HotelIllust key="hotel" />,
+const caseImages = [
+  { src: '/cases/restaurant.jpg', alt: 'レストラン' },
+  { src: '/cases/retail.jpg', alt: 'アパレルショップ' },
+  { src: '/cases/realestate.jpg', alt: '不動産' },
+  { src: '/cases/event.jpg', alt: 'イベント会場' },
+  { src: '/cases/salon.jpg', alt: '美容サロン' },
+  { src: '/cases/tourism.jpg', alt: '観光地' },
+  { src: '/cases/manufacturing.jpg', alt: '製造業' },
+  { src: '/cases/ec.jpg', alt: 'ECショップ' },
+  { src: '/cases/gym.jpg', alt: 'フィットネスジム' },
+  { src: '/cases/publisher.jpg', alt: '出版・書店' },
+  { src: '/cases/education.jpg', alt: '教育' },
+  { src: '/cases/hotel.jpg', alt: 'ホテル・宿泊' },
 ]
 
 const caseIcons = ['🍽️', '👕', '🏠', '🎪', '💇', '🗾', '🏭', '📦', '🏋️', '📚', '🎓', '🏨']
@@ -261,7 +257,15 @@ export default function LPContent() {
                   solution={c.solution}
                   feature={c.feature}
                   featureColor={caseFeatureColors[i]}
-                  illustration={caseIllustrations[i]}
+                  illustration={
+                    <Image
+                      src={caseImages[i].src}
+                      alt={caseImages[i].alt}
+                      width={800}
+                      height={480}
+                      className="w-full h-full object-cover"
+                    />
+                  }
                 />
               </ScrollReveal>
             ))}

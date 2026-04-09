@@ -14,13 +14,9 @@ interface Props {
 export default function CaseStudyCard({ icon, industry, title, problem, solution, feature, featureColor, illustration }: Props) {
   return (
     <div className="bg-card rounded-2xl border border-border overflow-hidden card-hover group">
-      {/* イラストエリア */}
-      <div className="relative h-48 bg-gradient-to-br from-slate-50 to-blue-50/50 flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: 'radial-gradient(circle, #3b82f6 1px, transparent 1px)',
-          backgroundSize: '20px 20px',
-        }} />
-        <div className="relative group-hover:scale-105 transition-transform duration-500">
+      {/* 写真エリア */}
+      <div className="relative h-48 overflow-hidden">
+        <div className="w-full h-full group-hover:scale-105 transition-transform duration-500">
           {illustration}
         </div>
       </div>

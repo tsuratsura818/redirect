@@ -2,18 +2,21 @@ export interface CaseStudy {
   slug: string
   industry: string
   title: string
+  seoTitle: string
+  metaDescription: string
   image: string
   icon: string
   feature: string
   featureColor: string
   problem: string
   solution: string
+  publishedAt: string
   detail: {
     background: string
     challenges: string[]
     howPivolink: string[]
     results: string[]
-    quote?: string
+    quote: string
   }
 }
 
@@ -22,7 +25,10 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: 'restaurant',
     industry: '飲食店',
     title: 'テーブルNFCで季節メニュー自動切替',
+    seoTitle: '飲食店のNFCメニュー活用事例｜季節メニュー自動切替で年間24時間の工数削減',
+    metaDescription: '飲食店3店舗のNFCメニューをPivolinkで自動化。季節メニュー切替の作業時間ゼロ、ランチ/ディナー自動振分で客単価8%向上した活用事例をご紹介。',
     image: '/cases/restaurant.jpg',
+    publishedAt: '2026-03-15',
     icon: '🍽️',
     feature: 'スケジュール切替',
     featureColor: 'bg-blue-100 text-blue-700',
@@ -52,7 +58,10 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: 'retail',
     industry: '小売・アパレル',
     title: '商品NFCタグからECへ直結',
+    seoTitle: 'アパレル店舗のNFC活用事例｜商品タグからEC直結でEC売上23%増加',
+    metaDescription: 'セレクトショップで商品NFCタグをPivolinkで運用。売り切れ時に類似商品へ即座にリンク変更し、EC売上が前月比23%増加。タグ再購入コスト年15万円削減。',
     image: '/cases/retail.jpg',
+    publishedAt: '2026-03-15',
     icon: '👕',
     feature: 'URL変更',
     featureColor: 'bg-indigo-100 text-indigo-700',
@@ -75,13 +84,17 @@ export const CASE_STUDIES: CaseStudy[] = [
         'タグの再購入コストが年間で約15万円削減',
         '売り切れ→類似商品への導線で回遊率が向上',
       ],
+      quote: '売り切れ商品のタグが無駄にならなくなったのが嬉しい。シーズン入替も楽になりました。',
     },
   },
   {
     slug: 'realestate',
     industry: '不動産',
     title: '物件チラシQRを次の物件に使い回し',
+    seoTitle: '不動産チラシのQRコード活用事例｜印刷コスト年40万円削減＆問い合わせ2倍',
+    metaDescription: '不動産チラシのQRコードをPivolinkで使い回し。成約済み物件→新着物件に即差替でチラシ廃棄率70%削減、問い合わせ数2倍に増加した活用事例。',
     image: '/cases/realestate.jpg',
+    publishedAt: '2026-03-15',
     icon: '🏠',
     feature: 'URL変更',
     featureColor: 'bg-indigo-100 text-indigo-700',
@@ -104,13 +117,17 @@ export const CASE_STUDIES: CaseStudy[] = [
         '年間の印刷コストを約40万円削減',
         'チラシ経由の問い合わせ数が約2倍に増加',
       ],
+      quote: 'チラシを捨てなくてよくなったのが一番の変化。エコにも繋がっています。',
     },
   },
   {
     slug: 'event',
     industry: 'イベント会社',
     title: '1枚のチラシで年間イベントを回す',
+    seoTitle: 'イベントチラシのQRコード活用事例｜年間印刷コスト80万円削減の方法',
+    metaDescription: 'イベント会社がQRチラシをPivolinkで年間共通化。スケジュール切替で毎月のイベント告知を自動化し、印刷コスト年80万円削減・デザイン工数60時間削減。',
     image: '/cases/event.jpg',
+    publishedAt: '2026-03-15',
     icon: '🎪',
     feature: 'スケジュール切替',
     featureColor: 'bg-blue-100 text-blue-700',
@@ -133,13 +150,17 @@ export const CASE_STUDIES: CaseStudy[] = [
         'チラシデザインの工数を年間約60時間削減',
         '常に最新イベント情報に自動で切り替わるため集客効率が向上',
       ],
+      quote: '毎月のチラシ制作から解放されて、イベント企画そのものに集中できるようになりました。',
     },
   },
   {
     slug: 'salon',
     industry: '美容サロン',
     title: '名刺QRを自社予約システムに移行',
+    seoTitle: '美容サロンの名刺QRコード活用事例｜予約システム移行を刷り直しゼロで実現',
+    metaDescription: '美容サロンが名刺のQRコードをPivolinkで管理。ホットペッパーから自社予約への移行を名刺刷り直しなしで実現、予約手数料月1.5万円削減。',
     image: '/cases/salon.jpg',
+    publishedAt: '2026-03-15',
     icon: '💇',
     feature: 'URL変更',
     featureColor: 'bg-indigo-100 text-indigo-700',
@@ -169,7 +190,10 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: 'tourism',
     industry: '観光・自治体',
     title: '多言語案内をデバイスで自動振分',
+    seoTitle: '観光地QRコードの多言語対応事例｜デバイス別自動振分で滞在時間3.2倍',
+    metaDescription: '観光協会がQRコードの多言語対応をPivolinkで実現。デバイス別自動振分で外国人観光客の滞在時間3.2倍、満足度89%を達成した活用事例。',
     image: '/cases/tourism.jpg',
+    publishedAt: '2026-03-15',
     icon: '🗾',
     feature: 'デバイス別振分',
     featureColor: 'bg-violet-100 text-violet-700',
@@ -192,13 +216,17 @@ export const CASE_STUDIES: CaseStudy[] = [
         '案内板に貼るQRは1つだけでスッキリ',
         '多言語対応の満足度調査で「分かりやすい」が89%',
       ],
+      quote: '看板にQRを1つ貼るだけで多言語対応できるのは画期的でした。',
     },
   },
   {
     slug: 'manufacturing',
     industry: '製造業',
     title: 'パッケージQRでリコール即時対応',
+    seoTitle: '製造業のQRコード活用事例｜リコール時のパッケージQR即時切替で72時間→即日対応',
+    metaDescription: '家電メーカーがパッケージのQRコードをPivolinkで管理。リコール発生時にワンクリックで告知ページに切替、従来72時間の対応をリアルタイムに短縮した事例。',
     image: '/cases/manufacturing.jpg',
+    publishedAt: '2026-03-15',
     icon: '🏭',
     feature: '緊急URL変更',
     featureColor: 'bg-red-100 text-red-700',
@@ -228,7 +256,10 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: 'ec',
     industry: 'ECショップ',
     title: '同梱QRでレビュー vs クーポンをA/Bテスト',
+    seoTitle: 'ECサイトのQRコードA/Bテスト事例｜同梱カードでリピート率12%向上',
+    metaDescription: 'ECショップが同梱カードのQRコードでA/Bテストを実施。レビュー誘導vsクーポンの効果をデータで比較し、月間リピート率12%向上を実現した活用事例。',
     image: '/cases/ec.jpg',
+    publishedAt: '2026-03-15',
     icon: '📦',
     feature: 'A/Bテスト',
     featureColor: 'bg-emerald-100 text-emerald-700',
@@ -251,13 +282,17 @@ export const CASE_STUDIES: CaseStudy[] = [
         '全トラフィックをクーポンに切替後、月間リピート率が12%向上',
         '同梱カードを1種類に統一しオペレーションコスト削減',
       ],
+      quote: 'データで意思決定できるようになったのが大きい。感覚頼りの運用から卒業できました。',
     },
   },
   {
     slug: 'gym',
     industry: 'フィットネスジム',
     title: '入口NFCで月替わりキャンペーン配信',
+    seoTitle: 'フィットネスジムのNFC活用事例｜入口NFCで月替わりキャンペーン認知率42%→78%',
+    metaDescription: 'フィットネスジムが入口NFCタグをPivolinkで自動化。月替わりキャンペーンの認知率を42%→78%に改善、ポスター制作・設置作業をゼロにした活用事例。',
     image: '/cases/gym.jpg',
+    publishedAt: '2026-03-15',
     icon: '🏋️',
     feature: 'スケジュール切替',
     featureColor: 'bg-blue-100 text-blue-700',
@@ -280,13 +315,17 @@ export const CASE_STUDIES: CaseStudy[] = [
         '会員のキャンペーン認知率が42%→78%に向上',
         'スマホから直接申し込めるためスタッフの説明工数も削減',
       ],
+      quote: 'スタッフが「今月のキャンペーンは？」と聞かれることがなくなりました。',
     },
   },
   {
     slug: 'publisher',
     industry: '出版社・メディア',
     title: '雑誌QRで連載の最新話へ誘導',
+    seoTitle: '出版社の雑誌QRコード活用事例｜全号共通QRでDTP工数年間130時間削減',
+    metaDescription: '週刊漫画雑誌がQRコードをPivolinkで全号共通化。毎号のQR差し替え作業をゼロにし、DTP工数年130時間削減。バックナンバー経由の新規読者も月2,000PV増加。',
     image: '/cases/publisher.jpg',
+    publishedAt: '2026-03-15',
     icon: '📚',
     feature: 'URL変更',
     featureColor: 'bg-indigo-100 text-indigo-700',
@@ -309,13 +348,17 @@ export const CASE_STUDIES: CaseStudy[] = [
         'QR差し替えミスによるインシデントがゼロに',
         'バックナンバー経由の新規読者流入が月平均2,000PV増加',
       ],
+      quote: 'QRの差し替えミスがなくなったのは編集部として本当に安心です。',
     },
   },
   {
     slug: 'education',
     industry: '学習塾・教育',
     title: '教材QRの補足動画を毎年差し替え',
+    seoTitle: '学習塾の教材QRコード活用事例｜動画差し替えで改訂印刷コスト年300万円削減',
+    metaDescription: '学習塾が教材のQRコードをPivolinkで管理。講師変更時の動画URLを管理画面から即差し替え、教材の改訂印刷コスト年300万円を削減した活用事例。',
     image: '/cases/education.jpg',
+    publishedAt: '2026-03-15',
     icon: '🎓',
     feature: 'URL変更',
     featureColor: 'bg-indigo-100 text-indigo-700',
@@ -338,13 +381,17 @@ export const CASE_STUDIES: CaseStudy[] = [
         '生徒からの「講師不一致」クレームがゼロに',
         '動画コンテンツの改善サイクルが年1回→随時に短縮',
       ],
+      quote: '教材を刷り直さずに動画を差し替えられるので、コンテンツ改善のスピードが上がりました。',
     },
   },
   {
     slug: 'hotel',
     industry: 'ホテル・旅館',
     title: '客室NFCで季節の観光ガイド',
+    seoTitle: 'ホテル・旅館のNFC活用事例｜客室NFCで季節観光ガイド自動切替、満足度4.7達成',
+    metaDescription: '温泉旅館が客室NFCタグをPivolinkで季節自動切替。パンフレット差し替え作業ゼロ、ゲストの観光情報満足度が4.2→4.7に向上した活用事例。',
     image: '/cases/hotel.jpg',
+    publishedAt: '2026-03-15',
     icon: '🏨',
     feature: 'スケジュール切替',
     featureColor: 'bg-blue-100 text-blue-700',

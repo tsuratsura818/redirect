@@ -17,15 +17,41 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cs = CASE_STUDIES.find((c) => c.slug === slug)
   if (!cs) return {}
 
+  const fullImageUrl = `https://redirect.tsuratsura.com${cs.image}`
+
   return {
-    title: `${cs.title} | Pivolink 活用事例`,
-    description: `${cs.industry}での活用事例：${cs.problem} → ${cs.solution}`,
+    title: cs.seoTitle,
+    description: cs.metaDescription,
+    alternates: {
+      canonical: `https://redirect.tsuratsura.com/cases/${cs.slug}`,
+    },
     openGraph: {
-      title: `${cs.title} | Pivolink`,
-      description: cs.solution,
-      images: [{ url: cs.image, width: 800, height: 480 }],
+      title: cs.seoTitle,
+      description: cs.metaDescription,
+      url: `https://redirect.tsuratsura.com/cases/${cs.slug}`,
+      siteName: 'Pivolink',
+      type: 'article',
+      publishedTime: cs.publishedAt,
+      images: [{ url: fullImageUrl, width: 800, height: 480, alt: cs.title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: cs.title,
+      description: cs.metaDescription,
+      images: [fullImageUrl],
     },
   }
+}
+
+function getReadingTime(cs: typeof CASE_STUDIES[0]): number {
+  const text = [
+    cs.detail.background,
+    ...cs.detail.challenges,
+    ...cs.detail.howPivolink,
+    ...cs.detail.results,
+    cs.detail.quote,
+  ].join('')
+  return Math.max(2, Math.ceil(text.length / 400))
 }
 
 export default async function CaseDetailPage({ params }: Props) {
@@ -37,9 +63,45 @@ export default async function CaseDetailPage({ params }: Props) {
   const currentIndex = CASE_STUDIES.findIndex((c) => c.slug === slug)
   const prev = currentIndex > 0 ? CASE_STUDIES[currentIndex - 1] : null
   const next = currentIndex < CASE_STUDIES.length - 1 ? CASE_STUDIES[currentIndex + 1] : null
+  const readingTime = getReadingTime(cs)
+
+  // 同じfeatureを使った関連事例（自分を除く最大3件）
+  const relatedCases = CASE_STUDIES
+    .filter((c) => c.feature === cs.feature && c.slug !== cs.slug)
+    .slice(0, 3)
+
+  // JSON-LD 構造化データ
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: cs.title,
+    description: cs.metaDescription,
+    image: `https://redirect.tsuratsura.com${cs.image}`,
+    datePublished: cs.publishedAt,
+    author: { '@type': 'Organization', name: 'Pivolink by TSURATSURA' },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Pivolink',
+      logo: { '@type': 'ImageObject', url: 'https://redirect.tsuratsura.com/pivofavicon.png' },
+    },
+  }
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Pivolink', item: 'https://redirect.tsuratsura.com' },
+      { '@type': 'ListItem', position: 2, name: '活用事例', item: 'https://redirect.tsuratsura.com/cases' },
+      { '@type': 'ListItem', position: 3, name: cs.title, item: `https://redirect.tsuratsura.com/cases/${cs.slug}` },
+    ],
+  }
 
   return (
     <div className="min-h-screen bg-white">
+      {/* 構造化データ */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+
       {/* ヘッダー */}
       <header className="border-b border-border bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -55,11 +117,22 @@ export default async function CaseDetailPage({ params }: Props) {
         </div>
       </header>
 
+      {/* パンくずリスト */}
+      <nav className="max-w-4xl mx-auto px-6 py-3" aria-label="パンくずリスト">
+        <ol className="flex items-center gap-1.5 text-xs text-foreground/50">
+          <li><Link href="/" className="hover:text-foreground transition-colors">Pivolink</Link></li>
+          <li>/</li>
+          <li><Link href="/cases" className="hover:text-foreground transition-colors">活用事例</Link></li>
+          <li>/</li>
+          <li className="text-foreground/70 font-medium truncate max-w-[200px]">{cs.industry}</li>
+        </ol>
+      </nav>
+
       {/* ヒーロー */}
       <div className="relative h-64 md:h-80 overflow-hidden">
         <Image
           src={cs.image}
-          alt={cs.title}
+          alt={`${cs.industry}の活用事例：${cs.title}`}
           fill
           className="object-cover"
           priority
@@ -77,6 +150,10 @@ export default async function CaseDetailPage({ params }: Props) {
             <h1 className="text-2xl md:text-4xl font-extrabold text-white leading-tight">
               {cs.title}
             </h1>
+            <div className="flex items-center gap-4 mt-3 text-white/60 text-xs">
+              <span>公開: {new Date(cs.publishedAt).toLocaleDateString('ja-JP')}</span>
+              <span>読了目安: 約{readingTime}分</span>
+            </div>
           </div>
         </div>
       </div>
@@ -105,7 +182,7 @@ export default async function CaseDetailPage({ params }: Props) {
         <section className="mb-12">
           <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
             <span className="w-1 h-6 bg-primary rounded-full" />
-            背景
+            {cs.industry}での導入背景
           </h2>
           <p className="text-foreground/75 leading-relaxed">{cs.detail.background}</p>
         </section>
@@ -114,7 +191,7 @@ export default async function CaseDetailPage({ params }: Props) {
         <section className="mb-12">
           <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
             <span className="w-1 h-6 bg-red-500 rounded-full" />
-            抱えていた課題
+            {cs.industry}が抱えていたQR・NFCの課題
           </h2>
           <ul className="space-y-3">
             {cs.detail.challenges.map((c, i) => (
@@ -132,7 +209,7 @@ export default async function CaseDetailPage({ params }: Props) {
         <section className="mb-12">
           <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
             <span className="w-1 h-6 bg-primary rounded-full" />
-            Pivolinkでの解決方法
+            Pivolinkの{cs.feature}機能での解決方法
           </h2>
           <ul className="space-y-3">
             {cs.detail.howPivolink.map((h, i) => (
@@ -146,11 +223,33 @@ export default async function CaseDetailPage({ params }: Props) {
           </ul>
         </section>
 
+        {/* 中間CTA */}
+        <section className="rounded-xl border border-primary/20 bg-gradient-to-r from-emerald-50/50 to-teal-50/50 p-6 mb-12 flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex-1">
+            <p className="font-bold text-foreground text-sm">同じ課題をお持ちですか？</p>
+            <p className="text-foreground/60 text-xs mt-1">Pivolinkなら無料で始められます。カード登録不要。</p>
+          </div>
+          <div className="flex gap-3 shrink-0">
+            <Link
+              href="/login?tab=signup"
+              className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:shadow-lg transition-all whitespace-nowrap"
+            >
+              無料で始める
+            </Link>
+            <Link
+              href="/#pricing"
+              className="border border-border text-foreground/70 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 transition-all whitespace-nowrap"
+            >
+              料金プラン
+            </Link>
+          </div>
+        </section>
+
         {/* 成果 */}
         <section className="mb-12">
           <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
             <span className="w-1 h-6 bg-emerald-500 rounded-full" />
-            導入の成果
+            導入後の具体的な成果
           </h2>
           <ul className="space-y-3">
             {cs.detail.results.map((r, i) => (
@@ -165,34 +264,70 @@ export default async function CaseDetailPage({ params }: Props) {
         </section>
 
         {/* 引用 */}
-        {cs.detail.quote && (
-          <section className="mb-12">
-            <blockquote className="border-l-4 border-primary bg-slate-50 rounded-r-xl p-6">
-              <p className="text-foreground/80 leading-relaxed italic">
-                &ldquo;{cs.detail.quote}&rdquo;
-              </p>
-              <footer className="mt-3 text-sm text-foreground/50">
-                — {cs.industry}ご担当者様
-              </footer>
-            </blockquote>
-          </section>
-        )}
+        <section className="mb-12">
+          <blockquote className="border-l-4 border-primary bg-slate-50 rounded-r-xl p-6">
+            <p className="text-foreground/80 leading-relaxed italic">
+              &ldquo;{cs.detail.quote}&rdquo;
+            </p>
+            <footer className="mt-3 text-sm text-foreground/50">
+              — {cs.industry}ご担当者様
+            </footer>
+          </blockquote>
+        </section>
 
-        {/* CTA */}
+        {/* 最下部CTA */}
         <section className="rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 p-8 text-center mb-12">
           <h3 className="text-xl font-bold text-foreground mb-2">
-            あなたの業界でもPivolinkを活用しませんか？
+            あなたの{cs.industry}でもPivolinkを活用しませんか？
           </h3>
           <p className="text-foreground/60 text-sm mb-6">
             Freeプラン: 3リンクまで永久無料 / カード登録不要 / 1分で開始
           </p>
-          <Link
-            href="/login?tab=signup"
-            className="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-8 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-emerald-300/30 transition-all"
-          >
-            無料で始める
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/login?tab=signup"
+              className="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-8 py-3 rounded-xl font-bold hover:shadow-lg hover:shadow-emerald-300/30 transition-all"
+            >
+              無料で始める
+            </Link>
+            <Link
+              href="/#pricing"
+              className="inline-block border-2 border-emerald-300 text-emerald-700 px-8 py-3 rounded-xl font-bold hover:bg-emerald-50 transition-all"
+            >
+              料金プランを見る
+            </Link>
+          </div>
         </section>
+
+        {/* 関連事例 */}
+        {relatedCases.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
+              <span className="w-1 h-6 bg-primary rounded-full" />
+              「{cs.feature}」を活用した他の事例
+            </h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {relatedCases.map((rc) => (
+                <Link
+                  key={rc.slug}
+                  href={`/cases/${rc.slug}`}
+                  className="group rounded-xl border border-border p-4 hover:bg-slate-50 transition-colors"
+                >
+                  <div className="relative h-32 rounded-lg overflow-hidden mb-3">
+                    <Image src={rc.image} alt={rc.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <span className="text-sm">{rc.icon}</span>
+                    <span className="text-xs text-foreground/50">{rc.industry}</span>
+                  </div>
+                  <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors leading-snug">
+                    {rc.title}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* 前後ナビ */}
         <nav className="flex items-stretch gap-4">

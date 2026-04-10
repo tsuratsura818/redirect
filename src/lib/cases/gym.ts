@@ -9,6 +9,7 @@ export const gymCase: CaseStudy = {
   metaDescription:
     'フィットネスジムが入口NFCタグをPivolinkで自動化する活用法。月替わりキャンペーンの認知率向上、ポスター制作・設置作業ゼロが期待できる活用事例。',
   image: '/cases/gym.jpg',
+  sectionImages: ['/cases/gym-2.jpg', '/cases/gym-3.jpg', '/cases/gym.jpg'],
   icon: '🏋️',
   feature: 'スケジュール切替',
   featureColor: 'bg-blue-100 text-blue-700',

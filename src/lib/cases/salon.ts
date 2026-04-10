@@ -9,6 +9,7 @@ export const salonCase: CaseStudy = {
   metaDescription:
     '美容サロンが名刺のQRコードをPivolinkで管理する活用法。ホットペッパーから自社予約への移行を名刺刷り直しなしで実現、予約手数料削減が期待できる事例。',
   image: '/cases/salon.jpg',
+  sectionImages: ['/cases/salon-2.jpg', '/cases/salon-3.jpg', '/cases/salon.jpg'],
   icon: '💇',
   feature: 'URL変更',
   featureColor: 'bg-indigo-100 text-indigo-700',

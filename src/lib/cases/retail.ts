@@ -9,6 +9,7 @@ export const retailCase: CaseStudy = {
   metaDescription:
     'セレクトショップで商品NFCタグをPivolinkで運用する活用法。売り切れ時に類似商品へ即リンク変更、タグ再購入コスト削減が期待できる活用事例。',
   image: '/cases/retail.jpg',
+  sectionImages: ['/cases/retail-2.jpg', '/cases/retail-3.jpg', '/cases/retail.jpg'],
   icon: '👕',
   feature: 'URL変更',
   featureColor: 'bg-indigo-100 text-indigo-700',

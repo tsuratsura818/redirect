@@ -9,6 +9,7 @@ export const educationCase: CaseStudy = {
   metaDescription:
     '学習塾が教材のQRコードをPivolinkで管理する活用法。講師変更時の動画URLを管理画面から即差し替え、教材の改訂印刷コスト大幅削減が期待できる事例。',
   image: '/cases/education.jpg',
+  sectionImages: ['/cases/education-2.jpg', '/cases/education-3.jpg', '/cases/education.jpg'],
   icon: '🎓',
   feature: 'URL変更',
   featureColor: 'bg-indigo-100 text-indigo-700',

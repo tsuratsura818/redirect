@@ -9,6 +9,7 @@ export const realestateCase: CaseStudy = {
   metaDescription:
     '不動産チラシのQRコードをPivolinkで使い回す活用法。成約済み物件→新着物件に即差替でチラシ廃棄率削減、問い合わせ増加が期待できる活用事例。',
   image: '/cases/realestate.jpg',
+  sectionImages: ['/cases/realestate-2.jpg', '/cases/realestate-3.jpg', '/cases/realestate.jpg'],
   icon: '🏠',
   feature: 'URL変更',
   featureColor: 'bg-indigo-100 text-indigo-700',

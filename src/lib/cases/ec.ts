@@ -9,6 +9,7 @@ export const ecCase: CaseStudy = {
   metaDescription:
     'ECショップが同梱カードのQRコードでA/Bテストを実施する活用法。レビュー誘導vsクーポンの効果をデータで比較し、リピート率向上が期待できる活用事例。',
   image: '/cases/ec.jpg',
+  sectionImages: ['/cases/ec-2.jpg', '/cases/ec-3.jpg', '/cases/ec.jpg'],
   icon: '📦',
   feature: 'A/Bテスト',
   featureColor: 'bg-emerald-100 text-emerald-700',

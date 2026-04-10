@@ -9,6 +9,7 @@ export const restaurantCase: CaseStudy = {
   metaDescription:
     '飲食店でNFCメニューをPivolinkで自動化する活用法。季節メニュー切替の作業時間ゼロ、ランチ/ディナー自動振分で客単価向上が期待できる活用事例をご紹介。',
   image: '/cases/restaurant.jpg',
+  sectionImages: ['/cases/restaurant-2.jpg', '/cases/restaurant-3.jpg', '/cases/restaurant.jpg'],
   icon: '🍽️',
   feature: 'スケジュール切替',
   featureColor: 'bg-blue-100 text-blue-700',

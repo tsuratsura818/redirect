@@ -9,6 +9,7 @@ export const tourismCase: CaseStudy = {
   metaDescription:
     '観光協会がQRコードの多言語対応をPivolinkで実現する活用法。デバイス別自動振分で外国人観光客の離脱防止・満足度向上が期待できる活用事例。',
   image: '/cases/tourism.jpg',
+  sectionImages: ['/cases/tourism-2.jpg', '/cases/tourism-3.jpg', '/cases/tourism.jpg'],
   icon: '🗾',
   feature: 'デバイス別振分',
   featureColor: 'bg-violet-100 text-violet-700',

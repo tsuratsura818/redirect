@@ -9,6 +9,7 @@ export const publisherCase: CaseStudy = {
   metaDescription:
     '週刊漫画雑誌がQRコードをPivolinkで全号共通化する活用法。毎号のQR差し替え作業ゼロ、DTP工数大幅削減が期待できる活用事例。',
   image: '/cases/publisher.jpg',
+  sectionImages: ['/cases/publisher-2.jpg', '/cases/publisher-3.jpg', '/cases/publisher.jpg'],
   icon: '📚',
   feature: 'URL変更',
   featureColor: 'bg-indigo-100 text-indigo-700',

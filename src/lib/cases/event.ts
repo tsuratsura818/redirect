@@ -9,6 +9,7 @@ export const eventCase: CaseStudy = {
   metaDescription:
     'イベント会社がQRチラシをPivolinkで年間共通化する活用法。スケジュール切替で毎月のイベント告知を自動化し、印刷コスト大幅削減が期待できる事例。',
   image: '/cases/event.jpg',
+  sectionImages: ['/cases/event-2.jpg', '/cases/event-3.jpg', '/cases/event.jpg'],
   icon: '🎪',
   feature: 'スケジュール切替',
   featureColor: 'bg-blue-100 text-blue-700',

@@ -5,6 +5,7 @@ export interface CaseStudy {
   seoTitle: string
   metaDescription: string
   image: string
+  sectionImages: [string, string, string]
   icon: string
   feature: string
   featureColor: string

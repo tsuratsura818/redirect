@@ -9,6 +9,7 @@ export const hotelCase: CaseStudy = {
   metaDescription:
     '温泉旅館が客室NFCタグをPivolinkで季節自動切替する活用法。パンフレット差し替え作業ゼロ、ゲストの観光情報満足度向上が期待できる活用事例。',
   image: '/cases/hotel.jpg',
+  sectionImages: ['/cases/hotel-2.jpg', '/cases/hotel-3.jpg', '/cases/hotel.jpg'],
   icon: '🏨',
   feature: 'スケジュール切替',
   featureColor: 'bg-blue-100 text-blue-700',

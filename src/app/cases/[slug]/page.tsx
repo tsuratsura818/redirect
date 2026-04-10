@@ -209,6 +209,9 @@ export default async function CaseDetailPage({ params }: Props) {
             <span className="w-1 h-6 bg-slate-400 rounded-full" />
             {cs.industry}の現状
           </h2>
+          <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden mb-6">
+            <Image src={cs.sectionImages[0]} alt={`${cs.industry}の現状`} fill className="object-cover" />
+          </div>
           <Paragraphs text={cs.detail.industryContext} />
         </section>
 
@@ -227,6 +230,9 @@ export default async function CaseDetailPage({ params }: Props) {
             <span className="w-1 h-6 bg-red-500 rounded-full" />
             {cs.industry}でよくあるQR・NFCの課題
           </h2>
+          <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden mb-6">
+            <Image src={cs.sectionImages[1]} alt={`${cs.industry}の課題`} fill className="object-cover" />
+          </div>
           <ul className="space-y-6">
             {cs.detail.challenges.map((c, i) => (
               <li key={i} className="rounded-xl border border-red-100 bg-red-50/30 p-5">
@@ -248,6 +254,9 @@ export default async function CaseDetailPage({ params }: Props) {
             <span className="w-1 h-6 bg-primary rounded-full" />
             Pivolinkの「{cs.feature}」機能での解決方法
           </h2>
+          <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden mb-6">
+            <Image src={cs.sectionImages[2]} alt={`Pivolinkでの解決方法`} fill className="object-cover" />
+          </div>
           <ul className="space-y-6">
             {cs.detail.howPivolink.map((h, i) => (
               <li key={i} className="rounded-xl border border-primary/10 bg-primary/[0.02] p-5">

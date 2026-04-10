@@ -9,6 +9,7 @@ export const manufacturingCase: CaseStudy = {
   metaDescription:
     '家電メーカーがパッケージのQRコードをPivolinkで管理する活用法。リコール発生時にワンクリックで告知ページに切替、迅速な消費者対応が可能になる事例。',
   image: '/cases/manufacturing.jpg',
+  sectionImages: ['/cases/manufacturing-2.jpg', '/cases/manufacturing-3.jpg', '/cases/manufacturing.jpg'],
   icon: '🏭',
   feature: '緊急URL変更',
   featureColor: 'bg-red-100 text-red-700',

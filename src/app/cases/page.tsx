@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { CASE_STUDIES } from '@/lib/cases'
+import Logo from '@/components/Logo'
 
 export const metadata: Metadata = {
   title: '活用事例 | Pivolink',
@@ -14,8 +15,8 @@ export default function CasesPage() {
       {/* ヘッダー */}
       <header className="border-b border-border bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-lg font-bold text-foreground">
-            Pivolink
+          <Link href="/">
+            <Logo size="sm" />
           </Link>
           <Link
             href="/login?tab=signup"

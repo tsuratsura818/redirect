@@ -286,11 +286,11 @@ export default function LPContent() {
             {featureList.map((f, i) => (
               <ScrollReveal key={i} animation="fade-in-up" delay={i * 80}>
                 <div className="bg-gradient-to-b from-slate-50/50 to-white rounded-xl p-6 border border-border card-hover group">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3 transition-colors duration-250 group-hover:bg-primary/20">
-                    <span className="text-xl leading-none">{featureIcons[i]}</span>
+                  <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4 transition-colors duration-250 group-hover:bg-primary/20">
+                    <span className="text-3xl leading-none">{featureIcons[i]}</span>
                   </div>
                   <h3 className="font-bold text-foreground text-base mb-2">{f.title}</h3>
-                  <p className="text-foreground/75 leading-relaxed">{f.desc}</p>
+                  <p className="text-foreground/75 leading-relaxed text-sm">{f.desc}</p>
                 </div>
               </ScrollReveal>
             ))}

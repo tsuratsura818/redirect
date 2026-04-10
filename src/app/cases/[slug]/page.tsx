@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { CASE_STUDIES } from '@/lib/cases'
+import Logo from '@/components/Logo'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -54,7 +55,31 @@ function getReadingTime(cs: typeof CASE_STUDIES[0]): number {
     ...cs.detail.faq.map((f) => f.q + f.a),
     cs.detail.quote,
   ].join('')
-  return Math.max(2, Math.ceil(text.length / 400))
+  return Math.max(3, Math.ceil(text.length / 400))
+}
+
+/** 長文を2〜3文ごとに段落分割して表示 */
+function Paragraphs({ text, className }: { text: string; className?: string }) {
+  const sentences = text.split(/(?<=。)/)
+  const paragraphs: string[] = []
+  let current = ''
+  for (const s of sentences) {
+    current += s
+    const count = (current.match(/。/g) || []).length
+    if (count >= 2 || current.length > 120) {
+      paragraphs.push(current.trim())
+      current = ''
+    }
+  }
+  if (current.trim()) paragraphs.push(current.trim())
+
+  return (
+    <div className={`space-y-4 ${className ?? ''}`}>
+      {paragraphs.map((p, i) => (
+        <p key={i} className="text-foreground/75 leading-[1.9] text-[15px]">{p}</p>
+      ))}
+    </div>
+  )
 }
 
 export default async function CaseDetailPage({ params }: Props) {
@@ -68,12 +93,10 @@ export default async function CaseDetailPage({ params }: Props) {
   const next = currentIndex < CASE_STUDIES.length - 1 ? CASE_STUDIES[currentIndex + 1] : null
   const readingTime = getReadingTime(cs)
 
-  // 同じfeatureを使った関連事例（自分を除く最大3件）
   const relatedCases = CASE_STUDIES
     .filter((c) => c.feature === cs.feature && c.slug !== cs.slug)
     .slice(0, 3)
 
-  // JSON-LD 構造化データ
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -101,15 +124,14 @@ export default async function CaseDetailPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* 構造化データ */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
       {/* ヘッダー */}
       <header className="border-b border-border bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-lg font-bold text-foreground">
-            Pivolink
+        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
+          <Link href="/">
+            <Logo size="sm" />
           </Link>
           <Link
             href="/cases"
@@ -162,9 +184,9 @@ export default async function CaseDetailPage({ params }: Props) {
       </div>
 
       {/* コンテンツ */}
-      <article className="max-w-4xl mx-auto px-6 py-12 md:py-16">
+      <article className="max-w-3xl mx-auto px-6 py-12 md:py-16">
         {/* Before / After サマリー */}
-        <div className="grid md:grid-cols-2 gap-6 mb-12">
+        <div className="grid md:grid-cols-2 gap-6 mb-14">
           <div className="rounded-xl border border-red-200 bg-red-50 p-6">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded">Before</span>
@@ -182,67 +204,67 @@ export default async function CaseDetailPage({ params }: Props) {
         </div>
 
         {/* 業界コンテキスト */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+        <section className="mb-14">
+          <h2 className="text-xl font-bold text-foreground mb-5 flex items-center gap-2">
             <span className="w-1 h-6 bg-slate-400 rounded-full" />
             {cs.industry}の現状
           </h2>
-          <p className="text-foreground/75 leading-relaxed">{cs.detail.industryContext}</p>
+          <Paragraphs text={cs.detail.industryContext} />
         </section>
 
         {/* 背景 */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+        <section className="mb-14">
+          <h2 className="text-xl font-bold text-foreground mb-5 flex items-center gap-2">
             <span className="w-1 h-6 bg-primary rounded-full" />
             こんな場面で活用が考えられます
           </h2>
-          <p className="text-foreground/75 leading-relaxed">{cs.detail.background}</p>
+          <Paragraphs text={cs.detail.background} />
         </section>
 
         {/* 課題 */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+        <section className="mb-14">
+          <h2 className="text-xl font-bold text-foreground mb-5 flex items-center gap-2">
             <span className="w-1 h-6 bg-red-500 rounded-full" />
-            {cs.industry}が抱えていたQR・NFCの課題
+            {cs.industry}でよくあるQR・NFCの課題
           </h2>
-          <ul className="space-y-4">
+          <ul className="space-y-6">
             {cs.detail.challenges.map((c, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-red-400 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <div>
-                  <p className="font-semibold text-foreground mb-1">{c.title}</p>
-                  <p className="text-foreground/75 leading-relaxed text-sm">{c.body}</p>
+              <li key={i} className="rounded-xl border border-red-100 bg-red-50/30 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <svg className="w-5 h-5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <p className="font-semibold text-foreground">{c.title}</p>
                 </div>
+                <Paragraphs text={c.body} />
               </li>
             ))}
           </ul>
         </section>
 
-        {/* Pivolinkの導入 */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+        {/* Pivolinkでの解決方法 */}
+        <section className="mb-14">
+          <h2 className="text-xl font-bold text-foreground mb-5 flex items-center gap-2">
             <span className="w-1 h-6 bg-primary rounded-full" />
-            Pivolinkの{cs.feature}機能での解決方法
+            Pivolinkの「{cs.feature}」機能での解決方法
           </h2>
-          <ul className="space-y-4">
+          <ul className="space-y-6">
             {cs.detail.howPivolink.map((h, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0 mt-1">
-                  {i + 1}
-                </span>
-                <div>
-                  <p className="font-semibold text-foreground mb-1">{h.title}</p>
-                  <p className="text-foreground/75 leading-relaxed text-sm">{h.body}</p>
+              <li key={i} className="rounded-xl border border-primary/10 bg-primary/[0.02] p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-sm font-bold shrink-0">
+                    {i + 1}
+                  </span>
+                  <p className="font-semibold text-foreground">{h.title}</p>
                 </div>
+                <Paragraphs text={h.body} />
               </li>
             ))}
           </ul>
         </section>
 
         {/* 中間CTA */}
-        <section className="rounded-xl border border-primary/20 bg-gradient-to-r from-emerald-50/50 to-teal-50/50 p-6 mb-12 flex flex-col sm:flex-row items-center gap-4">
+        <section className="rounded-xl border border-primary/20 bg-gradient-to-r from-emerald-50/50 to-teal-50/50 p-6 mb-14 flex flex-col sm:flex-row items-center gap-4">
           <div className="flex-1">
             <p className="font-bold text-foreground text-sm">同じ課題をお持ちですか？</p>
             <p className="text-foreground/60 text-xs mt-1">Pivolinkなら無料で始められます。カード登録不要。</p>
@@ -263,73 +285,73 @@ export default async function CaseDetailPage({ params }: Props) {
           </div>
         </section>
 
-        {/* 成果 */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+        {/* 期待できる成果 */}
+        <section className="mb-14">
+          <h2 className="text-xl font-bold text-foreground mb-5 flex items-center gap-2">
             <span className="w-1 h-6 bg-emerald-500 rounded-full" />
-            導入後の具体的な成果
+            期待できる成果
           </h2>
-          <ul className="space-y-4">
+          <ul className="space-y-6">
             {cs.detail.results.map((r, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-emerald-500 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <div>
-                  <p className="font-semibold text-foreground mb-1">{r.title}</p>
-                  <p className="text-foreground/75 leading-relaxed text-sm">{r.body}</p>
+              <li key={i} className="rounded-xl border border-emerald-100 bg-emerald-50/30 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <p className="font-semibold text-foreground">{r.title}</p>
                 </div>
+                <Paragraphs text={r.body} />
               </li>
             ))}
           </ul>
         </section>
 
         {/* 実践Tips */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+        <section className="mb-14">
+          <h2 className="text-xl font-bold text-foreground mb-5 flex items-center gap-2">
             <span className="w-1 h-6 bg-amber-500 rounded-full" />
-            実践Tips
+            {cs.industry}での実践Tips
           </h2>
-          <ul className="space-y-4">
+          <ul className="space-y-6">
             {cs.detail.tips.map((t, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-amber-100 text-amber-700 text-xs font-bold shrink-0 mt-1">
-                  {i + 1}
-                </span>
-                <div>
-                  <p className="font-semibold text-foreground mb-1">{t.title}</p>
-                  <p className="text-foreground/75 leading-relaxed text-sm">{t.body}</p>
+              <li key={i} className="rounded-xl border border-amber-100 bg-amber-50/30 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="flex items-center justify-center w-7 h-7 rounded-full bg-amber-100 text-amber-700 text-sm font-bold shrink-0">
+                    {i + 1}
+                  </span>
+                  <p className="font-semibold text-foreground">{t.title}</p>
                 </div>
+                <Paragraphs text={t.body} />
               </li>
             ))}
           </ul>
         </section>
 
         {/* FAQ */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+        <section className="mb-14">
+          <h2 className="text-xl font-bold text-foreground mb-5 flex items-center gap-2">
             <span className="w-1 h-6 bg-violet-500 rounded-full" />
             よくある質問
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-5">
             {cs.detail.faq.map((f, i) => (
               <div key={i} className="rounded-xl border border-border p-5">
-                <p className="font-semibold text-foreground mb-2 flex items-start gap-2">
-                  <span className="text-primary font-bold shrink-0">Q.</span>
+                <p className="font-semibold text-foreground mb-3 flex items-start gap-2">
+                  <span className="text-primary font-bold shrink-0 text-lg leading-tight">Q.</span>
                   {f.q}
                 </p>
-                <p className="text-foreground/75 leading-relaxed text-sm pl-6">
-                  {f.a}
-                </p>
+                <div className="pl-7 border-l-2 border-primary/10">
+                  <Paragraphs text={f.a} />
+                </div>
               </div>
             ))}
           </div>
         </section>
 
         {/* 引用 */}
-        <section className="mb-12">
+        <section className="mb-14">
           <blockquote className="border-l-4 border-primary bg-slate-50 rounded-r-xl p-6">
-            <p className="text-foreground/80 leading-relaxed italic">
+            <p className="text-foreground/80 leading-[1.9] italic text-[15px]">
               &ldquo;{cs.detail.quote}&rdquo;
             </p>
             <footer className="mt-3 text-sm text-foreground/50">
@@ -339,7 +361,7 @@ export default async function CaseDetailPage({ params }: Props) {
         </section>
 
         {/* 最下部CTA */}
-        <section className="rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 p-8 text-center mb-12">
+        <section className="rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 p-8 text-center mb-14">
           <h3 className="text-xl font-bold text-foreground mb-2">
             あなたの{cs.industry}でもPivolinkを活用しませんか？
           </h3>
@@ -364,7 +386,7 @@ export default async function CaseDetailPage({ params }: Props) {
 
         {/* 関連事例 */}
         {relatedCases.length > 0 && (
-          <section className="mb-12">
+          <section className="mb-14">
             <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
               <span className="w-1 h-6 bg-primary rounded-full" />
               「{cs.feature}」を活用した他の事例

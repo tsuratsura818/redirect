@@ -45,10 +45,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 function getReadingTime(cs: typeof CASE_STUDIES[0]): number {
   const text = [
+    cs.detail.industryContext,
     cs.detail.background,
-    ...cs.detail.challenges,
-    ...cs.detail.howPivolink,
-    ...cs.detail.results,
+    ...cs.detail.challenges.map((c) => c.title + c.body),
+    ...cs.detail.howPivolink.map((h) => h.title + h.body),
+    ...cs.detail.results.map((r) => r.title + r.body),
+    ...cs.detail.tips.map((t) => t.title + t.body),
+    ...cs.detail.faq.map((f) => f.q + f.a),
     cs.detail.quote,
   ].join('')
   return Math.max(2, Math.ceil(text.length / 400))
@@ -178,11 +181,20 @@ export default async function CaseDetailPage({ params }: Props) {
           </div>
         </div>
 
+        {/* 業界コンテキスト */}
+        <section className="mb-12">
+          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <span className="w-1 h-6 bg-slate-400 rounded-full" />
+            {cs.industry}の現状
+          </h2>
+          <p className="text-foreground/75 leading-relaxed">{cs.detail.industryContext}</p>
+        </section>
+
         {/* 背景 */}
         <section className="mb-12">
           <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
             <span className="w-1 h-6 bg-primary rounded-full" />
-            {cs.industry}での導入背景
+            こんな場面で活用が考えられます
           </h2>
           <p className="text-foreground/75 leading-relaxed">{cs.detail.background}</p>
         </section>
@@ -193,13 +205,16 @@ export default async function CaseDetailPage({ params }: Props) {
             <span className="w-1 h-6 bg-red-500 rounded-full" />
             {cs.industry}が抱えていたQR・NFCの課題
           </h2>
-          <ul className="space-y-3">
+          <ul className="space-y-4">
             {cs.detail.challenges.map((c, i) => (
               <li key={i} className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-red-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-5 h-5 text-red-400 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                <span className="text-foreground/75 leading-relaxed">{c}</span>
+                <div>
+                  <p className="font-semibold text-foreground mb-1">{c.title}</p>
+                  <p className="text-foreground/75 leading-relaxed text-sm">{c.body}</p>
+                </div>
               </li>
             ))}
           </ul>
@@ -211,13 +226,16 @@ export default async function CaseDetailPage({ params }: Props) {
             <span className="w-1 h-6 bg-primary rounded-full" />
             Pivolinkの{cs.feature}機能での解決方法
           </h2>
-          <ul className="space-y-3">
+          <ul className="space-y-4">
             {cs.detail.howPivolink.map((h, i) => (
               <li key={i} className="flex items-start gap-3">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0 mt-0.5">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0 mt-1">
                   {i + 1}
                 </span>
-                <span className="text-foreground/75 leading-relaxed">{h}</span>
+                <div>
+                  <p className="font-semibold text-foreground mb-1">{h.title}</p>
+                  <p className="text-foreground/75 leading-relaxed text-sm">{h.body}</p>
+                </div>
               </li>
             ))}
           </ul>
@@ -251,16 +269,61 @@ export default async function CaseDetailPage({ params }: Props) {
             <span className="w-1 h-6 bg-emerald-500 rounded-full" />
             導入後の具体的な成果
           </h2>
-          <ul className="space-y-3">
+          <ul className="space-y-4">
             {cs.detail.results.map((r, i) => (
               <li key={i} className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <svg className="w-5 h-5 text-emerald-500 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
-                <span className="text-foreground/75 leading-relaxed font-medium">{r}</span>
+                <div>
+                  <p className="font-semibold text-foreground mb-1">{r.title}</p>
+                  <p className="text-foreground/75 leading-relaxed text-sm">{r.body}</p>
+                </div>
               </li>
             ))}
           </ul>
+        </section>
+
+        {/* 実践Tips */}
+        <section className="mb-12">
+          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <span className="w-1 h-6 bg-amber-500 rounded-full" />
+            実践Tips
+          </h2>
+          <ul className="space-y-4">
+            {cs.detail.tips.map((t, i) => (
+              <li key={i} className="flex items-start gap-3">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-amber-100 text-amber-700 text-xs font-bold shrink-0 mt-1">
+                  {i + 1}
+                </span>
+                <div>
+                  <p className="font-semibold text-foreground mb-1">{t.title}</p>
+                  <p className="text-foreground/75 leading-relaxed text-sm">{t.body}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* FAQ */}
+        <section className="mb-12">
+          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <span className="w-1 h-6 bg-violet-500 rounded-full" />
+            よくある質問
+          </h2>
+          <div className="space-y-4">
+            {cs.detail.faq.map((f, i) => (
+              <div key={i} className="rounded-xl border border-border p-5">
+                <p className="font-semibold text-foreground mb-2 flex items-start gap-2">
+                  <span className="text-primary font-bold shrink-0">Q.</span>
+                  {f.q}
+                </p>
+                <p className="text-foreground/75 leading-relaxed text-sm pl-6">
+                  {f.a}
+                </p>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* 引用 */}
@@ -270,7 +333,7 @@ export default async function CaseDetailPage({ params }: Props) {
               &ldquo;{cs.detail.quote}&rdquo;
             </p>
             <footer className="mt-3 text-sm text-foreground/50">
-              — {cs.industry}ご担当者様
+              — {cs.industry}ご担当者様（想定される声）
             </footer>
           </blockquote>
         </section>

@@ -129,7 +129,7 @@ export default async function CaseDetailPage({ params }: Props) {
 
       {/* ヘッダー */}
       <header className="border-b border-border bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
           <Link href="/">
             <Logo size="sm" />
           </Link>
@@ -143,7 +143,7 @@ export default async function CaseDetailPage({ params }: Props) {
       </header>
 
       {/* パンくずリスト */}
-      <nav className="max-w-4xl mx-auto px-6 py-3" aria-label="パンくずリスト">
+      <nav className="max-w-5xl mx-auto px-6 py-3" aria-label="パンくずリスト">
         <ol className="flex items-center gap-1.5 text-xs text-foreground/50">
           <li><Link href="/" className="hover:text-foreground transition-colors">Pivolink</Link></li>
           <li>/</li>
@@ -164,7 +164,7 @@ export default async function CaseDetailPage({ params }: Props) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-2xl">{cs.icon}</span>
               <span className="text-sm font-semibold text-white/80 uppercase tracking-wider">{cs.industry}</span>
@@ -184,7 +184,7 @@ export default async function CaseDetailPage({ params }: Props) {
       </div>
 
       {/* コンテンツ */}
-      <article className="max-w-3xl mx-auto px-6 py-12 md:py-16">
+      <article className="max-w-5xl mx-auto px-6 py-12 md:py-16">
         {/* Before / After サマリー */}
         <div className="grid md:grid-cols-2 gap-6 mb-14">
           <div className="rounded-xl border border-red-200 bg-red-50 p-6">
@@ -391,23 +391,28 @@ export default async function CaseDetailPage({ params }: Props) {
               <span className="w-1 h-6 bg-primary rounded-full" />
               「{cs.feature}」を活用した他の事例
             </h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedCases.map((rc) => (
                 <Link
                   key={rc.slug}
                   href={`/cases/${rc.slug}`}
-                  className="group rounded-xl border border-border p-4 hover:bg-slate-50 transition-colors"
+                  className="group rounded-2xl border border-border overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                 >
-                  <div className="relative h-32 rounded-lg overflow-hidden mb-3">
+                  <div className="relative h-44 overflow-hidden">
                     <Image src={rc.image} alt={rc.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <span className="text-sm">{rc.icon}</span>
-                    <span className="text-xs text-foreground/50">{rc.industry}</span>
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-lg">{rc.icon}</span>
+                      <span className="text-xs font-semibold text-foreground/55">{rc.industry}</span>
+                    </div>
+                    <p className="font-bold text-foreground group-hover:text-primary transition-colors leading-snug">
+                      {rc.title}
+                    </p>
+                    <p className="mt-2 text-xs font-semibold text-primary group-hover:underline">
+                      詳しく見る →
+                    </p>
                   </div>
-                  <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors leading-snug">
-                    {rc.title}
-                  </p>
                 </Link>
               ))}
             </div>

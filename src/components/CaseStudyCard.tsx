@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 interface Props {
   icon: string
   industry: string
@@ -9,11 +11,20 @@ interface Props {
   feature: string
   featureColor: string
   illustration: React.ReactNode
+  slug?: string
 }
 
-export default function CaseStudyCard({ icon, industry, title, problem, solution, feature, featureColor, illustration }: Props) {
+export default function CaseStudyCard({ icon, industry, title, problem, solution, feature, featureColor, illustration, slug }: Props) {
+  const Wrapper = slug
+    ? ({ children, className }: { children: React.ReactNode; className: string }) => (
+        <Link href={`/cases/${slug}`} className={className}>{children}</Link>
+      )
+    : ({ children, className }: { children: React.ReactNode; className: string }) => (
+        <div className={className}>{children}</div>
+      )
+
   return (
-    <div className="bg-card rounded-2xl border border-border overflow-hidden card-hover group">
+    <Wrapper className="bg-card rounded-2xl border border-border overflow-hidden card-hover group block">
       {/* 写真エリア */}
       <div className="relative h-48 overflow-hidden">
         <div className="w-full h-full group-hover:scale-105 transition-transform duration-500">
@@ -30,7 +41,7 @@ export default function CaseStudyCard({ icon, industry, title, problem, solution
             {feature}
           </span>
         </div>
-        <h3 className="text-lg font-bold text-foreground mb-3 leading-snug">{title}</h3>
+        <h3 className="text-lg font-bold text-foreground mb-3 leading-snug group-hover:text-primary transition-colors">{title}</h3>
         <div className="space-y-2 text-sm">
           <div className="flex items-start gap-2">
             <span className="text-danger font-bold text-xs mt-0.5 shrink-0">Before</span>
@@ -41,7 +52,12 @@ export default function CaseStudyCard({ icon, industry, title, problem, solution
             <p className="text-foreground/70 leading-relaxed font-medium">{solution}</p>
           </div>
         </div>
+        {slug && (
+          <p className="mt-4 text-xs font-semibold text-primary group-hover:underline">
+            詳しく見る →
+          </p>
+        )}
       </div>
-    </div>
+    </Wrapper>
   )
 }

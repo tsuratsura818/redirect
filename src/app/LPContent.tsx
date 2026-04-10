@@ -10,6 +10,7 @@ import { useLanguage } from '@/i18n/LanguageProvider'
 import { IS_BETA } from '@/lib/plans'
 import type { BillingCycle } from '@/lib/plans'
 import Image from 'next/image'
+import { CASE_STUDIES } from '@/lib/cases'
 
 const caseImages = [
   { src: '/cases/restaurant.jpg', alt: 'レストラン' },
@@ -257,6 +258,7 @@ export default function LPContent() {
                   solution={c.solution}
                   feature={c.feature}
                   featureColor={caseFeatureColors[i]}
+                  slug={CASE_STUDIES[i]?.slug}
                   illustration={
                     <Image
                       src={caseImages[i].src}

@@ -27,11 +27,34 @@ export default function PlanClient() {
   const isAnnual = billing === 'annual'
   const [overriding, setOverriding] = useState<PlanId | null>(null)
   const [jpycPlan, setJpycPlan] = useState<PlanId | null>(null)
+  const [couponCode, setCouponCode] = useState('')
+  const [couponStatus, setCouponStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle')
+  const [couponDiscount, setCouponDiscount] = useState<number>(0)
+  const [couponError, setCouponError] = useState('')
 
   const fetchData = useCallback(async () => {
     const res = await fetch('/api/subscription')
     if (res.ok) setData(await res.json())
     setLoading(false)
+  }, [])
+
+  const handleValidateCoupon = useCallback(async (code: string) => {
+    if (!code.trim()) return
+    setCouponStatus('validating')
+    setCouponError('')
+    const res = await fetch('/api/coupon/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: code.trim() }),
+    })
+    const result = await res.json()
+    if (res.ok && result.valid) {
+      setCouponStatus('valid')
+      setCouponDiscount(result.discount_percent)
+    } else {
+      setCouponStatus('invalid')
+      setCouponError(result.error || '無効なクーポンです')
+    }
   }, [])
 
   useEffect(() => {
@@ -44,7 +67,13 @@ export default function PlanClient() {
       setMessage('プラン変更がキャンセルされました')
       setTimeout(() => setMessage(''), 5000)
     }
-  }, [fetchData, searchParams])
+    // URLパラメータからクーポン自動適用
+    const couponParam = searchParams.get('coupon')
+    if (couponParam) {
+      setCouponCode(couponParam)
+      handleValidateCoupon(couponParam)
+    }
+  }, [fetchData, searchParams, handleValidateCoupon])
 
   const handleChangePlan = async (planId: PlanId) => {
     if (!data) return
@@ -59,7 +88,7 @@ export default function PlanClient() {
     const res = await fetch('/api/subscription/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan: planId, billing }),
+      body: JSON.stringify({ plan: planId, billing, couponCode: couponStatus === 'valid' ? couponCode : undefined }),
     })
 
     const result = await res.json()
@@ -281,6 +310,61 @@ export default function PlanClient() {
           </button>
         </div>
       </div>
+      {/* クーポンコード入力 */}
+      <div className="mb-8 rounded-xl border border-border bg-card p-4">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1">
+            <label className="text-xs font-medium text-muted mb-1 block">クーポンコード</label>
+            <input
+              type="text"
+              value={couponCode}
+              onChange={(e) => {
+                setCouponCode(e.target.value.toUpperCase())
+                if (couponStatus !== 'idle') {
+                  setCouponStatus('idle')
+                  setCouponDiscount(0)
+                  setCouponError('')
+                }
+              }}
+              placeholder="クーポンコードを入力"
+              className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+              disabled={couponStatus === 'valid'}
+            />
+          </div>
+          {couponStatus === 'valid' ? (
+            <button
+              onClick={() => {
+                setCouponCode('')
+                setCouponStatus('idle')
+                setCouponDiscount(0)
+              }}
+              className="self-end px-4 py-2 rounded-lg text-sm font-medium border border-border text-muted hover:bg-gray-50 transition-colors"
+            >
+              クリア
+            </button>
+          ) : (
+            <button
+              onClick={() => handleValidateCoupon(couponCode)}
+              disabled={!couponCode.trim() || couponStatus === 'validating'}
+              className="self-end px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-dark transition-colors disabled:opacity-50"
+            >
+              {couponStatus === 'validating' ? '確認中...' : '適用'}
+            </button>
+          )}
+        </div>
+        {couponStatus === 'valid' && (
+          <div className="mt-2 flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            <span className="font-medium">{couponDiscount}%OFF クーポン適用済み</span>
+          </div>
+        )}
+        {couponStatus === 'invalid' && (
+          <p className="mt-2 text-sm text-red-600">{couponError}</p>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {(Object.values(PLANS) as (typeof PLANS)[PlanId][]).map(plan => {
           const isCurrent = plan.id === currentPlan

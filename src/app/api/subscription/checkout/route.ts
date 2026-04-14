@@ -5,6 +5,7 @@ import { stripe, getPriceId } from '@/lib/stripe'
 import { getUserSubscription } from '@/lib/subscription'
 import type { PlanId } from '@/lib/plans'
 import { PLANS } from '@/lib/plans'
+import { validateCouponCode } from '@/lib/affiliate'
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,14 +13,53 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { plan, billing = 'monthly' } = await request.json() as { plan: PlanId; billing?: 'monthly' | 'annual' }
+    const { plan, billing = 'monthly', couponCode } = await request.json() as {
+      plan: PlanId
+      billing?: 'monthly' | 'annual'
+      couponCode?: string
+    }
+
+    const admin = createAdminClient()
+
+    // クーポン検証（指定時のみ）
+    let stripeCouponId: string | undefined
+    let couponId: string | undefined
+    let affiliateUserId: string | undefined
+
+    if (couponCode?.trim()) {
+      const couponResult = await validateCouponCode(couponCode.trim(), user.id)
+      if (!couponResult.valid) {
+        return NextResponse.json({ error: couponResult.error }, { status: 400 })
+      }
+      const coupon = couponResult.coupon!
+
+      // Stripe Couponがなければ作成
+      if (coupon.stripe_coupon_id) {
+        stripeCouponId = coupon.stripe_coupon_id
+      } else {
+        const stripeCoupon = await stripe.coupons.create({
+          percent_off: coupon.discount_percent,
+          duration: 'forever',
+          name: `Pivolink ${coupon.discount_percent}%OFF - ${coupon.code}`,
+        })
+        stripeCouponId = stripeCoupon.id
+
+        // Stripe Coupon IDを保存
+        await admin
+          .from('coupons')
+          .update({ stripe_coupon_id: stripeCouponId })
+          .eq('id', coupon.id)
+      }
+
+      couponId = coupon.id
+      affiliateUserId = coupon.affiliate_user_id ?? undefined
+    }
 
     if (!PLANS[plan]) {
       return NextResponse.json({ error: '無効なプランです' }, { status: 400 })
     }
 
     const sub = await getUserSubscription(user.id)
-    const admin = createAdminClient()
     const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || ''
 
     // Freeへのダウングレード: Stripeサブスクリプションをキャンセル
@@ -61,11 +101,21 @@ export async function POST(request: NextRequest) {
         }],
         cancel_at_period_end: false,
         proration_behavior: 'create_prorations',
+        ...(stripeCouponId && { coupon: stripeCouponId }),
+        metadata: {
+          ...stripeSub.metadata,
+          ...(couponId && { coupon_id: couponId }),
+          ...(affiliateUserId && { affiliate_user_id: affiliateUserId }),
+        },
       })
+
+      const subUpdate: Record<string, unknown> = { plan, status: 'active', cancel_at_period_end: false }
+      if (couponId) subUpdate.coupon_id = couponId
+      if (affiliateUserId) subUpdate.affiliate_user_id = affiliateUserId
 
       await admin
         .from('user_subscriptions')
-        .update({ plan, status: 'active', cancel_at_period_end: false })
+        .update(subUpdate)
         .eq('user_id', user.id)
 
       return NextResponse.json({
@@ -97,8 +147,16 @@ export async function POST(request: NextRequest) {
       success_url: `${origin}/dashboard/plan?success=true`,
       cancel_url: `${origin}/dashboard/plan?canceled=true`,
       subscription_data: {
-        metadata: { supabase_user_id: user.id, plan },
+        metadata: {
+          supabase_user_id: user.id,
+          plan,
+          ...(couponId && { coupon_id: couponId }),
+          ...(affiliateUserId && { affiliate_user_id: affiliateUserId }),
+        },
       },
+      ...(stripeCouponId && {
+        discounts: [{ coupon: stripeCouponId }],
+      }),
     })
 
     return NextResponse.json({ url: session.url })

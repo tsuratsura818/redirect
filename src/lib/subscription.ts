@@ -17,6 +17,8 @@ export interface UserSubscription {
   jpyc_amount: number | null
   jpyc_paid_at: string | null
   jpyc_expires_at: string | null
+  coupon_id: string | null
+  affiliate_user_id: string | null
   created_at: string
   updated_at: string
 }

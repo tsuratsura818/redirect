@@ -32,6 +32,9 @@ export async function POST(request: NextRequest) {
         const plan = subscription.metadata.plan
 
         if (userId && plan) {
+          const couponId = subscription.metadata.coupon_id
+          const affiliateUserId = subscription.metadata.affiliate_user_id
+
           await admin
             .from('user_subscriptions')
             .update({
@@ -42,8 +45,25 @@ export async function POST(request: NextRequest) {
               current_period_start: new Date((subscription as unknown as { current_period_start: number }).current_period_start * 1000).toISOString(),
               current_period_end: new Date((subscription as unknown as { current_period_end: number }).current_period_end * 1000).toISOString(),
               cancel_at_period_end: false,
+              ...(couponId && { coupon_id: couponId }),
+              ...(affiliateUserId && { affiliate_user_id: affiliateUserId }),
             })
             .eq('user_id', userId)
+
+          // クーポン利用記録
+          if (couponId) {
+            await admin.from('coupon_usages').upsert({
+              coupon_id: couponId,
+              user_id: userId,
+              stripe_subscription_id: subscription.id,
+            }, { onConflict: 'user_id' })
+
+            // current_uses をインクリメント
+            const { data: couponData } = await admin.from('coupons').select('current_uses').eq('id', couponId).single()
+            if (couponData) {
+              await admin.from('coupons').update({ current_uses: couponData.current_uses + 1 }).eq('id', couponId)
+            }
+          }
         }
       }
       break

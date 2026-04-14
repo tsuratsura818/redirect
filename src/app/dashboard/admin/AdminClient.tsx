@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { AdminUser } from '@/types/database'
 
-type AdminTab = 'users' | 'contacts' | 'feedbacks' | 'business' | 'settings'
+type AdminTab = 'users' | 'contacts' | 'feedbacks' | 'business' | 'coupons' | 'affiliates' | 'settings'
 
 interface Stats {
   total_users: number
@@ -128,6 +128,12 @@ export default function AdminClient({ currentUserId }: { currentUserId: string }
         <TabButton active={tab === 'feedbacks'} onClick={() => setTab('feedbacks')} badge={feedbacks.filter(f => f.status === 'new').length}>
           フィードバック
         </TabButton>
+        <TabButton active={tab === 'coupons'} onClick={() => setTab('coupons')}>
+          クーポン
+        </TabButton>
+        <TabButton active={tab === 'affiliates'} onClick={() => setTab('affiliates')}>
+          アフィリエイト
+        </TabButton>
         <TabButton active={tab === 'settings'} onClick={() => setTab('settings')}>
           サイト設定
         </TabButton>
@@ -147,6 +153,14 @@ export default function AdminClient({ currentUserId }: { currentUserId: string }
 
       {tab === 'settings' && (
         <SiteSettings />
+      )}
+
+      {tab === 'coupons' && (
+        <CouponsSection />
+      )}
+
+      {tab === 'affiliates' && (
+        <AffiliatesSection currentUserId={currentUserId} />
       )}
 
       {tab === 'users' && <>
@@ -993,6 +1007,328 @@ function SiteSettings() {
           >
             Google リッチリザルト
           </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// クーポン管理セクション
+// ============================================
+function CouponsSection() {
+  const [coupons, setCoupons] = useState<{ id: string; code: string; discount_percent: number; affiliate_user_id: string | null; max_uses: number | null; current_uses: number; is_active: boolean; created_at: string }[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [newCode, setNewCode] = useState('')
+  const [newDiscount, setNewDiscount] = useState(20)
+  const [creating, setCreating] = useState(false)
+
+  const fetchCoupons = useCallback(async () => {
+    const res = await fetch('/api/admin/coupons')
+    if (res.ok) setCoupons(await res.json())
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetchCoupons() }, [fetchCoupons])
+
+  const handleCreate = async () => {
+    if (!newCode.trim()) return
+    setCreating(true)
+    const res = await fetch('/api/admin/coupons', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: newCode.trim(), discountPercent: newDiscount }),
+    })
+    if (res.ok) {
+      setNewCode('')
+      setShowForm(false)
+      await fetchCoupons()
+    }
+    setCreating(false)
+  }
+
+  const toggleActive = async (id: string, isActive: boolean) => {
+    await fetch(`/api/admin/coupons/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_active: !isActive }),
+    })
+    await fetchCoupons()
+  }
+
+  if (loading) return <div className="text-center py-10 text-muted text-sm">読み込み中...</div>
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold text-foreground">クーポン管理</h2>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="px-3 py-1.5 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-dark transition-colors"
+        >
+          {showForm ? 'キャンセル' : '+ 新規作成'}
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="bg-card border border-border rounded-xl p-4 mb-6 space-y-3">
+          <div>
+            <label className="text-xs font-medium text-muted block mb-1">クーポンコード</label>
+            <input
+              value={newCode}
+              onChange={(e) => setNewCode(e.target.value.toUpperCase())}
+              placeholder="例: COMMUNITY2026"
+              className="w-full px-3 py-2 rounded-lg border border-border text-sm bg-background"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted block mb-1">割引率(%)</label>
+            <input
+              type="number"
+              value={newDiscount}
+              onChange={(e) => setNewDiscount(Number(e.target.value))}
+              className="w-24 px-3 py-2 rounded-lg border border-border text-sm bg-background"
+            />
+          </div>
+          <button
+            onClick={handleCreate}
+            disabled={creating || !newCode.trim()}
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-dark disabled:opacity-50 transition-colors"
+          >
+            {creating ? '作成中...' : '作成'}
+          </button>
+        </div>
+      )}
+
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-50 border-b border-border">
+            <tr>
+              <th className="text-left px-4 py-3 font-semibold text-foreground">コード</th>
+              <th className="text-left px-4 py-3 font-semibold text-foreground">割引</th>
+              <th className="text-left px-4 py-3 font-semibold text-foreground">使用数</th>
+              <th className="text-left px-4 py-3 font-semibold text-foreground">ステータス</th>
+              <th className="text-left px-4 py-3 font-semibold text-foreground">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {coupons.map((c) => (
+              <tr key={c.id} className="border-b border-border last:border-0">
+                <td className="px-4 py-3 font-mono font-semibold">{c.code}</td>
+                <td className="px-4 py-3">{c.discount_percent}%OFF</td>
+                <td className="px-4 py-3">{c.current_uses}{c.max_uses ? `/${c.max_uses}` : ''}</td>
+                <td className="px-4 py-3">
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${c.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
+                    {c.is_active ? '有効' : '無効'}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <button
+                    onClick={() => toggleActive(c.id, c.is_active)}
+                    className={`text-xs px-3 py-1 rounded border transition-colors ${c.is_active ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'}`}
+                  >
+                    {c.is_active ? '無効化' : '有効化'}
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {coupons.length === 0 && (
+              <tr><td colSpan={5} className="px-4 py-8 text-center text-muted">クーポンがありません</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// アフィリエイト管理セクション
+// ============================================
+function AffiliatesSection({ currentUserId }: { currentUserId: string }) {
+  const [apps, setApps] = useState<{ id: string; user_id: string; email?: string; status: string; community_name: string | null; applied_at: string }[]>([])
+  const [payouts, setPayouts] = useState<{ id: string; affiliate_user_id: string; amount: number; active_referrals: number; period_start: string; status: string }[]>([])
+  const [loading, setLoading] = useState(true)
+  const [actionId, setActionId] = useState<string | null>(null)
+
+  const fetchData = useCallback(async () => {
+    const [appsRes, payoutsRes] = await Promise.all([
+      fetch('/api/admin/affiliates'),
+      fetch('/api/admin/payouts'),
+    ])
+    if (appsRes.ok) setApps(await appsRes.json())
+    if (payoutsRes.ok) setPayouts(await payoutsRes.json())
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetchData() }, [fetchData])
+
+  const handleAction = async (id: string, status: string) => {
+    setActionId(id)
+    await fetch(`/api/admin/affiliates/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    })
+    await fetchData()
+    setActionId(null)
+  }
+
+  const handleCalculatePayouts = async () => {
+    setActionId('calc')
+    await fetch('/api/admin/payouts', { method: 'POST' })
+    await fetchData()
+    setActionId(null)
+  }
+
+  const handlePayoutAction = async (id: string, status: string) => {
+    setActionId(id)
+    await fetch(`/api/admin/payouts/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    })
+    await fetchData()
+    setActionId(null)
+  }
+
+  if (loading) return <div className="text-center py-10 text-muted text-sm">読み込み中...</div>
+
+  const pending = apps.filter(a => a.status === 'pending')
+
+  return (
+    <div className="space-y-8">
+      {/* 申請一覧 */}
+      <div>
+        <h2 className="text-lg font-bold text-foreground mb-4">
+          アフィリエイト申請
+          {pending.length > 0 && (
+            <span className="ml-2 text-xs font-bold bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">{pending.length}件</span>
+          )}
+        </h2>
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 border-b border-border">
+              <tr>
+                <th className="text-left px-4 py-3 font-semibold text-foreground">ユーザー</th>
+                <th className="text-left px-4 py-3 font-semibold text-foreground">コミュニティ</th>
+                <th className="text-left px-4 py-3 font-semibold text-foreground">申請日</th>
+                <th className="text-left px-4 py-3 font-semibold text-foreground">ステータス</th>
+                <th className="text-left px-4 py-3 font-semibold text-foreground">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {apps.map((a) => (
+                <tr key={a.id} className="border-b border-border last:border-0">
+                  <td className="px-4 py-3 text-xs font-mono">{a.email || a.user_id.slice(0, 8)}</td>
+                  <td className="px-4 py-3">{a.community_name || '-'}</td>
+                  <td className="px-4 py-3 text-xs text-muted">{new Date(a.applied_at).toLocaleDateString('ja-JP')}</td>
+                  <td className="px-4 py-3">
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                      a.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+                      a.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {a.status === 'approved' ? '承認済' : a.status === 'pending' ? '審査中' : '却下'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 flex gap-2">
+                    {a.status === 'pending' && (
+                      <>
+                        <button
+                          onClick={() => handleAction(a.id, 'approved')}
+                          disabled={actionId === a.id}
+                          className="text-xs px-3 py-1 rounded border border-emerald-200 text-emerald-600 hover:bg-emerald-50 disabled:opacity-50 transition-colors"
+                        >
+                          承認
+                        </button>
+                        <button
+                          onClick={() => handleAction(a.id, 'rejected')}
+                          disabled={actionId === a.id}
+                          className="text-xs px-3 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                        >
+                          却下
+                        </button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {apps.length === 0 && (
+                <tr><td colSpan={5} className="px-4 py-8 text-center text-muted">申請がありません</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 報酬管理 */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-foreground">報酬管理</h2>
+          <button
+            onClick={handleCalculatePayouts}
+            disabled={actionId === 'calc'}
+            className="px-3 py-1.5 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-dark disabled:opacity-50 transition-colors"
+          >
+            {actionId === 'calc' ? '計算中...' : '今月分を計算'}
+          </button>
+        </div>
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 border-b border-border">
+              <tr>
+                <th className="text-left px-4 py-3 font-semibold text-foreground">期間</th>
+                <th className="text-left px-4 py-3 font-semibold text-foreground">紹介数</th>
+                <th className="text-left px-4 py-3 font-semibold text-foreground">報酬</th>
+                <th className="text-left px-4 py-3 font-semibold text-foreground">ステータス</th>
+                <th className="text-left px-4 py-3 font-semibold text-foreground">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {payouts.map((p) => (
+                <tr key={p.id} className="border-b border-border last:border-0">
+                  <td className="px-4 py-3 text-xs">{p.period_start}</td>
+                  <td className="px-4 py-3">{p.active_referrals}人</td>
+                  <td className="px-4 py-3 font-semibold">¥{p.amount.toLocaleString()}</td>
+                  <td className="px-4 py-3">
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                      p.status === 'paid' ? 'bg-emerald-100 text-emerald-700' :
+                      p.status === 'approved' ? 'bg-blue-100 text-blue-700' :
+                      p.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {p.status === 'paid' ? '支払済' : p.status === 'approved' ? '承認済' : p.status === 'pending' ? '未処理' : '却下'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 flex gap-2">
+                    {p.status === 'pending' && (
+                      <button
+                        onClick={() => handlePayoutAction(p.id, 'approved')}
+                        disabled={actionId === p.id}
+                        className="text-xs px-3 py-1 rounded border border-blue-200 text-blue-600 hover:bg-blue-50 disabled:opacity-50 transition-colors"
+                      >
+                        承認
+                      </button>
+                    )}
+                    {p.status === 'approved' && (
+                      <button
+                        onClick={() => handlePayoutAction(p.id, 'paid')}
+                        disabled={actionId === p.id}
+                        className="text-xs px-3 py-1 rounded border border-emerald-200 text-emerald-600 hover:bg-emerald-50 disabled:opacity-50 transition-colors"
+                      >
+                        支払済
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {payouts.length === 0 && (
+                <tr><td colSpan={5} className="px-4 py-8 text-center text-muted">報酬データがありません</td></tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

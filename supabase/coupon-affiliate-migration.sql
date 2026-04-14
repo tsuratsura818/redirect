@@ -104,16 +104,24 @@ ALTER TABLE user_subscriptions
   ADD COLUMN IF NOT EXISTS affiliate_user_id UUID REFERENCES auth.users(id);
 
 -- ============================================
--- 6. Updated_at triggers
+-- 6. Updated_at function + triggers
 -- ============================================
-CREATE TRIGGER IF NOT EXISTS trg_coupons_updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_coupons_updated_at
   BEFORE UPDATE ON coupons FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER IF NOT EXISTS trg_affiliate_applications_updated_at
+CREATE OR REPLACE TRIGGER trg_affiliate_applications_updated_at
   BEFORE UPDATE ON affiliate_applications FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER IF NOT EXISTS trg_affiliate_payouts_updated_at
+CREATE OR REPLACE TRIGGER trg_affiliate_payouts_updated_at
   BEFORE UPDATE ON affiliate_payouts FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();

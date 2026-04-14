@@ -1147,7 +1147,7 @@ function CouponsSection() {
 // アフィリエイト管理セクション
 // ============================================
 function AffiliatesSection({ currentUserId }: { currentUserId: string }) {
-  const [apps, setApps] = useState<{ id: string; user_id: string; email?: string; status: string; community_name: string | null; applied_at: string }[]>([])
+  const [apps, setApps] = useState<{ id: string; user_id: string; email?: string; status: string; community_name: string | null; applied_at: string; has_bank_account?: boolean }[]>([])
   const [payouts, setPayouts] = useState<{ id: string; affiliate_user_id: string; amount: number; active_referrals: number; period_start: string; status: string }[]>([])
   const [loading, setLoading] = useState(true)
   const [actionId, setActionId] = useState<string | null>(null)
@@ -1214,6 +1214,7 @@ function AffiliatesSection({ currentUserId }: { currentUserId: string }) {
                 <th className="text-left px-4 py-3 font-semibold text-foreground">ユーザー</th>
                 <th className="text-left px-4 py-3 font-semibold text-foreground">コミュニティ</th>
                 <th className="text-left px-4 py-3 font-semibold text-foreground">申請日</th>
+                <th className="text-left px-4 py-3 font-semibold text-foreground">口座</th>
                 <th className="text-left px-4 py-3 font-semibold text-foreground">ステータス</th>
                 <th className="text-left px-4 py-3 font-semibold text-foreground">操作</th>
               </tr>
@@ -1224,6 +1225,13 @@ function AffiliatesSection({ currentUserId }: { currentUserId: string }) {
                   <td className="px-4 py-3 text-xs font-mono">{a.email || a.user_id.slice(0, 8)}</td>
                   <td className="px-4 py-3">{a.community_name || '-'}</td>
                   <td className="px-4 py-3 text-xs text-muted">{new Date(a.applied_at).toLocaleDateString('ja-JP')}</td>
+                  <td className="px-4 py-3">
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                      a.has_bank_account ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      {a.has_bank_account ? '登録済' : '未登録'}
+                    </span>
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`text-xs font-bold px-2 py-1 rounded-full ${
                       a.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
@@ -1256,7 +1264,7 @@ function AffiliatesSection({ currentUserId }: { currentUserId: string }) {
                 </tr>
               ))}
               {apps.length === 0 && (
-                <tr><td colSpan={5} className="px-4 py-8 text-center text-muted">申請がありません</td></tr>
+                <tr><td colSpan={6} className="px-4 py-8 text-center text-muted">申請がありません</td></tr>
               )}
             </tbody>
           </table>
@@ -1283,6 +1291,7 @@ function AffiliatesSection({ currentUserId }: { currentUserId: string }) {
                 <th className="text-left px-4 py-3 font-semibold text-foreground">紹介数</th>
                 <th className="text-left px-4 py-3 font-semibold text-foreground">報酬</th>
                 <th className="text-left px-4 py-3 font-semibold text-foreground">ステータス</th>
+                <th className="text-left px-4 py-3 font-semibold text-foreground">明細書</th>
                 <th className="text-left px-4 py-3 font-semibold text-foreground">操作</th>
               </tr>
             </thead>
@@ -1301,6 +1310,18 @@ function AffiliatesSection({ currentUserId }: { currentUserId: string }) {
                     }`}>
                       {p.status === 'paid' ? '支払済' : p.status === 'approved' ? '承認済' : p.status === 'pending' ? '未処理' : '却下'}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {(p.status === 'approved' || p.status === 'paid') && (
+                      <a
+                        href={`/api/admin/payouts/${p.id}/statement`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs px-3 py-1 rounded border border-violet-200 text-violet-600 hover:bg-violet-50 transition-colors inline-block"
+                      >
+                        明細書
+                      </a>
+                    )}
                   </td>
                   <td className="px-4 py-3 flex gap-2">
                     {p.status === 'pending' && (
@@ -1325,7 +1346,7 @@ function AffiliatesSection({ currentUserId }: { currentUserId: string }) {
                 </tr>
               ))}
               {payouts.length === 0 && (
-                <tr><td colSpan={5} className="px-4 py-8 text-center text-muted">報酬データがありません</td></tr>
+                <tr><td colSpan={6} className="px-4 py-8 text-center text-muted">報酬データがありません</td></tr>
               )}
             </tbody>
           </table>

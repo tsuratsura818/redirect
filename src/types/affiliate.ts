@@ -58,3 +58,13 @@ export interface AffiliateStats {
   couponCode: string
   monthlyEarnings: { month: string; amount: number; referrals: number }[]
 }
+
+export interface BankAccount {
+  id: string
+  user_id: string
+  bank_name: string
+  branch_name: string
+  account_type: '普通' | '当座'
+  account_number: string
+  account_holder: string
+}

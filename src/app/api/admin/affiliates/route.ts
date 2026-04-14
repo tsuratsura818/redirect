@@ -37,10 +37,19 @@ export async function GET() {
 
     const profileMap = new Map((profiles || []).map((p) => [p.id, p]))
 
+    // 振込先口座登録状況を取得
+    const { data: bankAccounts } = await admin
+      .from('affiliate_bank_accounts')
+      .select('user_id')
+      .in('user_id', userIds)
+
+    const bankAccountSet = new Set((bankAccounts || []).map((b) => b.user_id))
+
     const result = (applications || []).map((app) => ({
       ...app,
       email: emailMap.get(app.user_id) || '',
       display_name: profileMap.get(app.user_id)?.display_name || null,
+      has_bank_account: bankAccountSet.has(app.user_id),
     }))
 
     return NextResponse.json(result)

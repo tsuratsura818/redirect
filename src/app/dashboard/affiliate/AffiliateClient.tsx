@@ -1,11 +1,27 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { AffiliateApplication, Coupon, AffiliateStats, AffiliatePayout } from '@/types/affiliate'
+import type { AffiliateApplication, Coupon, AffiliateStats, AffiliatePayout, BankAccount } from '@/types/affiliate'
 
 type StatusData = {
   application: AffiliateApplication | null
   coupon: Coupon | null
+}
+
+interface BankForm {
+  bankName: string
+  branchName: string
+  accountType: '普通' | '当座'
+  accountNumber: string
+  accountHolder: string
+}
+
+const initialBankForm: BankForm = {
+  bankName: '',
+  branchName: '',
+  accountType: '普通',
+  accountNumber: '',
+  accountHolder: '',
 }
 
 export default function AffiliateClient() {
@@ -24,6 +40,13 @@ export default function AffiliateClient() {
   // コピー通知
   const [copiedField, setCopiedField] = useState<string | null>(null)
 
+  // 振込先情報
+  const [bankAccount, setBankAccount] = useState<BankAccount | null>(null)
+  const [bankForm, setBankForm] = useState<BankForm>(initialBankForm)
+  const [bankEditing, setBankEditing] = useState(false)
+  const [bankSaving, setBankSaving] = useState(false)
+  const [bankError, setBankError] = useState('')
+
   const fetchStatus = useCallback(async () => {
     try {
       const res = await fetch('/api/affiliate/status')
@@ -31,14 +54,29 @@ export default function AffiliateClient() {
         const data: StatusData = await res.json()
         setStatusData(data)
 
-        // 承認済みの場合はstatsも取得
+        // 承認済みの場合はstatsと振込先情報も取得
         if (data.application?.status === 'approved') {
-          const statsRes = await fetch('/api/affiliate/stats')
+          const [statsRes, bankRes] = await Promise.all([
+            fetch('/api/affiliate/stats'),
+            fetch('/api/affiliate/bank-account'),
+          ])
           if (statsRes.ok) {
             const statsData: AffiliateStats & { payouts?: AffiliatePayout[] } = await statsRes.json()
             setStats(statsData)
           }
-          // payoutsは /api/affiliate/stats 内の monthlyEarnings から復元
+          if (bankRes.ok) {
+            const bankData: BankAccount | null = await bankRes.json()
+            setBankAccount(bankData)
+            if (bankData) {
+              setBankForm({
+                bankName: bankData.bank_name,
+                branchName: bankData.branch_name,
+                accountType: bankData.account_type,
+                accountNumber: bankData.account_number,
+                accountHolder: bankData.account_holder,
+              })
+            }
+          }
         }
       }
     } catch {
@@ -90,6 +128,33 @@ export default function AffiliateClient() {
       setTimeout(() => setCopiedField(null), 2000)
     } catch {
       // fallback
+    }
+  }
+
+  const handleBankSave = async () => {
+    setBankError('')
+    if (!bankForm.bankName.trim() || !bankForm.branchName.trim() || !bankForm.accountNumber.trim() || !bankForm.accountHolder.trim()) {
+      setBankError('全ての項目を入力してください')
+      return
+    }
+    setBankSaving(true)
+    try {
+      const res = await fetch('/api/affiliate/bank-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bankForm),
+      })
+      const result = await res.json()
+      if (!res.ok) {
+        setBankError(result.error || '保存に失敗しました')
+        return
+      }
+      setBankAccount(result as BankAccount)
+      setBankEditing(false)
+    } catch {
+      setBankError('保存に失敗しました')
+    } finally {
+      setBankSaving(false)
     }
   }
 
@@ -331,6 +396,143 @@ export default function AffiliateClient() {
           </div>
         ) : (
           <p className="text-muted text-center py-8">まだ報酬履歴はありません</p>
+        )}
+      </div>
+
+      {/* 振込先情報 */}
+      <div className="bg-card rounded-xl border border-border p-6">
+        <h2 className="text-lg font-semibold text-foreground mb-4">振込先情報</h2>
+
+        {bankError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {bankError}
+          </div>
+        )}
+
+        {bankAccount && !bankEditing ? (
+          // 登録済み表示
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-muted">銀行名</span>
+                <p className="font-medium text-foreground">{bankAccount.bank_name}</p>
+              </div>
+              <div>
+                <span className="text-muted">支店名</span>
+                <p className="font-medium text-foreground">{bankAccount.branch_name}</p>
+              </div>
+              <div>
+                <span className="text-muted">口座種別</span>
+                <p className="font-medium text-foreground">{bankAccount.account_type}</p>
+              </div>
+              <div>
+                <span className="text-muted">口座番号</span>
+                <p className="font-medium text-foreground">{bankAccount.account_number}</p>
+              </div>
+              <div className="col-span-2">
+                <span className="text-muted">口座名義</span>
+                <p className="font-medium text-foreground">{bankAccount.account_holder}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setBankEditing(true)}
+              className="mt-2 text-sm text-primary hover:underline"
+            >
+              編集
+            </button>
+          </div>
+        ) : (
+          // フォーム表示
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                銀行名 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={bankForm.bankName}
+                onChange={(e) => setBankForm({ ...bankForm, bankName: e.target.value })}
+                placeholder="例: 三菱UFJ銀行"
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                支店名 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={bankForm.branchName}
+                onChange={(e) => setBankForm({ ...bankForm, branchName: e.target.value })}
+                placeholder="例: 渋谷支店"
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                口座種別 <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={bankForm.accountType}
+                onChange={(e) => setBankForm({ ...bankForm, accountType: e.target.value as '普通' | '当座' })}
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition"
+              >
+                <option value="普通">普通</option>
+                <option value="当座">当座</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                口座番号 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={bankForm.accountNumber}
+                onChange={(e) => setBankForm({ ...bankForm, accountNumber: e.target.value })}
+                placeholder="例: 1234567"
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                口座名義（カタカナ） <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={bankForm.accountHolder}
+                onChange={(e) => setBankForm({ ...bankForm, accountHolder: e.target.value })}
+                placeholder="例: ニシカワ タロウ"
+                className="w-full px-4 py-2.5 rounded-lg border border-border bg-card text-foreground focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none transition"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handleBankSave}
+                disabled={bankSaving}
+                className="px-6 py-2.5 bg-primary text-white font-medium rounded-lg hover:opacity-90 transition disabled:opacity-50"
+              >
+                {bankSaving ? '保存中...' : bankAccount ? '更新する' : '登録する'}
+              </button>
+              {bankAccount && (
+                <button
+                  onClick={() => {
+                    setBankEditing(false)
+                    setBankError('')
+                    setBankForm({
+                      bankName: bankAccount.bank_name,
+                      branchName: bankAccount.branch_name,
+                      accountType: bankAccount.account_type,
+                      accountNumber: bankAccount.account_number,
+                      accountHolder: bankAccount.account_holder,
+                    })
+                  }}
+                  className="px-6 py-2.5 border border-border text-foreground font-medium rounded-lg hover:bg-gray-50 transition"
+                >
+                  キャンセル
+                </button>
+              )}
+            </div>
+          </div>
         )}
       </div>
     </div>

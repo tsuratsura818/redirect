@@ -16,7 +16,7 @@ export async function GET(
 
   const { data: qrCode } = await supabase
     .from('qr_codes')
-    .select('slug')
+    .select('slug, qr_color_dark, qr_color_light')
     .eq('id', id)
     .eq('user_id', user.id)
     .single()
@@ -31,11 +31,19 @@ export async function GET(
   const baseUrl = searchParams.get('baseUrl') || process.env.NEXT_PUBLIC_BASE_URL || request.headers.get('origin') || ''
   const redirectUrl = `${baseUrl}/r/${qrCode.slug}`
 
+  // 色設定: query param 優先、未指定なら DB の値、それでもなければデフォルト
+  const isHex = (v: string) => /^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(v)
+  const rawDark = searchParams.get('color') || qrCode.qr_color_dark || '#000000'
+  const rawLight = searchParams.get('bg') || qrCode.qr_color_light || '#ffffff'
+  const dark = isHex(rawDark) ? rawDark : '#000000'
+  const light = isHex(rawLight) ? rawLight : '#ffffff'
+
   if (format === 'svg') {
     const svg = await QRCode.toString(redirectUrl, {
       type: 'svg',
       width: size,
       margin: 2,
+      color: { dark, light },
     })
     return new NextResponse(svg, {
       headers: {
@@ -49,6 +57,7 @@ export async function GET(
     width: size,
     margin: 2,
     type: 'png',
+    color: { dark, light },
   })
 
   return new NextResponse(new Uint8Array(buffer), {

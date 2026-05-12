@@ -56,8 +56,12 @@ export async function PATCH(
   const updateData: Record<string, unknown> = {}
   const changes: Record<string, { old: unknown; new: unknown }> = {}
 
-  for (const key of ['name', 'default_url', 'description', 'is_active', 'expires_at', 'fallback_url'] as const) {
+  for (const key of ['name', 'default_url', 'description', 'is_active', 'expires_at', 'fallback_url', 'qr_color_dark', 'qr_color_light'] as const) {
     if (body[key] !== undefined && body[key] !== existing[key]) {
+      // 色フィールドは HEX 形式検証
+      if ((key === 'qr_color_dark' || key === 'qr_color_light') && typeof body[key] === 'string') {
+        if (!/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/.test(body[key])) continue
+      }
       updateData[key] = body[key]
       changes[key] = { old: existing[key], new: body[key] }
     }

@@ -29,6 +29,9 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
   const [editActive, setEditActive] = useState(qr.is_active)
   const [editExpires, setEditExpires] = useState(qr.expires_at ? qr.expires_at.split('T')[0] : '')
   const [editFallback, setEditFallback] = useState(qr.fallback_url || '')
+  const [editColorDark, setEditColorDark] = useState(qr.qr_color_dark || '#000000')
+  const [editColorLight, setEditColorLight] = useState(qr.qr_color_light || '#ffffff')
+  const [colorSaving, setColorSaving] = useState(false)
 
   const loadRules = useCallback(async () => {
     const res = await fetch(`/api/qr/${qr.id}/rules`)
@@ -82,6 +85,27 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
     setLoading(false)
   }
 
+  const handleSaveColor = async () => {
+    setColorSaving(true)
+    const res = await fetch(`/api/qr/${qr.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ qr_color_dark: editColorDark, qr_color_light: editColorLight }),
+    })
+    if (res.ok) {
+      const data = await res.json()
+      setQr(data)
+      showMessage('QRカラーを保存しました')
+      loadHistory()
+    }
+    setColorSaving(false)
+  }
+
+  const handleResetColor = () => {
+    setEditColorDark('#000000')
+    setEditColorLight('#ffffff')
+  }
+
   const handleDelete = async () => {
     if (!confirm('この設定を削除しますか？この操作は元に戻せません。')) return
     await fetch(`/api/qr/${qr.id}`, { method: 'DELETE' })
@@ -90,6 +114,17 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
   const redirectUrl = `${baseUrl}/r/${qr.slug}`
+  const colorQuery = `&color=${encodeURIComponent(editColorDark)}&bg=${encodeURIComponent(editColorLight)}`
+  const colorDirty = editColorDark !== qr.qr_color_dark || editColorLight !== qr.qr_color_light
+
+  const COLOR_PRESETS: { label: string; dark: string; light: string }[] = [
+    { label: 'モノクロ',   dark: '#000000', light: '#ffffff' },
+    { label: 'ネイビー',   dark: '#1e40af', light: '#ffffff' },
+    { label: 'グリーン',   dark: '#15803d', light: '#ffffff' },
+    { label: 'パープル',   dark: '#7c3aed', light: '#ffffff' },
+    { label: 'レッド',     dark: '#dc2626', light: '#ffffff' },
+    { label: 'ダーク反転', dark: '#ffffff', light: '#0f172a' },
+  ]
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'overview', label: '概要' },
@@ -116,14 +151,14 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
         </div>
         <div className="flex gap-2 shrink-0">
           <a
-            href={`/api/qr/${qr.id}/qrcode?format=png&size=400&baseUrl=${encodeURIComponent(baseUrl)}`}
+            href={`/api/qr/${qr.id}/qrcode?format=png&size=400&baseUrl=${encodeURIComponent(baseUrl)}${colorQuery}`}
             download={`qr-${qr.slug}.png`}
             className="px-4 py-2 border border-border rounded-lg text-sm font-medium text-muted hover:bg-gray-50 transition-colors"
           >
             PNG
           </a>
           <a
-            href={`/api/qr/${qr.id}/qrcode?format=svg&size=400&baseUrl=${encodeURIComponent(baseUrl)}`}
+            href={`/api/qr/${qr.id}/qrcode?format=svg&size=400&baseUrl=${encodeURIComponent(baseUrl)}${colorQuery}`}
             download={`qr-${qr.slug}.svg`}
             className="px-4 py-2 border border-border rounded-lg text-sm font-medium text-muted hover:bg-gray-50 transition-colors"
           >
@@ -134,10 +169,10 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
 
       {/* QRコードプレビュー & NFC URL */}
       <div className="bg-card rounded-xl border border-border p-4 sm:p-6 mb-6 flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-8">
-        <div className="bg-white p-4 rounded-xl border border-border shrink-0">
+        <div className="p-4 rounded-xl border border-border shrink-0" style={{ backgroundColor: editColorLight }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`/api/qr/${qr.id}/qrcode?format=svg&size=200&baseUrl=${encodeURIComponent(baseUrl)}`}
+            src={`/api/qr/${qr.id}/qrcode?format=svg&size=200&baseUrl=${encodeURIComponent(baseUrl)}${colorQuery}`}
             alt="QR Code"
             width={140}
             height={140}
@@ -168,6 +203,96 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* QRカラー設定 */}
+      <div className="bg-card rounded-xl border border-border p-4 sm:p-6 mb-6 no-print">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-bold text-foreground">QRコードの色</h3>
+            <p className="text-xs text-muted mt-0.5">前景色と背景色を自由に変更できます。プレビュー上部の QR に即反映されます</p>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <button
+              onClick={handleResetColor}
+              className="text-xs px-3 py-1.5 rounded-lg border border-border text-muted hover:bg-gray-50 transition-colors"
+            >
+              リセット
+            </button>
+            <button
+              onClick={handleSaveColor}
+              disabled={!colorDirty || colorSaving}
+              className="text-xs px-4 py-1.5 rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            >
+              {colorSaving ? '保存中...' : colorDirty ? '色を保存' : '保存済み'}
+            </button>
+          </div>
+        </div>
+
+        {/* プリセット */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          {COLOR_PRESETS.map(p => {
+            const active = editColorDark.toLowerCase() === p.dark.toLowerCase()
+              && editColorLight.toLowerCase() === p.light.toLowerCase()
+            return (
+              <button
+                key={p.label}
+                onClick={() => { setEditColorDark(p.dark); setEditColorLight(p.light) }}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                  active ? 'border-primary bg-primary/5 text-foreground' : 'border-border text-muted hover:bg-gray-50'
+                }`}
+              >
+                <span className="w-4 h-4 rounded border border-border" style={{ backgroundColor: p.dark }} />
+                <span className="w-4 h-4 rounded border border-border" style={{ backgroundColor: p.light }} />
+                {p.label}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* カスタムカラーピッカー */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-medium text-muted mb-1.5">前景色 (QRパターン)</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={editColorDark.length === 7 ? editColorDark : '#000000'}
+                onChange={e => setEditColorDark(e.target.value)}
+                className="h-10 w-14 rounded-lg border border-border cursor-pointer bg-white"
+              />
+              <input
+                type="text"
+                value={editColorDark}
+                onChange={e => setEditColorDark(e.target.value)}
+                placeholder="#000000"
+                className="flex-1 px-3 py-2 rounded-lg border border-border bg-white text-sm font-mono focus:ring-2 focus:ring-primary outline-none"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-muted mb-1.5">背景色</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={editColorLight.length === 7 ? editColorLight : '#ffffff'}
+                onChange={e => setEditColorLight(e.target.value)}
+                className="h-10 w-14 rounded-lg border border-border cursor-pointer bg-white"
+              />
+              <input
+                type="text"
+                value={editColorLight}
+                onChange={e => setEditColorLight(e.target.value)}
+                placeholder="#ffffff"
+                className="flex-1 px-3 py-2 rounded-lg border border-border bg-white text-sm font-mono focus:ring-2 focus:ring-primary outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-muted mt-3">
+          ※ コントラスト差が小さいと読み取りエラーになりやすいので、前景は濃い色・背景は薄い色をおすすめします
+        </p>
       </div>
 
       {message && (

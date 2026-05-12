@@ -9,6 +9,8 @@ export interface QrCode {
   expires_at: string | null
   fallback_url: string | null
   scan_count: number
+  qr_color_dark: string
+  qr_color_light: string
   created_at: string
   updated_at: string
 }

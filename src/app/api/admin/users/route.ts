@@ -37,14 +37,26 @@ export async function GET() {
       countMap.set(row.user_id, (countMap.get(row.user_id) || 0) + 1)
     }
 
-    const result = users.map(u => ({
-      id: u.id,
-      email: u.email || '',
-      created_at: u.created_at,
-      last_sign_in_at: u.last_sign_in_at || null,
-      profile: profileMap.get(u.id) || null,
-      qr_count: countMap.get(u.id) || 0,
-    }))
+    // サブスクリプション一括取得
+    const { data: subs } = await admin
+      .from('user_subscriptions')
+      .select('user_id, plan, status')
+
+    const subMap = new Map((subs || []).map(s => [s.user_id, s]))
+
+    const result = users.map(u => {
+      const sub = subMap.get(u.id)
+      return {
+        id: u.id,
+        email: u.email || '',
+        created_at: u.created_at,
+        last_sign_in_at: u.last_sign_in_at || null,
+        profile: profileMap.get(u.id) || null,
+        qr_count: countMap.get(u.id) || 0,
+        plan: (sub?.plan as 'free' | 'pro' | 'business') || 'free',
+        subscription_status: (sub?.status as string) || null,
+      }
+    })
 
     return NextResponse.json(result)
   } catch (e) {

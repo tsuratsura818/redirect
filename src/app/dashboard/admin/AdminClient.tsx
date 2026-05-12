@@ -188,6 +188,7 @@ export default function AdminClient({ currentUserId }: { currentUserId: string }
               <tr className="border-b border-border text-left text-muted">
                 <th className="px-4 sm:px-6 py-3 font-medium">ユーザー</th>
                 <th className="px-4 sm:px-6 py-3 font-medium">ロール</th>
+                <th className="px-4 sm:px-6 py-3 font-medium">プラン</th>
                 <th className="px-4 sm:px-6 py-3 font-medium">QR/NFC数</th>
                 <th className="px-4 sm:px-6 py-3 font-medium">登録日</th>
                 <th className="px-4 sm:px-6 py-3 font-medium">最終ログイン</th>
@@ -211,6 +212,17 @@ export default function AdminClient({ currentUserId }: { currentUserId: string }
                         : 'bg-gray-100 text-gray-600'
                     }`}>
                       {u.profile?.role === 'admin' ? '管理者' : 'ユーザー'}
+                    </span>
+                  </td>
+                  <td className="px-4 sm:px-6 py-4">
+                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                      u.plan === 'business'
+                        ? 'bg-purple-100 text-purple-700'
+                        : u.plan === 'pro'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {u.plan === 'business' ? 'Business' : u.plan === 'pro' ? 'Pro' : 'Free'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-foreground">{u.qr_count}</td>

@@ -105,6 +105,8 @@ export interface AdminUser {
   last_sign_in_at: string | null
   profile: UserProfile | null
   qr_count: number
+  plan: 'free' | 'pro' | 'business'
+  subscription_status: string | null
 }
 
 // アナリティクス集計用

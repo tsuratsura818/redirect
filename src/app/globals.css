@@ -154,3 +154,62 @@ body {
 .animate-slide-up {
   animation: slide-up 0.3s ease-out both;
 }
+
+/* ============================================
+   印刷スタイル (レポート出力用)
+   ============================================ */
+@media print {
+  /* デフォルトのページマージン */
+  @page {
+    margin: 14mm 12mm;
+    size: A4;
+  }
+
+  /* 印刷時に隠す要素 */
+  aside,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+
+  /* レイアウトを 1 カラムに展開 */
+  body, main, .min-h-screen, .flex {
+    display: block !important;
+    min-height: 0 !important;
+    background: #ffffff !important;
+  }
+
+  /* メインコンテンツのパディング除去 */
+  main > div {
+    padding: 0 !important;
+  }
+
+  /* カードの影と背景は印刷で潰れるので調整 */
+  .bg-card, .bg-gray-50, .bg-gray-100 {
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  /* ボーダーは細めに */
+  .border, .border-border {
+    border-color: #cbd5e1 !important;
+  }
+
+  /* ページ内改ページ防止 */
+  .print-keep-together {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* 強制改ページ */
+  .print-break-before {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  /* リンクの下線抑制 */
+  a {
+    text-decoration: none !important;
+    color: inherit !important;
+  }
+}

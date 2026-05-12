@@ -51,23 +51,34 @@ export default function AnalyticsTab({ qrId }: { qrId: string }) {
 
   return (
     <div className="space-y-6">
-      {/* 期間選択 */}
-      <div className="flex items-center justify-between">
+      {/* 期間選択 + 印刷 */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="text-lg font-bold text-foreground">
           合計 <span className="text-primary">{data.total.toLocaleString()}</span> スキャン
+          <span className="text-xs text-muted ml-2 font-normal">(直近 {days} 日間)</span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
           {[7, 14, 30, 90].map(d => (
             <button
               key={d}
               onClick={() => setDays(d)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors no-print ${
                 days === d ? 'bg-primary text-white' : 'bg-gray-100 text-muted hover:bg-gray-200'
               }`}
             >
               {d}日間
             </button>
           ))}
+          <button
+            onClick={() => window.print()}
+            className="ml-2 px-3 py-1.5 rounded-lg text-sm font-medium border border-border text-foreground hover:bg-gray-100 transition-colors flex items-center gap-1.5 no-print"
+            title="印刷 / PDF として保存"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            印刷 / PDF
+          </button>
         </div>
       </div>
 

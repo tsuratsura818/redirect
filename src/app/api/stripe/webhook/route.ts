@@ -7,16 +7,16 @@ export async function POST(request: NextRequest) {
   const body = await request.text()
   const sig = request.headers.get('stripe-signature')
 
-  // Webhook Secretが未設定の場合はシグネチャ検証をスキップ（開発用）
+  // 署名検証は必須（未署名イベントは受け付けない）
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
   let event: Stripe.Event
 
+  if (!webhookSecret || !sig) {
+    return NextResponse.json({ error: 'Webhook signature verification required' }, { status: 400 })
+  }
+
   try {
-    if (webhookSecret && sig) {
-      event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
-    } else {
-      event = JSON.parse(body) as Stripe.Event
-    }
+    event = stripe.webhooks.constructEvent(body, sig, webhookSecret)
   } catch {
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 })
   }

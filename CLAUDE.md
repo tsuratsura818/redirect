@@ -1,7 +1,9 @@
-# Redirect Manager (QR / NFC)
+# PivoLink (QR / NFC リダイレクト管理)
+
+> 旧称「Redirect Manager」。フォルダ名 `redirect` は歴史的経緯で残存（本番ドメイン `redirect.tsuratsura.com` と `/r/` ルートも互換維持のため変更しない）。プロジェクト名としては **PivoLink** を使用する。
 
 ## 概要
-QRコード・NFCタグのリダイレクト先を動的に管理するSaaSサービス。
+QRコード・NFCタグのリンク先を動的に管理するSaaS「PivoLink」。
 印刷済みQRコードや設置済みNFCタグの遷移先を後から変更可能にする。
 
 ## 技術スタック

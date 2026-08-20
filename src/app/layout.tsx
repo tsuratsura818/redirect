@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { LanguageProvider } from '@/i18n/LanguageProvider'
+import { SITE_URL } from '@/lib/site'
+import Analytics from '@/components/Analytics'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -26,11 +28,11 @@ export const metadata: Metadata = {
   },
   title: 'Pivolink — QRコード・NFCタグのリダイレクト管理',
   description: 'Pivolink（ピボリンク）は、QRコード・NFCタグのリダイレクト先をいつでも変更できる管理サービス。印刷済みQRや設置済みNFCの遷移先をワンクリックで切替。',
-  metadataBase: new URL('https://redirect.tsuratsura.com'),
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     title: 'Pivolink — QRコード・NFCタグのリダイレクト管理',
     description: 'QRコード・NFCタグのリダイレクト先をいつでも変更。印刷済みQRコードの再発行不要。無料プランあり。',
-    url: 'https://redirect.tsuratsura.com',
+    url: SITE_URL,
     siteName: 'Pivolink',
     type: 'website',
     locale: 'ja_JP',
@@ -59,6 +61,7 @@ export default function RootLayout({
         <LanguageProvider>
           {children}
         </LanguageProvider>
+        <Analytics />
       </body>
     </html>
   )

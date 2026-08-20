@@ -33,12 +33,20 @@ export async function POST(req: NextRequest) {
       period: JpycPeriod;
     };
 
+    // 入力検証
+    if (typeof txHash !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(txHash)) {
+      return NextResponse.json({ error: 'txHash が不正です' }, { status: 400 });
+    }
+    if (!JPYC_PRICING[plan] || !JPYC_PRICING[plan][period]) {
+      return NextResponse.json({ error: 'プラン／期間の指定が不正です' }, { status: 400 });
+    }
+
     // 1. 重複チェック
     const { data: existing } = await supabase
       .from('jpyc_payments')
       .select('id')
       .eq('tx_hash', txHash)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       return NextResponse.json({ error: 'このトランザクションは既に処理済みです' }, { status: 409 });
@@ -118,9 +126,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '決済記録の保存に失敗しました' }, { status: 500 });
     }
 
-    // 7. subscriptions テーブル更新
+    // 7. user_subscriptions テーブル更新
     const { error: updateError } = await supabase
-      .from('subscriptions')
+      .from('user_subscriptions')
       .update({
         payment_method: 'jpyc',
         plan,

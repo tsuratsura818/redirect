@@ -430,6 +430,7 @@ export default function QrDetailClient({ qrCode: initialQr }: Props) {
 // ルール管理
 function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule[]; onUpdate: () => void }) {
   const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [url, setUrl] = useState('')
   const [priority, setPriority] = useState(0)
@@ -438,26 +439,90 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
   const [scheduleEnd, setScheduleEnd] = useState('')
   const [device, setDevice] = useState<'ios' | 'android' | 'desktop'>('ios')
   const [abWeight, setAbWeight] = useState(50)
+  const [switchAt, setSwitchAt] = useState('')
+  const [todStart, setTodStart] = useState('09:00')
+  const [todEnd, setTodEnd] = useState('18:00')
+  const [stepVisit, setStepVisit] = useState(1)
   const [loading, setLoading] = useState(false)
 
-  const handleAdd = async () => {
+  const timeOfDayTotal = rules.filter(r => r.condition_type === 'time_of_day').length
+  const todLimitReached =
+    condType === 'time_of_day' &&
+    rules.filter(r => r.condition_type === 'time_of_day' && r.id !== editingId).length >= 3
+
+  const resetForm = () => {
+    setEditingId(null)
+    setName('')
+    setUrl('')
+    setPriority(0)
+    setCondType('default')
+    setScheduleStart('')
+    setScheduleEnd('')
+    setDevice('ios')
+    setAbWeight(50)
+    setSwitchAt('')
+    setTodStart('09:00')
+    setTodEnd('18:00')
+    setStepVisit(1)
+  }
+
+  const openNewForm = () => {
+    if (showForm && !editingId) {
+      setShowForm(false)
+      return
+    }
+    resetForm()
+    setShowForm(true)
+  }
+
+  const startEdit = (rule: RedirectRule) => {
+    resetForm()
+    setEditingId(rule.id)
+    setName(rule.name)
+    setUrl(rule.destination_url)
+    setPriority(rule.priority)
+    setCondType(rule.condition_type)
+    if (rule.condition_type === 'schedule') {
+      const cv = rule.condition_value as { start_at: string; end_at: string }
+      setScheduleStart(format(new Date(cv.start_at), "yyyy-MM-dd'T'HH:mm"))
+      setScheduleEnd(format(new Date(cv.end_at), "yyyy-MM-dd'T'HH:mm"))
+    } else if (rule.condition_type === 'device') {
+      setDevice((rule.condition_value as { device: 'ios' | 'android' | 'desktop' }).device)
+    } else if (rule.condition_type === 'ab_test') {
+      setAbWeight((rule.condition_value as { weight: number }).weight)
+    } else if (rule.condition_type === 'scheduled_switch') {
+      setSwitchAt(format(new Date((rule.condition_value as { switch_at: string }).switch_at), "yyyy-MM-dd'T'HH:mm"))
+    } else if (rule.condition_type === 'time_of_day') {
+      const cv = rule.condition_value as { start_time: string; end_time: string }
+      setTodStart(cv.start_time)
+      setTodEnd(cv.end_time)
+    } else if (rule.condition_type === 'scan_step') {
+      setStepVisit((rule.condition_value as { visit: number }).visit)
+    }
+    setShowForm(true)
+  }
+
+  const handleSubmit = async () => {
     setLoading(true)
     let condition_value = {}
     if (condType === 'schedule') condition_value = { start_at: new Date(scheduleStart).toISOString(), end_at: new Date(scheduleEnd).toISOString() }
     if (condType === 'device') condition_value = { device }
     if (condType === 'ab_test') condition_value = { weight: abWeight }
+    if (condType === 'scheduled_switch') condition_value = { switch_at: new Date(switchAt).toISOString() }
+    if (condType === 'time_of_day') condition_value = { start_time: todStart, end_time: todEnd }
+    if (condType === 'scan_step') condition_value = { visit: stepVisit }
 
-    await fetch(`/api/qr/${qrId}/rules`, {
-      method: 'POST',
+    const payload = { name, destination_url: url, priority, condition_type: condType, condition_value }
+    const isEdit = editingId !== null
+
+    await fetch(isEdit ? `/api/qr/${qrId}/rules/${editingId}` : `/api/qr/${qrId}/rules`, {
+      method: isEdit ? 'PATCH' : 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, destination_url: url, priority, condition_type: condType, condition_value }),
+      body: JSON.stringify(payload),
     })
 
     setShowForm(false)
-    setName('')
-    setUrl('')
-    setPriority(0)
-    setCondType('default')
+    resetForm()
     setLoading(false)
     onUpdate()
   }
@@ -482,6 +547,9 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
     schedule: 'スケジュール',
     device: 'デバイス',
     ab_test: 'A/Bテスト',
+    scheduled_switch: '予約切替',
+    time_of_day: '時間帯',
+    scan_step: 'ステップ',
   }
 
   const condTypeColor: Record<ConditionType, string> = {
@@ -489,6 +557,9 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
     schedule: 'bg-blue-100 text-blue-700',
     device: 'bg-purple-100 text-purple-700',
     ab_test: 'bg-orange-100 text-orange-700',
+    scheduled_switch: 'bg-teal-100 text-teal-700',
+    time_of_day: 'bg-amber-100 text-amber-700',
+    scan_step: 'bg-pink-100 text-pink-700',
   }
 
   return (
@@ -496,7 +567,7 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-muted">優先度が高いルールから順に評価されます</p>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={openNewForm}
           className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors"
         >
           ルール追加
@@ -505,6 +576,9 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
 
       {showForm && (
         <div className="bg-card rounded-xl border border-border p-4 sm:p-6 mb-4 space-y-4">
+          <div className="font-bold text-foreground text-sm">
+            {editingId ? 'ルールを編集' : '新しいルール'}
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">ルール名</label>
@@ -524,7 +598,10 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
                 className="w-full px-3 py-2 rounded-lg border border-border bg-white focus:ring-2 focus:ring-primary outline-none text-sm"
               >
                 <option value="default">デフォルト</option>
-                <option value="schedule">スケジュール</option>
+                <option value="schedule">スケジュール（期間指定）</option>
+                <option value="scheduled_switch">予約切替（指定日時で変更）</option>
+                <option value="time_of_day">時間帯（毎日・最大3つ）</option>
+                <option value="scan_step">ステップアップ（読み込み回数）</option>
                 <option value="device">デバイス</option>
                 <option value="ab_test">A/Bテスト</option>
               </select>
@@ -596,6 +673,72 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
             </div>
           )}
 
+          {condType === 'scheduled_switch' && (
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">切替日時</label>
+              <input
+                type="datetime-local"
+                value={switchAt}
+                onChange={e => setSwitchAt(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-border bg-white text-sm"
+              />
+              <p className="text-xs text-muted mt-1">この日時を過ぎると、リンク先がこのURLに切り替わります（以降は継続）</p>
+            </div>
+          )}
+
+          {condType === 'time_of_day' && (
+            <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">開始時刻</label>
+                  <input
+                    type="time"
+                    value={todStart}
+                    onChange={e => setTodStart(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">終了時刻</label>
+                  <input
+                    type="time"
+                    value={todEnd}
+                    onChange={e => setTodEnd(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-white text-sm"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-muted mt-1">
+                毎日この時間帯（日本時間）にこのURLへ。終了時刻が開始より前なら日跨ぎ扱い。現在 {timeOfDayTotal}/3 件
+              </p>
+              {todLimitReached && (
+                <p className="text-xs text-danger mt-1">時間帯ルールは3つまでです。既存のものを削除してください。</p>
+              )}
+            </div>
+          )}
+
+          {condType === 'scan_step' && (
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">何回目の読み込み</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min={1}
+                  value={stepVisit}
+                  onChange={e => {
+                    const n = parseInt(e.target.value, 10)
+                    setStepVisit(Number.isNaN(n) || n < 1 ? 1 : n)
+                  }}
+                  className="w-24 px-3 py-2 rounded-lg border border-border bg-white text-sm"
+                />
+                <span className="text-sm text-muted">回目</span>
+              </div>
+              <p className="text-xs text-muted mt-1">
+                1回目・2回目…と回数ごとにルールを作成してください。回数はCookieで端末ごとに判定します。最後のステップを超えた読み込みは、最後のステップのURLが継続表示されます。
+              </p>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">優先度（大きいほど優先）</label>
             <input
@@ -608,14 +751,14 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
 
           <div className="flex gap-2">
             <button
-              onClick={handleAdd}
-              disabled={loading || !name || !url}
+              onClick={handleSubmit}
+              disabled={loading || !name || !url || todLimitReached || (condType === 'scheduled_switch' && !switchAt) || (condType === 'schedule' && (!scheduleStart || !scheduleEnd)) || (condType === 'time_of_day' && (!todStart || !todEnd))}
               className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
             >
-              追加
+              {loading ? '保存中...' : editingId ? '更新' : '追加'}
             </button>
             <button
-              onClick={() => setShowForm(false)}
+              onClick={() => { setShowForm(false); resetForm() }}
               className="px-4 py-2 border border-border rounded-lg text-sm text-muted"
             >
               キャンセル
@@ -644,6 +787,12 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-xs text-muted hidden sm:inline">優先度: {rule.priority}</span>
+                  <button
+                    onClick={() => startEdit(rule)}
+                    className="px-3 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                  >
+                    編集
+                  </button>
                   <button
                     onClick={() => handleToggle(rule)}
                     className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
@@ -680,6 +829,21 @@ function RulesTab({ qrId, rules, onUpdate }: { qrId: string; rules: RedirectRule
                   配分: {(rule.condition_value as { weight: number }).weight}%
                 </div>
               )}
+              {rule.condition_type === 'scheduled_switch' && (
+                <div className="mt-2 text-xs text-muted">
+                  切替日時: {format(new Date((rule.condition_value as { switch_at: string }).switch_at), 'yyyy/MM/dd HH:mm')} 以降
+                </div>
+              )}
+              {rule.condition_type === 'time_of_day' && (
+                <div className="mt-2 text-xs text-muted">
+                  時間帯: {(rule.condition_value as { start_time: string }).start_time} 〜 {(rule.condition_value as { end_time: string }).end_time}（毎日）
+                </div>
+              )}
+              {rule.condition_type === 'scan_step' && (
+                <div className="mt-2 text-xs text-muted">
+                  {(rule.condition_value as { visit: number }).visit}回目の読み込み
+                </div>
+              )}
             </div>
           ))
         )}
@@ -698,8 +862,13 @@ function CushionTab({ qrId, cushion, onUpdate }: { qrId: string; cushion: Cushio
   const [textColor, setTextColor] = useState(cushion?.text_color ?? '#000000')
   const [accentColor, setAccentColor] = useState(cushion?.accent_color ?? '#3b82f6')
   const [seconds, setSeconds] = useState(cushion?.display_seconds ?? 5)
+  const [couponEnabled, setCouponEnabled] = useState(cushion?.coupon_enabled ?? false)
+  const [couponCode, setCouponCode] = useState(cushion?.coupon_code ?? '')
+  const [couponNote, setCouponNote] = useState(cushion?.coupon_note ?? '')
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
+
+  const showCoupon = couponEnabled && couponCode.trim().length > 0
 
   const handleSave = async () => {
     setLoading(true)
@@ -715,6 +884,9 @@ function CushionTab({ qrId, cushion, onUpdate }: { qrId: string; cushion: Cushio
         text_color: textColor,
         accent_color: accentColor,
         display_seconds: seconds,
+        coupon_enabled: couponEnabled,
+        coupon_code: couponCode || null,
+        coupon_note: couponNote || null,
       }),
     })
     setLoading(false)
@@ -757,7 +929,46 @@ function CushionTab({ qrId, cushion, onUpdate }: { qrId: string; cushion: Cushio
             className="w-full px-3 py-2 rounded-lg border border-border bg-white text-sm resize-none"
             placeholder="お知らせやクーポン情報など"
           />
+          <p className="text-xs text-muted mt-1">改行はそのまま表示されます</p>
         </div>
+
+        {/* クーポン表示設定 */}
+        <div className="rounded-lg border border-border p-3 space-y-3">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={couponEnabled}
+              onChange={e => setCouponEnabled(e.target.checked)}
+              className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+            />
+            <span className="text-sm font-medium">クーポンコードを表示する</span>
+          </label>
+          {couponEnabled && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">クーポンコード</label>
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={e => setCouponCode(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-white text-sm font-mono"
+                  placeholder="例: WELCOME10"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">注記（任意）</label>
+                <textarea
+                  value={couponNote}
+                  onChange={e => setCouponNote(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-white text-sm resize-none"
+                  placeholder="有効期限・利用条件など（改行可）"
+                />
+              </div>
+            </>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">ボタンテキスト</label>
@@ -772,12 +983,16 @@ function CushionTab({ qrId, cushion, onUpdate }: { qrId: string; cushion: Cushio
             <label className="block text-sm font-medium text-foreground mb-1">表示秒数</label>
             <input
               type="number"
-              min={1}
-              max={30}
+              min={0}
+              max={60}
               value={seconds}
-              onChange={e => setSeconds(parseInt(e.target.value) || 5)}
+              onChange={e => {
+                const n = parseInt(e.target.value)
+                setSeconds(Number.isNaN(n) ? 0 : n)
+              }}
               className="w-full px-3 py-2 rounded-lg border border-border bg-white text-sm"
             />
+            <p className="text-xs text-muted mt-1">0 で自動遷移しない</p>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-4">
@@ -813,8 +1028,21 @@ function CushionTab({ qrId, cushion, onUpdate }: { qrId: string; cushion: Cushio
         >
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full text-center">
             <h2 className="text-lg font-bold mb-2" style={{ color: textColor }}>{title}</h2>
-            {msg && <p className="text-sm mb-4" style={{ color: textColor, opacity: 0.7 }}>{msg}</p>}
-            <p className="text-sm mb-4" style={{ color: textColor, opacity: 0.5 }}>{seconds}秒後に自動的に移動します</p>
+            {msg && <p className="text-sm mb-4 whitespace-pre-line" style={{ color: textColor, opacity: 0.7 }}>{msg}</p>}
+            {showCoupon && (
+              <div className="my-4">
+                <div className="rounded-xl border-2 border-dashed p-3" style={{ borderColor: accentColor }}>
+                  <p className="text-xs mb-1" style={{ color: textColor, opacity: 0.6 }}>クーポンコード</p>
+                  <p className="text-xl font-bold tracking-wider break-all" style={{ color: accentColor }}>{couponCode}</p>
+                </div>
+                {couponNote && (
+                  <p className="mt-2 text-xs whitespace-pre-line" style={{ color: textColor, opacity: 0.5 }}>{couponNote}</p>
+                )}
+              </div>
+            )}
+            {seconds > 0 && (
+              <p className="text-sm mb-4" style={{ color: textColor, opacity: 0.5 }}>{seconds}秒後に自動的に移動します</p>
+            )}
             <button
               className="w-full py-3 rounded-lg text-white font-medium"
               style={{ backgroundColor: accentColor }}

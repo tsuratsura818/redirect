@@ -35,10 +35,10 @@ export async function getUserJpycPayments(userId: string): Promise<JpycPaymentRe
 export async function getUserSubscription(userId: string) {
   const supabase = createBrowserClient();
   const { data, error } = await supabase
-    .from('subscriptions')
+    .from('user_subscriptions')
     .select('*, payment_method, jpyc_expires_at, jpyc_amount')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
   return data;
@@ -68,7 +68,7 @@ export async function getJpycRevenueSummary(days: number = 30) {
 export async function getPaymentMethodRatio() {
   const supabase = createBrowserClient();
   const { data, error } = await supabase
-    .from('subscriptions')
+    .from('user_subscriptions')
     .select('payment_method')
     .eq('status', 'active');
 

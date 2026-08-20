@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { validateCouponCode } from '@/lib/affiliate'
+import { requireUser } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { userId } = auth
 
     const { code } = await request.json() as { code: string }
     if (!code?.trim()) {
       return NextResponse.json({ error: 'クーポンコードを入力してください' }, { status: 400 })
     }
 
-    const result = await validateCouponCode(code.trim(), user.id)
+    const result = await validateCouponCode(code.trim(), userId)
 
     if (!result.valid) {
       return NextResponse.json({ valid: false, error: result.error }, { status: 400 })

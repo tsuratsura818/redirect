@@ -1,19 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireUser } from '@/lib/auth'
 
 // 通知設定の取得
 export async function GET() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
-    }
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { supabase, userId } = auth
 
     const { data, error } = await supabase
       .from('notification_preferences')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single()
 
     if (error && error.code !== 'PGRST116') {
@@ -36,11 +34,9 @@ export async function GET() {
 // 通知設定の更新
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
-    }
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { supabase, userId } = auth
 
     const body = await request.json()
     const updates: Record<string, boolean> = {}
@@ -58,7 +54,7 @@ export async function PUT(request: NextRequest) {
     const { error } = await supabase
       .from('notification_preferences')
       .upsert(
-        { user_id: user.id, ...updates },
+        { user_id: userId, ...updates },
         { onConflict: 'user_id' }
       )
 

@@ -8,6 +8,7 @@ import { Suspense } from 'react'
 import Logo from '@/components/Logo'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { useLanguage } from '@/i18n/LanguageProvider'
+import { pushEvent } from '@/lib/gtm'
 
 function LoginForm() {
   const router = useRouter()
@@ -34,6 +35,9 @@ function LoginForm() {
         setLoading(false)
         return
       }
+      // 計測（GTM経由でGA4へ）。どのチャネル経由の登録かを見るための起点
+      pushEvent('sign_up', { method: 'email' })
+
       // 新規登録通知（ベストエフォート）
       fetch('/api/notify/signup', {
         method: 'POST',

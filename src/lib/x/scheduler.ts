@@ -127,9 +127,13 @@ export async function autoSchedulePosts(daysAhead: number = 7): Promise<number> 
       if (draftIndex >= drafts.length) break
 
       const [hours, minutes] = time.split(':').map(Number)
-      const scheduledAt = new Date(currentDate)
-      // JST → UTC変換（-9時間）
-      scheduledAt.setHours(hours - 9, minutes, 0, 0)
+      // JST の hours:minutes を UTC instant へ変換（-9時間、サーバーのタイムゾーンに依存しない）
+      const scheduledAt = new Date(Date.UTC(
+        currentDate.getUTCFullYear(),
+        currentDate.getUTCMonth(),
+        currentDate.getUTCDate(),
+        hours - 9, minutes, 0, 0,
+      ))
 
       await supabase
         .from('x_scheduled_posts')

@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireUser } from '@/lib/auth'
+import { jstDateString } from '@/lib/date'
 
 // アカウント全体のアクセス解析サマリー
 export async function GET(request: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
-  }
+  const auth = await requireUser()
+  if (auth.error) return auth.error
+  const { userId } = auth
 
   const { searchParams } = new URL(request.url)
-  const days = Math.max(1, Math.min(365, parseInt(searchParams.get('days') || '30', 10)))
+  const days = Math.max(1, Math.min(365, parseInt(searchParams.get('days') || '30', 10) || 30))
 
   const since = new Date()
   since.setDate(since.getDate() - days)
@@ -21,7 +20,7 @@ export async function GET(request: NextRequest) {
   const { data: qrCodes } = await admin
     .from('qr_codes')
     .select('id, slug, name, default_url, is_active, scan_count, created_at')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
   const codes = qrCodes || []
@@ -51,15 +50,15 @@ export async function GET(request: NextRequest) {
 
   const scanLogs = logs || []
 
-  // 日別集計
+  // 日別集計（JST基準）
   const dailyMap = new Map<string, number>()
   for (let i = 0; i < days; i++) {
     const d = new Date()
     d.setDate(d.getDate() - i)
-    dailyMap.set(d.toISOString().split('T')[0], 0)
+    dailyMap.set(jstDateString(d), 0)
   }
   for (const log of scanLogs) {
-    const date = log.scanned_at.split('T')[0]
+    const date = jstDateString(new Date(log.scanned_at))
     dailyMap.set(date, (dailyMap.get(date) || 0) + 1)
   }
   const daily = Array.from(dailyMap.entries())

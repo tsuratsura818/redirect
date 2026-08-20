@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
 
     // 1. 猶予期間を過ぎたサブスクを期限切れに
     const { data: expired, error: expiredError } = await supabase
-      .from('subscriptions')
+      .from('user_subscriptions')
       .update({ status: 'expired' })
       .eq('payment_method', 'jpyc')
       .eq('status', 'active')
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     warningDate.setDate(warningDate.getDate() + 7);
 
     const { data: expiringSoon, error: warningError } = await supabase
-      .from('subscriptions')
+      .from('user_subscriptions')
       .select('user_id, plan, jpyc_expires_at')
       .eq('payment_method', 'jpyc')
       .eq('status', 'active')

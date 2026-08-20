@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/admin'
+import { requireUser } from '@/lib/auth'
 
 // 月次推定収益単価（ベータ価格・月換算）
 const PLAN_MRR: Record<string, number> = {
@@ -19,11 +19,11 @@ const FIXED_COSTS = {
 
 export async function GET() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { userId } = auth
 
-    await requireAdmin(user.id)
+    await requireAdmin(userId)
 
     const admin = createAdminClient()
 

@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireUser } from '@/lib/auth'
 
 // アフィリエイト申請
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { userId } = auth
 
     const { motivation, communityName, communityUrl } = await request.json() as {
       motivation?: string
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const { data: existing } = await admin
       .from('affiliate_applications')
       .select('id, status')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single()
 
     // 既に承認済みまたは審査中の場合はエラー
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     const { error: insertError } = await admin
       .from('affiliate_applications')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         status: 'pending',
         motivation: motivation || null,
         community_name: communityName || null,

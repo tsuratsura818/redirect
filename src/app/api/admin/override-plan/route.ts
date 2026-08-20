@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/admin'
 import { PLANS } from '@/lib/plans'
 import type { PlanId } from '@/lib/plans'
+import { requireUser } from '@/lib/auth'
 
 // 管理者専用: Stripeを介さず即時プラン切替
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { userId } = auth
 
-    await requireAdmin(user.id)
+    await requireAdmin(userId)
 
     const { plan } = await request.json() as { plan: PlanId }
 
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
         status: 'active',
         cancel_at_period_end: false,
       })
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
 
     return NextResponse.json({ success: true, plan })
   } catch (e) {

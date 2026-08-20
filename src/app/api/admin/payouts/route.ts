@@ -1,17 +1,15 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/admin'
 import { countActiveReferrals, PAYOUT_PER_REFERRAL } from '@/lib/affiliate'
+import { requireUser } from '@/lib/auth'
 
 // 報酬一覧取得
 export async function GET() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-    await requireAdmin(user.id)
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    await requireAdmin(auth.userId)
 
     const admin = createAdminClient()
     const { data: payouts, error } = await admin
@@ -42,11 +40,9 @@ export async function GET() {
 // 当月の報酬計算トリガー
 export async function POST() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-    await requireAdmin(user.id)
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    await requireAdmin(auth.userId)
 
     const result = await calculateMonthlyPayouts()
     return NextResponse.json(result)

@@ -3,15 +3,32 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import { CASE_STUDIES } from '@/lib/cases'
 import Logo from '@/components/Logo'
+import { SITE_URL } from '@/lib/site'
 
 export const metadata: Metadata = {
   title: '活用事例 | Pivolink',
   description: 'Pivolinkの活用事例集。飲食・小売・不動産・イベント・美容・観光・製造・EC・ジム・出版・教育・ホテルなど、12業種での導入事例をご紹介。',
+  alternates: { canonical: `${SITE_URL}/cases` },
+}
+
+// 一覧が12本の記事へのハブであることを機械可読にしておく
+const itemListLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Pivolink 活用事例',
+  numberOfItems: CASE_STUDIES.length,
+  itemListElement: CASE_STUDIES.map((c, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: c.title,
+    url: `${SITE_URL}/cases/${c.slug}`,
+  })),
 }
 
 export default function CasesPage() {
   return (
     <div className="min-h-screen bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
       {/* ヘッダー */}
       <header className="border-b border-border bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">

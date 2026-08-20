@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { pushEvent } from '@/lib/gtm'
 
 export default function NewQrPage() {
   const router = useRouter()
@@ -40,6 +41,8 @@ export default function NewQrPage() {
       setLoading(false)
       return
     }
+
+    pushEvent('qr_create')
 
     router.push(`/dashboard/qr/${data.id}`)
   }

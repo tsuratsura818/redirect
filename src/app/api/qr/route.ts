@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { checkQrLimit } from '@/lib/subscription'
+import { requireUser } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
-  }
+  const auth = await requireUser()
+  if (auth.error) return auth.error
+  const { supabase, userId } = auth
 
   // プラン上限チェック
-  const { allowed, current, max } = await checkQrLimit(user.id)
+  const { allowed, current, max } = await checkQrLimit(userId)
   if (!allowed) {
     return NextResponse.json(
       { error: `リダイレクト数が上限に達しています（${current}/${max}件）。プランをアップグレードしてください。` },
@@ -44,7 +41,7 @@ export async function POST(request: NextRequest) {
   const { data, error } = await supabase
     .from('qr_codes')
     .insert({
-      user_id: user.id,
+      user_id: userId,
       name,
       slug,
       default_url,
@@ -60,7 +57,7 @@ export async function POST(request: NextRequest) {
   // 変更履歴を記録
   await supabase.from('redirect_history').insert({
     qr_code_id: data.id,
-    user_id: user.id,
+    user_id: userId,
     action: 'create',
     changes: { name, slug, default_url },
   })

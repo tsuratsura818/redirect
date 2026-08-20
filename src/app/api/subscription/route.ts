@@ -1,24 +1,24 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { getUserSubscription } from '@/lib/subscription'
 import { PLANS } from '@/lib/plans'
 import { isAdmin } from '@/lib/admin'
+import { requireUser } from '@/lib/auth'
 
 // 現在のサブスクリプション情報を取得
 export async function GET() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { supabase, userId } = auth
 
-    const subscription = await getUserSubscription(user.id)
+    const subscription = await getUserSubscription(userId)
     const plan = PLANS[subscription.plan]
 
     // QRコード使用数
     const { count: qrCount } = await supabase
       .from('qr_codes')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
 
     // 今月のスキャン数
     const now = new Date()
@@ -26,7 +26,7 @@ export async function GET() {
     const { data: userQrs } = await supabase
       .from('qr_codes')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
     const qrIds = (userQrs || []).map(q => q.id)
 
     let scanCount = 0
@@ -39,7 +39,7 @@ export async function GET() {
       scanCount = count || 0
     }
 
-    const adminFlag = await isAdmin(user.id)
+    const adminFlag = await isAdmin(userId)
 
     return NextResponse.json({
       subscription,

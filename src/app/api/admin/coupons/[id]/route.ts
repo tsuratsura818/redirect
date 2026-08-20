@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/admin'
+import { requireUser } from '@/lib/auth'
 
 // クーポン更新（有効/無効切り替え、上限変更）
 export async function PATCH(
@@ -10,11 +10,9 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-    await requireAdmin(user.id)
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    await requireAdmin(auth.userId)
 
     const body = await request.json()
     const updates: Record<string, unknown> = {}
@@ -60,11 +58,9 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-    await requireAdmin(user.id)
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    await requireAdmin(auth.userId)
 
     const admin = createAdminClient()
     const { error } = await admin

@@ -1,23 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireUser, requireQrOwner } from '@/lib/auth'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
-  }
+  const auth = await requireUser()
+  if (auth.error) return auth.error
+  const { supabase } = auth
 
   const { data } = await supabase
     .from('cushion_pages')
     .select('*')
     .eq('qr_code_id', id)
-    .single()
+    .maybeSingle()
 
   return NextResponse.json(data || null)
 }
@@ -27,38 +24,37 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
-  }
+  const auth = await requireUser()
+  if (auth.error) return auth.error
+  const { supabase, userId } = auth
 
   // オーナー確認
-  const { data: qrCode } = await supabase
-    .from('qr_codes')
-    .select('id')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
-
-  if (!qrCode) {
-    return NextResponse.json({ error: '見つかりません' }, { status: 404 })
-  }
+  const ownerError = await requireQrOwner(supabase, id, userId)
+  if (ownerError) return ownerError
 
   const body = await request.json()
+  // 受け付けるカラムをホワイトリスト化（qr_code_id 等の上書きを防止）
+  const allowed = [
+    'is_active', 'title', 'message', 'button_text',
+    'background_color', 'text_color', 'accent_color', 'logo_url',
+    'display_seconds', 'coupon_enabled', 'coupon_code', 'coupon_note',
+  ] as const
+  const fields: Record<string, unknown> = {}
+  for (const key of allowed) {
+    if (body[key] !== undefined) fields[key] = body[key]
+  }
 
   // 既存チェック
   const { data: existing } = await supabase
     .from('cushion_pages')
     .select('id')
     .eq('qr_code_id', id)
-    .single()
+    .maybeSingle()
 
   if (existing) {
     const { data, error } = await supabase
       .from('cushion_pages')
-      .update(body)
+      .update(fields)
       .eq('qr_code_id', id)
       .select()
       .single()
@@ -71,7 +67,7 @@ export async function PUT(
 
   const { data, error } = await supabase
     .from('cushion_pages')
-    .insert({ qr_code_id: id, ...body })
+    .insert({ qr_code_id: id, ...fields })
     .select()
     .single()
 

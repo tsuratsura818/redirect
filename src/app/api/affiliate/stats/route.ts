@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { isApprovedAffiliate, countActiveReferrals, getAffiliateCoupon, PAYOUT_PER_REFERRAL } from '@/lib/affiliate'
 import type { AffiliateStats, AffiliatePayout } from '@/types/affiliate'
+import { requireUser } from '@/lib/auth'
 
 // アフィリエイト統計取得
 export async function GET() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { userId } = auth
 
     // 承認済みアフィリエイトのみ
-    const approved = await isApprovedAffiliate(user.id)
+    const approved = await isApprovedAffiliate(userId)
     if (!approved) {
       return NextResponse.json({ error: 'アフィリエイトとして承認されていません' }, { status: 403 })
     }
@@ -21,12 +21,12 @@ export async function GET() {
 
     // 並列でデータ取得
     const [activeReferrals, coupon, { data: payouts }] = await Promise.all([
-      countActiveReferrals(user.id),
-      getAffiliateCoupon(user.id),
+      countActiveReferrals(userId),
+      getAffiliateCoupon(userId),
       admin
         .from('affiliate_payouts')
         .select('*')
-        .eq('affiliate_user_id', user.id)
+        .eq('affiliate_user_id', userId)
         .order('period_start', { ascending: false }),
     ])
 

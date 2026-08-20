@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { notifyAdmin } from '@/lib/notify'
 
 const categoryLabel: Record<string, string> = {
+  consulting: '企画・導入のご相談',
   general: '一般的なお問い合わせ',
   bug: '不具合の報告',
   feature: '機能リクエスト',
@@ -27,6 +29,23 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       return NextResponse.json({ error: '送信に失敗しました' }, { status: 500 })
+    }
+
+    // DBに入るだけだと誰も気付かない。通知に失敗しても問い合わせ自体は成功扱いにする
+    const notified = await notifyAdmin({
+      subject: `お問い合わせ: ${name}様`,
+      heading: '📩 お問い合わせが届きました',
+      rows: [
+        { label: 'お名前', value: String(name) },
+        { label: 'メール', value: String(email) },
+        { label: '種別', value: categoryLabel[category] || String(category ?? '—') },
+        { label: '本文', value: String(message) },
+      ],
+      linkPath: '/dashboard/admin',
+      linkLabel: '管理画面で確認する',
+    })
+    if (!notified.ok) {
+      console.error('[contact] 管理者通知に失敗:', notified.error)
     }
 
     return NextResponse.json({ success: true })

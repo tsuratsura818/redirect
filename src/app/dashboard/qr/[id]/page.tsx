@@ -15,12 +15,14 @@ export default async function QrDetailPage({
 
   if (!user) return null
 
+  // id が UUID 形式なら id 検索、それ以外は slug 検索（QR/NFCスキャンからの遷移に対応）
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
   const { data: qrCode } = await supabase
     .from('qr_codes')
     .select('*')
-    .eq('id', id)
+    .eq(isUuid ? 'id' : 'slug', id)
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
 
   if (!qrCode) notFound()
 

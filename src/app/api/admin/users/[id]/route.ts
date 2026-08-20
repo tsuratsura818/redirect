@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/admin'
+import { requireUser } from '@/lib/auth'
 
 // ユーザーロール変更・BAN
 export async function PATCH(
@@ -10,14 +10,14 @@ export async function PATCH(
 ) {
   try {
     const { id: targetId } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { userId } = auth
 
-    await requireAdmin(user.id)
+    await requireAdmin(userId)
 
     // 自分自身の権限は変更不可
-    if (targetId === user.id) {
+    if (targetId === userId) {
       return NextResponse.json({ error: '自分自身の権限は変更できません' }, { status: 400 })
     }
 
@@ -85,13 +85,13 @@ export async function DELETE(
 ) {
   try {
     const { id: targetId } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { userId } = auth
 
-    await requireAdmin(user.id)
+    await requireAdmin(userId)
 
-    if (targetId === user.id) {
+    if (targetId === userId) {
       return NextResponse.json({ error: '自分自身は削除できません' }, { status: 400 })
     }
 

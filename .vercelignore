@@ -1,0 +1,6 @@
+# 配下にある別プロジェクト（まわりみち）は PivoLink 本体のデプロイに含めない
+pivolink-mawarimichi
+
+# 作業用スクリプト・資料
+_create-*.mjs
+docs

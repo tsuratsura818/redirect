@@ -1,35 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireUser, requireQrOwner } from '@/lib/auth'
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; ruleId: string }> }
 ) {
   const { id, ruleId } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
-  }
+  const auth = await requireUser()
+  if (auth.error) return auth.error
+  const { supabase, userId } = auth
 
   // オーナー確認
-  const { data: qrCode } = await supabase
-    .from('qr_codes')
-    .select('id')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
-
-  if (!qrCode) {
-    return NextResponse.json({ error: '見つかりません' }, { status: 404 })
-  }
+  const ownerError = await requireQrOwner(supabase, id, userId)
+  if (ownerError) return ownerError
 
   const body = await request.json()
+  const allowed = ['name', 'destination_url', 'priority', 'condition_type', 'condition_value', 'is_active'] as const
+  const updateData: Record<string, unknown> = {}
+  for (const key of allowed) {
+    if (body[key] !== undefined) updateData[key] = body[key]
+  }
 
   const { data, error } = await supabase
     .from('redirect_rules')
-    .update(body)
+    .update(updateData)
     .eq('id', ruleId)
     .eq('qr_code_id', id)
     .select()
@@ -42,7 +36,7 @@ export async function PATCH(
   // 変更履歴
   await supabase.from('redirect_history').insert({
     qr_code_id: id,
-    user_id: user.id,
+    user_id: userId,
     action: 'update',
     changes: { rule_id: ruleId, ...body },
   })
@@ -55,12 +49,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string; ruleId: string }> }
 ) {
   const { id, ruleId } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const auth = await requireUser()
+  if (auth.error) return auth.error
+  const { supabase, userId } = auth
 
-  if (!user) {
-    return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
-  }
+  // オーナー確認
+  const ownerError = await requireQrOwner(supabase, id, userId)
+  if (ownerError) return ownerError
 
   const { error } = await supabase
     .from('redirect_rules')
@@ -74,7 +69,7 @@ export async function DELETE(
 
   await supabase.from('redirect_history').insert({
     qr_code_id: id,
-    user_id: user.id,
+    user_id: userId,
     action: 'delete',
     changes: { rule_id: ruleId },
   })

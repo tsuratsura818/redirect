@@ -29,7 +29,7 @@ export default function LinkSelector({ onSelect }: LinkSelectorProps) {
 
         const { data, error } = await supabase
           .from('qr_codes')
-          .select('id, slug, label, redirect_url')
+          .select('id, slug, name, default_url')
           .eq('user_id', user.id)
           .eq('is_active', true)
           .order('created_at', { ascending: false })
@@ -41,8 +41,8 @@ export default function LinkSelector({ onSelect }: LinkSelectorProps) {
             data.map((d) => ({
               id: d.id,
               slug: d.slug,
-              label: d.label || d.slug,
-              redirectUrl: d.redirect_url,
+              label: d.name || d.slug,
+              redirectUrl: d.default_url,
             }))
           )
         }

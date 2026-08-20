@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/admin'
 import { stripe } from '@/lib/stripe'
 import crypto from 'crypto'
+import { requireUser } from '@/lib/auth'
 
 // アフィリエイト申請の承認/却下
 export async function PATCH(
@@ -12,11 +12,11 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { userId } = auth
 
-    await requireAdmin(user.id)
+    await requireAdmin(userId)
 
     const { status, rejectionReason } = await request.json() as {
       status: 'approved' | 'rejected'
@@ -77,7 +77,7 @@ export async function PATCH(
       .update({
         status,
         reviewed_at: new Date().toISOString(),
-        reviewed_by: user.id,
+        reviewed_by: userId,
         rejection_reason: status === 'rejected' ? (rejectionReason || null) : null,
       })
       .eq('id', id)

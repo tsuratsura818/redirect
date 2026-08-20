@@ -1,25 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { notifyUser } from '@/lib/firebase-admin'
+import { requireUser } from '@/lib/auth'
 
 // 手動プッシュ通知送信（管理者用 or 内部呼び出し用）
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
-    }
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { supabase, userId } = auth
 
-    const { userId, title, body, data } = await request.json()
+    const { userId: bodyUserId, title, body, data } = await request.json()
 
     // 他ユーザーへの通知は管理者のみ許可
-    const targetUserId = typeof userId === 'string' && userId.length > 0 ? userId : user.id
-    if (targetUserId !== user.id) {
+    const targetUserId = typeof bodyUserId === 'string' && bodyUserId.length > 0 ? bodyUserId : userId
+    if (targetUserId !== userId) {
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('role')
-        .eq('id', user.id)
+        .eq('id', userId)
         .single()
       if (!profile || profile.role !== 'admin') {
         return NextResponse.json({ error: '権限がありません' }, { status: 403 })

@@ -25,6 +25,9 @@ const nextConfig: NextConfig = {
   ],
   // 本番ビルドの最適化
   poweredByHeader: false,
+  // Shopify App Proxy は末尾スラッシュ付きでリクエストするため、
+  // 308 リダイレクト（/path/ → /path）を無効化してハンドラに直接届かせる
+  skipTrailingSlashRedirect: true,
 };
 
 export default nextConfig;

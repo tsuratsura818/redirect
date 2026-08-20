@@ -40,11 +40,17 @@ export async function GET(
   const userAgent = request.headers.get('user-agent') || ''
   const deviceType = detectDeviceType(userAgent)
 
+  // 読み込み回数（ステップアップ用）— Cookieで端末ごとにカウント
+  const stepCookieName = `qrstep_${slug}`
+  const prevCount = Number.parseInt(request.cookies.get(stepCookieName)?.value || '0', 10)
+  const scanCount = (Number.isNaN(prevCount) ? 0 : prevCount) + 1
+
   // リダイレクト先を決定
   const { url: destinationUrl, ruleId } = resolveRedirectUrl(
     (rules || []) as RedirectRule[],
     qrCode.default_url,
-    deviceType
+    deviceType,
+    scanCount
   )
 
   // クッションページチェック
@@ -65,13 +71,23 @@ export async function GET(
     referer: request.headers.get('referer'),
   }).catch(() => {})
 
+  // 読み込み回数Cookieをレスポンスにセット（端末ごと・1年保持）
+  const withStepCookie = (res: NextResponse) => {
+    res.cookies.set(stepCookieName, String(scanCount), {
+      maxAge: 60 * 60 * 24 * 365,
+      path: '/',
+      sameSite: 'lax',
+    })
+    return res
+  }
+
   // クッションページがあれば表示
   if (cushion && (cushion as CushionPage).is_active) {
     const cushionUrl = new URL(`/r/${slug}/cushion`, request.url)
     cushionUrl.searchParams.set('dest', destinationUrl)
-    return NextResponse.redirect(cushionUrl)
+    return withStepCookie(NextResponse.redirect(cushionUrl))
   }
 
   // 直接リダイレクト
-  return NextResponse.redirect(destinationUrl)
+  return withStepCookie(NextResponse.redirect(destinationUrl))
 }

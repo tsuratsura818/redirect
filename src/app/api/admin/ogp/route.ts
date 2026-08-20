@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/admin'
+import { requireUser } from '@/lib/auth'
 
 const BUCKET = 'assets'
 const OGP_PATH = 'ogp/main'
@@ -10,10 +10,9 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 // 現在のOGP画像URL取得
 export async function GET() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    await requireAdmin(user.id)
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    await requireAdmin(auth.userId)
 
     const admin = createAdminClient()
     const { data } = admin.storage.from(BUCKET).getPublicUrl(OGP_PATH)
@@ -36,10 +35,9 @@ export async function GET() {
 // OGP画像アップロード
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    await requireAdmin(user.id)
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    await requireAdmin(auth.userId)
 
     const formData = await request.formData()
     const file = formData.get('file') as File | null
@@ -74,10 +72,9 @@ export async function POST(request: NextRequest) {
 // OGP画像削除（動的生成に戻す）
 export async function DELETE() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    await requireAdmin(user.id)
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    await requireAdmin(auth.userId)
 
     const admin = createAdminClient()
     await admin.storage.from(BUCKET).remove([OGP_PATH])

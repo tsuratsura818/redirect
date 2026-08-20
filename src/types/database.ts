@@ -11,11 +11,19 @@ export interface QrCode {
   scan_count: number
   qr_color_dark: string
   qr_color_light: string
+  sort_order: number
   created_at: string
   updated_at: string
 }
 
-export type ConditionType = 'default' | 'schedule' | 'device' | 'ab_test'
+export type ConditionType =
+  | 'default'
+  | 'schedule'
+  | 'device'
+  | 'ab_test'
+  | 'scheduled_switch'
+  | 'time_of_day'
+  | 'scan_step'
 
 export interface ScheduleCondition {
   start_at: string
@@ -30,7 +38,30 @@ export interface AbTestCondition {
   weight: number
 }
 
-export type ConditionValue = ScheduleCondition | DeviceCondition | AbTestCondition | Record<string, never>
+// 予約切替: 指定日時(switch_at)以降、そのURLへ恒久的に切り替わる
+export interface ScheduledSwitchCondition {
+  switch_at: string
+}
+
+// 時間帯: 毎日 start_time〜end_time(JST, "HH:MM")にそのURLへ。end<startで日跨ぎ
+export interface TimeOfDayCondition {
+  start_time: string
+  end_time: string
+}
+
+// ステップアップ: N回目の読み込みでそのURLへ。回数はCookieで端末ごとに判定
+export interface ScanStepCondition {
+  visit: number
+}
+
+export type ConditionValue =
+  | ScheduleCondition
+  | DeviceCondition
+  | AbTestCondition
+  | ScheduledSwitchCondition
+  | TimeOfDayCondition
+  | ScanStepCondition
+  | Record<string, never>
 
 export interface RedirectRule {
   id: string
@@ -82,6 +113,9 @@ export interface CushionPage {
   logo_url: string | null
   display_seconds: number
   is_active: boolean
+  coupon_enabled: boolean
+  coupon_code: string | null
+  coupon_note: string | null
   created_at: string
   updated_at: string
 }

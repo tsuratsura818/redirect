@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
 import { getUserSubscription } from '@/lib/subscription'
+import { requireUser } from '@/lib/auth'
 
 // Stripe Customer Portalセッション作成（請求履歴・支払い方法管理）
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { userId } = auth
 
-    const sub = await getUserSubscription(user.id)
+    const sub = await getUserSubscription(userId)
 
     if (!sub.stripe_customer_id) {
       return NextResponse.json({ error: '有料プランに加入していません' }, { status: 400 })

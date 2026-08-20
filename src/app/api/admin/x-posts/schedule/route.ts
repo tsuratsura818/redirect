@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/admin'
 import { autoSchedulePosts } from '@/lib/x/scheduler'
+import { requireUser } from '@/lib/auth'
 
 // 自動スケジューリング（draftをscheduledに一括変換）
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    await requireAdmin(user.id)
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    await requireAdmin(auth.userId)
 
     const body = await request.json().catch(() => ({}))
     const days = body.days ?? 7

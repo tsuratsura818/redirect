@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>自販機キャンペーン企画書</title>
+<meta name="description" content="自販機に貼るQRを動的QRにし、抽選ページへのクッションと、QR発行数に応じた台別・エリア別の計測を担う。抽選そのものは外部サービスを使う前提でまとめた、自販機キャンペーンの企画書。">
+<style>
+@layer reset, tokens, base, layout, components, print;
+
+@layer reset {
+  *, *::before, *::after { box-sizing: border-box; }
+  * { margin: 0; }
+  img, svg { display: block; max-inline-size: 100%; height: auto; }
+}
+
+@layer tokens {
+  :root {
+    color-scheme: light only;
+    --night: #1E2D3D;
+    --gold:  #E5C84B;
+    --paper: #FFFFFF;
+    --ultra: #2B4C8C;
+    --sub:   #6B7785;
+    --line:  rgba(30, 45, 61, 0.14);
+    --line2: rgba(30, 45, 61, 0.28);
+    --tint:  #F4F6F8;
+    --blue-t:#EAF0FA;
+    --alert: #B3402E;
+    --mono: "SF Mono", "Roboto Mono", Consolas, monospace;
+  }
+}
+
+@layer base {
+  body {
+    background: #E9E9E6;
+    color: var(--night);
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN",
+                 "Hiragino Sans", Meiryo, sans-serif;
+    font-feature-settings: "palt" 1;
+    line-height: 1.8;
+    letter-spacing: 0.03em;
+    line-break: strict;
+    overflow-wrap: anywhere;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 { line-height: 1.4; word-break: keep-all; font-weight: 600; letter-spacing: 0.02em; }
+  :focus-visible { outline: 2px solid var(--ultra); outline-offset: 3px; }
+}
+
+@layer layout {
+  .slide {
+    inline-size: 297mm;
+    block-size: 210mm;
+    margin: 0 auto 12px;
+    background: var(--paper);
+    position: relative;
+    padding: 15mm 18mm 11mm;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    scroll-margin-block-start: 3.2rem;
+  }
+  .slide.cover { background: var(--night); color: #fff; justify-content: center; }
+
+  .site-nav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(30, 45, 61, 0.96);
+    backdrop-filter: blur(8px);
+    display: flex; gap: 1rem; justify-content: center;
+    padding: 0.7rem 1rem;
+    overflow-x: auto;
+  }
+  .site-nav a {
+    color: #fff; text-decoration: none;
+    font-family: var(--mono); font-size: 0.58rem;
+    letter-spacing: 0.12em; white-space: nowrap; opacity: 0.6;
+  }
+  .site-nav a:hover, .site-nav a:focus-visible { opacity: 1; color: var(--gold); }
+
+  .slide-footer {
+    margin-block-start: auto;
+    padding-block-start: 0.6rem;
+    border-block-start: 0.3pt solid var(--line);
+    display: flex; justify-content: space-between;
+    font-family: var(--mono); font-size: 0.55rem;
+    color: var(--sub); letter-spacing: 0.1em;
+  }
+  .cover .slide-footer { border-color: rgba(229, 200, 75, 0.25); color: rgba(255,255,255,.5); }
+}
+
+@layer components {
+  .label {
+    font-family: var(--mono); font-size: 0.58rem;
+    letter-spacing: 0.2em; color: var(--gold);
+    margin-block-end: 0.3rem;
+  }
+  .label.dark { color: var(--ultra); }
+  .s-title { font-size: 1.45rem; margin-block-end: 1rem; }
+  .s-lead { font-size: 0.78rem; color: var(--sub); margin-block-start: -0.7rem; margin-block-end: 1rem; }
+
+  .cover-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 3rem; align-items: center; flex: 1; }
+  .cover-copy { font-size: 2.15rem; line-height: 1.45; margin-block: 0.8rem 1.2rem; }
+  .cover-sub { font-size: 0.8rem; color: rgba(255,255,255,.72); }
+  .cover-keys { display: flex; gap: 1.6rem; font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.16em; color: var(--gold); margin-block-start: 1.6rem; flex-wrap: wrap; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.8rem; flex: 1; }
+  .cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; flex: 1; }
+  .col-head { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.16em; color: var(--sub); margin-block-end: 0.6rem; }
+  .item { padding: 0.78rem 0; border-block-start: 0.3pt solid var(--line); font-size: 0.8rem; line-height: 1.62; }
+  .item b { display: block; font-weight: 600; }
+  .item span { color: var(--sub); font-size: 0.73rem; }
+  .item.hit b { color: var(--ultra); }
+  .cols.stretch > div { display: flex; flex-direction: column; }
+  .cols.stretch .item { flex: 1; }
+  .cols.stretch table { flex: none; }
+
+  .flow { display: flex; align-items: stretch; gap: 7px; }
+  .step { flex: 1; background: var(--tint); border: 0.3pt solid var(--line); padding: 0.9rem 0.75rem; display: flex; flex-direction: column; }
+  .step.out { background: #fff; border-style: dashed; border-color: var(--line2); }
+  .step-n { font-family: var(--mono); font-size: 0.55rem; color: var(--ultra); letter-spacing: 0.12em; }
+  .step.out .step-n { color: var(--sub); }
+  .step h3 { font-size: 0.82rem; margin-block: 0.2rem; }
+  .step p { font-size: 0.7rem; color: var(--sub); line-height: 1.62; }
+
+  .chip {
+    display: inline-block; font-family: var(--mono); font-size: 0.5rem;
+    letter-spacing: 0.08em; padding: 1px 5px; border: 0.3pt solid currentColor;
+    margin-block-start: auto; align-self: flex-start;
+  }
+  .chip.pivo { color: var(--ultra); }
+  .chip.ext  { color: #8a5a1f; }
+
+  /* 責任範囲を示す帯 */
+  .band { display: grid; grid-template-columns: 3fr 2fr; gap: 7px; margin-block-start: 7px; }
+  .band > div { font-size: 0.68rem; padding: 0.45rem 0.8rem; text-align: center; letter-spacing: .04em; }
+  .band .b1 { background: var(--blue-t); border: 0.3pt solid var(--ultra); color: var(--ultra); font-weight: 600; }
+  .band .b2 { background: #fff; border: 0.3pt dashed var(--line2); color: var(--sub); }
+
+  /* 役割分担カード */
+  .role { border: 0.3pt solid var(--line); background: var(--tint); padding: 0.9rem 1rem; display: flex; flex-direction: column; }
+  .role.own { border: 1px solid var(--ultra); background: var(--blue-t); }
+  .role.out { background: #fff; border-style: dashed; border-color: var(--line2); }
+  .role-h { display: flex; align-items: center; gap: 0.5rem; margin-block-end: 0.5rem; }
+  .role-h h3 { font-size: 0.86rem; }
+  .role .who { font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.12em; color: var(--sub); }
+  .role ul { list-style: none; padding: 0; font-size: 0.73rem; color: var(--sub); }
+  .role li { padding-block: 0.32rem; border-block-start: 0.3pt solid var(--line); line-height: 1.55; }
+  .role li b { color: var(--night); font-weight: 600; }
+
+  table { border-collapse: collapse; inline-size: 100%; font-size: 0.73rem; }
+  th, td { border-block-end: 0.3pt solid var(--line); padding: 8px 7px; text-align: start; vertical-align: top; line-height: 1.6; }
+  th { font-family: var(--mono); font-size: 0.57rem; letter-spacing: 0.1em; color: var(--sub); font-weight: 400; white-space: nowrap; }
+  td:first-child:not([colspan]) { white-space: nowrap; }
+  td b { color: var(--ultra); }
+  tr.on td { background: var(--blue-t); }
+
+  .alert { border-inline-start: 3px solid var(--alert); background: #FBF0EE; padding: 0.8rem 1rem; font-size: 0.76rem; line-height: 1.7; }
+  .alert b { color: var(--alert); }
+  .info { border-inline-start: 3px solid var(--ultra); background: var(--blue-t); padding: 0.62rem 1rem; font-size: 0.76rem; line-height: 1.7; }
+  .info b { color: var(--ultra); }
+  .note { font-size: 0.68rem; color: var(--sub); line-height: 1.65; }
+
+  .cta-block { background: var(--gold); color: var(--night); padding: 0.7rem 1.1rem; margin-block-start: 8px; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+  .cta-label { font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.14em; }
+  .cta-text { font-size: 0.95rem; font-weight: 600; }
+
+  /* ── 線画アイコン（外部依存なし・印刷でも崩れない） ── */
+  .sprite { position: absolute; inline-size: 0; block-size: 0; overflow: hidden; }
+  symbol * { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .ico { block-size: 58px; inline-size: 100%; display: block; margin-block-end: 0.55rem; color: var(--night); }
+  .ico .g { stroke: var(--ultra); }
+  .ico .gf { fill: var(--ultra); stroke: none; }
+  .step.out .ico, .role.out .ico { color: var(--sub); }
+  .step.out .ico .g, .role.out .ico .g { stroke: var(--sub); }
+  .step.out .ico .gf, .role.out .ico .gf { fill: var(--sub); }
+  .ico-sm { block-size: 30px; inline-size: 34px; flex: none; color: var(--night); }
+  .role.out .ico-sm { color: var(--sub); }
+
+  /* ── 写真ドロップイン枠（assets/images/ に同名で置くと差し替わる） ── */
+  .ph {
+    position: relative; overflow: hidden; background-color: #F0F2F5;
+    background-image: var(--ph); background-size: cover; background-position: center;
+    border: 0.3pt solid var(--line); display: flex; align-items: center; justify-content: center;
+  }
+  .ph .ph-label {
+    font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.08em;
+    color: var(--sub); text-align: center; padding: 0.5rem; line-height: 1.7;
+  }
+  .cover .ph { background-color: rgba(255,255,255,.06); border-color: rgba(229,200,75,.35); }
+  .cover .ph .ph-label { color: rgba(255,255,255,.55); }
+
+  /* ── スマホ画面モック ── */
+  .phone { border: 1.6px solid var(--night); border-radius: 16px; background: #fff; padding: 5px; aspect-ratio: 10 / 17; display: flex; flex-direction: column; }
+  .phone-notch { inline-size: 32%; block-size: 4px; background: var(--night); border-radius: 3px; margin: 1px auto 4px; }
+  .ps { flex: 1; border-radius: 9px; overflow: hidden; display: flex; flex-direction: column; font-size: 0.56rem; line-height: 1.5; }
+  .ps-bar { background: var(--night); color: #fff; font-size: 0.5rem; letter-spacing: .06em; padding: 4px 6px; text-align: center; }
+  .ps-body { flex: 1; padding: 8px 8px 9px; display: flex; flex-direction: column; gap: 6px; background: var(--tint); }
+  .ln { block-size: 3px; background: rgba(30,45,61,.16); border-radius: 2px; }
+  .ln.s { inline-size: 62%; }
+  .ln.m { inline-size: 82%; }
+  .ps-btn { background: var(--gold); color: var(--night); text-align: center; font-weight: 600; font-size: 0.55rem; padding: 5px; border-radius: 4px; margin-block-start: auto; }
+  .ps-h { font-weight: 600; font-size: 0.62rem; line-height: 1.45; }
+  .ps-note { font-size: 0.5rem; color: var(--sub); line-height: 1.5; }
+
+  /* ── 画面遷移イメージ ── */
+  .sflow { display: grid; grid-template-columns: 1fr 54px 1fr 54px 1.15fr; align-items: center; flex: 1; }
+  .sf-arrow { text-align: center; color: var(--ultra); font-family: var(--mono); font-size: 0.95rem; line-height: 1; }
+  .sf-arrow small { display: block; font-size: 0.5rem; letter-spacing: .06em; color: var(--sub); margin-block-start: 4px; }
+  .sf-col { display: flex; flex-direction: column; gap: 0.5rem; }
+  .sf-scan { border: 0.3pt solid var(--line); background: var(--tint); padding: 1.9rem 1rem; text-align: center; }
+  .sf-scan .ico { block-size: 124px; margin-block-end: 0; }
+  .sf-cap { font-size: 0.7rem; line-height: 1.55; }
+  .sf-cap b { display: block; font-size: 0.76rem; }
+  .sf-cap span { color: var(--sub); }
+  .extbox {
+    border: 0.3pt dashed var(--line2); background: #fff; padding: 0.9rem 1rem;
+    display: flex; align-items: center; gap: 0.8rem;
+  }
+  .extbox svg { block-size: 34px; inline-size: 38px; flex: none; color: var(--sub); }
+  .extbox h4 { font-size: 0.86rem; }
+  .extbox .tagx { font-family: var(--mono); font-size: 0.5rem; letter-spacing: .1em; color: var(--sub); }
+  .extbox.b { border-color: #B07A1E; background: #FBF3E2; }
+  .extbox.b svg { color: #8a5a1f; }
+  .sf-switch { display: flex; align-items: center; gap: 0.5rem; padding-inline-start: 0.4rem; font-size: 0.68rem; color: var(--ultra); }
+  .sf-switch em { font-style: normal; font-family: var(--mono); font-size: 0.9rem; }
+  .sflow .phone { inline-size: 176px; margin-inline: auto; }
+  .tl.grow { flex: 1; align-content: space-evenly; }
+  .tl.grow .tl-bar { padding: 0.85rem 0.9rem; }
+  .cols.tight .item { padding: 0.6rem 0; }
+
+  /* ── 活用事例①：5本のQR → 1つの抽選ページ ── */
+  .qrmap { display: grid; grid-template-columns: 200px 96px 1fr; gap: 0 6px; align-items: stretch; }
+  .qrcol { display: flex; flex-direction: column; gap: 6px; }
+  .qrcard { display: flex; align-items: center; gap: 8px; border: 0.3pt solid var(--ultra); background: var(--blue-t); padding: 4px 8px; flex: 1; }
+  .qrcard svg { block-size: 24px; inline-size: 24px; flex: none; color: var(--night); }
+  .qrcard b { font-size: 0.72rem; display: block; line-height: 1.3; }
+  .qrcard code { font-family: var(--mono); font-size: 0.53rem; color: var(--ultra); letter-spacing: 0; }
+  .fan { inline-size: 100%; block-size: 100%; color: var(--ultra); }
+  .fan path { fill: none; stroke: currentColor; stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+  .dest { border: 0.3pt solid var(--line2); background: var(--tint); padding: 0.8rem 1rem; align-self: center; }
+  .dest h4 { font-size: 0.8rem; margin-block-end: 0.2rem; }
+  .dest p { font-size: 0.7rem; color: var(--sub); line-height: 1.6; }
+
+  /* ── サンプル数値の横棒 ── */
+  .bars { display: grid; grid-template-columns: auto 1fr 52px 52px; gap: 4px 10px; align-items: center; font-size: 0.7rem; }
+  .bars .bh { font-family: var(--mono); font-size: 0.53rem; letter-spacing: .08em; color: var(--sub); }
+  .bar { block-size: 10px; background: rgba(43,76,140,.12); }
+  .bar i { display: block; block-size: 100%; background: var(--ultra); }
+  .bar i.warn { background: var(--alert); }
+  .num { text-align: end; font-family: var(--mono); font-size: 0.68rem; }
+
+  /* ── 活用事例②：期間で行き先を切り替える ── */
+  .tl { display: grid; grid-template-columns: 128px 1fr; gap: 6px 10px; align-items: center; }
+  .tl-when { font-family: var(--mono); font-size: 0.58rem; letter-spacing: .06em; color: var(--sub); text-align: end; line-height: 1.5; }
+  .tl-bar { border: 0.3pt solid var(--line2); background: var(--tint); padding: 0.34rem 0.9rem; display: flex; align-items: center; gap: 0.7rem; font-size: 0.73rem; }
+  .tl-bar.a { border-color: var(--ultra); background: var(--blue-t); }
+  .tl-bar.b { border-color: #B07A1E; background: #FBF3E2; }
+  .tl-bar b { white-space: nowrap; }
+  .tl-bar span { color: var(--sub); font-size: 0.68rem; }
+  .tl-bar .to { margin-inline-start: auto; font-family: var(--mono); font-size: 0.56rem; color: var(--sub); white-space: nowrap; }
+  .oneqr { display: flex; align-items: center; gap: 0.8rem; border: 1px solid var(--night); padding: 0.5rem 0.9rem; background: #fff; }
+  .oneqr svg { block-size: 38px; inline-size: 38px; flex: none; }
+  .oneqr b { font-size: 0.78rem; display: block; }
+  .oneqr span { font-size: 0.68rem; color: var(--sub); }
+}
+
+/* ── レスポンシブ: A4固定を解除。スマホで必ず読まれる ── */
+@media (max-width: 1180px) {
+  .slide { inline-size: 100%; block-size: auto; padding: 1.8rem 1.1rem; }
+  .cover-copy { font-size: 1.5rem; }
+  .cover-grid, .cols, .cols3 { grid-template-columns: 1fr; gap: 1.2rem; }
+  .flow { flex-direction: column; }
+  .band { grid-template-columns: 1fr; }
+  .qrmap { grid-template-columns: 1fr; gap: 0.6rem; }
+  .fan { display: none; }
+  .dest { align-self: stretch; }
+  .tl { grid-template-columns: 1fr; gap: 0.2rem 0; }
+  .tl-when { text-align: start; margin-block-start: 0.5rem; }
+  .tl-bar { flex-wrap: wrap; gap: 0.2rem 0.6rem; }
+  .tl-bar .to { margin-inline-start: 0; white-space: normal; }
+  .bars { grid-template-columns: auto 1fr 46px 40px; gap: 4px 6px; font-size: 0.66rem; }
+  .oneqr { align-items: flex-start; }
+  .sflow { grid-template-columns: 1fr; gap: 0.7rem; }
+  .sflow .phone { inline-size: 100%; max-inline-size: 210px; }
+  .sf-arrow { font-size: 0; padding-block: 0.2rem; }
+  .sf-arrow::before { content: "↓"; font-size: 1.1rem; }
+  .sf-arrow small { display: none; }
+  .cover-keys { gap: 0.9rem; font-size: 0.56rem; }
+  .cta-block { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+  table { font-size: 0.66rem; }
+  .chip { margin-block-start: 0.4rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+@layer print {
+  @media print {
+    * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    body { background: none; }
+    .site-nav { display: none; }
+    .slide { margin: 0; break-after: page; inline-size: 297mm; block-size: 210mm; }
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- 線画アイコン定義（外部ファイル・CDNなし。印刷とPDFでもそのまま出る） -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-vending" viewBox="0 0 80 56">
+      <rect x="24" y="4" width="32" height="48" rx="2.5"/>
+      <rect x="28" y="8" width="16" height="21" rx="1"/>
+      <rect class="gf" x="30" y="12" width="3.3" height="13" rx="1.4"/>
+      <rect x="34.9" y="12" width="3.3" height="13" rx="1.4"/>
+      <rect x="39.8" y="12" width="3.3" height="13" rx="1.4"/>
+      <circle cx="50" cy="12" r="1.5"/><circle cx="50" cy="18" r="1.5"/><circle cx="50" cy="24" r="1.5"/>
+      <path d="M47 32h6"/>
+      <rect x="28" y="36" width="16" height="9" rx="1"/>
+      <rect class="gf" x="33" y="38.2" width="6" height="4.6" rx="1.4"/>
+    </symbol>
+
+    <symbol id="i-qr" viewBox="0 0 80 56">
+      <rect x="28" y="3" width="24" height="50" rx="4"/>
+      <path d="M36 7h8"/>
+      <rect x="32" y="14" width="6" height="6"/>
+      <rect x="42" y="14" width="6" height="6"/>
+      <rect x="32" y="24" width="6" height="6"/>
+      <rect class="gf" x="42" y="24" width="2.6" height="2.6"/>
+      <rect class="gf" x="46" y="27.5" width="2.6" height="2.6"/>
+      <rect class="gf" x="42" y="31" width="2.6" height="2.6"/>
+      <rect class="gf" x="46" y="34.5" width="2.6" height="2.6"/>
+      <rect class="gf" x="33.5" y="34.5" width="2.6" height="2.6"/>
+      <path class="g" d="M24 24v-5h5M56 24v-5h-5M24 34v5h5M56 34v5h-5"/>
+    </symbol>
+
+    <symbol id="i-screen" viewBox="0 0 80 56">
+      <rect x="28" y="3" width="24" height="50" rx="4"/>
+      <rect class="gf" x="31" y="9" width="18" height="6" rx="1"/>
+      <circle cx="34.5" cy="21.5" r="2.8"/>
+      <path d="M31 28h18M31 32h13M31 36h16"/>
+      <rect class="g" x="31" y="41" width="18" height="7" rx="3.5"/>
+    </symbol>
+
+    <symbol id="i-lottery" viewBox="0 0 80 56">
+      <path class="g" d="M40 2v6M18 10l4 4M62 10l-4 4M12 28h6M68 28h-6"/>
+      <rect x="22" y="18" width="36" height="24" rx="2.5"/>
+      <path class="gf" d="M40 22.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5-5.8-3-5.8 3 1.1-6.5-4.7-4.6 6.5-.9z"/>
+      <path d="M26 46h28"/>
+    </symbol>
+
+    <symbol id="i-gift" viewBox="0 0 80 56">
+      <rect x="25" y="24" width="30" height="24" rx="1.5"/>
+      <rect x="22" y="17" width="36" height="8" rx="1.5"/>
+      <path class="g" d="M40 17v31" stroke-width="2.4"/>
+      <path class="g" d="M40 17c-5 0-8-2-8-5s5-3 8 5c3-8 8-8 8-5s-3 5-8 5z"/>
+      <path class="gf" d="M14 12l1.4 3.1 3.1 1.4-3.1 1.4L14 21l-1.4-3.1L9.5 16.5l3.1-1.4z"/>
+      <path class="gf" d="M66 30l1.1 2.4 2.4 1.1-2.4 1.1L66 37l-1.1-2.4-2.4-1.1 2.4-1.1z"/>
+    </symbol>
+
+    <symbol id="i-chart" viewBox="0 0 80 56">
+      <path d="M18 8v40h44"/>
+      <rect class="gf" x="25" y="30" width="7" height="18"/>
+      <rect class="gf" x="36" y="22" width="7" height="26"/>
+      <rect class="gf" x="47" y="34" width="7" height="14"/>
+      <rect class="gf" x="58" y="14" width="7" height="34"/>
+      <path class="g" d="M26 26l12-8 11 6 13-12" stroke-width="2"/>
+    </symbol>
+
+    <symbol id="i-switch" viewBox="0 0 80 56">
+      <rect x="10" y="18" width="20" height="20" rx="2"/>
+      <path d="M15 24h10M15 28h10M15 32h6"/>
+      <path class="g" d="M34 22h14m0 0l-4-4m4 4l-4 4" stroke-width="2"/>
+      <path class="g" d="M48 34H34m0 0l4-4m-4 4l4 4" stroke-width="2"/>
+      <rect x="52" y="10" width="18" height="14" rx="2"/>
+      <rect x="52" y="32" width="18" height="14" rx="2"/>
+    </symbol>
+
+    <symbol id="i-tag" viewBox="0 0 80 56">
+      <path d="M40 6H16a4 4 0 0 0-4 4v18a4 4 0 0 0 1.2 2.8l18 18a4 4 0 0 0 5.6 0l16-16a4 4 0 0 0 0-5.6l-18-18A4 4 0 0 0 40 6z" transform="translate(6,2) scale(0.92)"/>
+      <circle class="gf" cx="27" cy="19" r="3.4"/>
+      <path class="g" d="M52 40h16M60 32v16" stroke-width="2"/>
+    </symbol>
+
+    <symbol id="i-doc" viewBox="0 0 80 56">
+      <path d="M26 4h20l12 12v36H26z"/>
+      <path d="M46 4v12h12"/>
+      <path d="M32 26h20M32 32h20M32 38h13"/>
+      <circle class="gf" cx="56" cy="44" r="6"/>
+      <path d="M53.5 44l1.8 2 3.2-3.6" stroke="#fff"/>
+    </symbol>
+
+    <symbol id="i-qrtag" viewBox="0 0 40 40">
+      <rect x="1.5" y="1.5" width="37" height="37" rx="3"/>
+      <rect x="7" y="7" width="9" height="9"/>
+      <rect x="24" y="7" width="9" height="9"/>
+      <rect x="7" y="24" width="9" height="9"/>
+      <rect class="gf" x="24" y="24" width="4" height="4"/>
+      <rect class="gf" x="30" y="24" width="4" height="4"/>
+      <rect class="gf" x="24" y="30" width="4" height="4"/>
+      <rect class="gf" x="30" y="30" width="4" height="4"/>
+    </symbol>
+
+    <symbol id="i-shop" viewBox="0 0 80 56">
+      <path d="M18 22h44v26H18z"/>
+      <path d="M18 22l4-8h36l4 8"/>
+      <path d="M26 48V34h12v14"/>
+      <path class="g" d="M46 32h10v10H46z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<nav class="site-nav">
+  <a href="#s01">HOME</a>
+  <a href="#s02">ISSUE</a>
+  <a href="#s03">ROLE</a>
+  <a href="#s04">FLOW</a>
+  <a href="#s05">SCREENS</a>
+  <a href="#s06">PIVOLINK</a>
+  <a href="#s07">CASE 01</a>
+  <a href="#s08">CASE 02</a>
+  <a href="#s09">COST</a>
+  <a href="#s10">MEASURE</a>
+  <a href="#s11">SCHEDULE</a>
+</nav>
+
+<!-- 01 表紙 -->
+<section class="slide cover" id="s01">
+  <div class="cover-grid">
+    <div>
+      <div class="label">PROPOSAL ／ 自販機キャンペーン企画</div>
+      <h1 class="cover-copy">QRは貼ったまま。<br>行き先と、数字だけが動く。</h1>
+      <p class="cover-sub">抽選は外部サービスに任せる。自販機に貼るQRを「あとから中身を変えられるQR」にして、抽選ページへの入口と、どの自販機が何回読まれたかの計測を担う。それが今回のPivoLinkの役割です。</p>
+      <div class="cover-keys"><span>DYNAMIC QR</span><span>CUSHION PAGE</span><span>MEASUREMENT</span></div>
+    </div>
+    <div class="ph" style="aspect-ratio:4/5; --ph:url('assets/images/vending-machine.jpg')">
+      <span class="ph-label">PHOTO SLOT<br>assets/images/vending-machine.jpg<br>（対象自販機／QR掲出イメージ）</span>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>株式会社TSURATSURA</span><span>2026.08.18</span><span>01 / 11</span>
+  </div>
+</section>
+
+<!-- 02 ISSUE & PROPOSAL -->
+<section class="slide" id="s02">
+  <div class="label dark">ISSUE &amp; PROPOSAL</div>
+  <h2 class="s-title">いただいたご相談と、ご提案</h2>
+  <div class="cols stretch">
+    <div>
+      <div class="col-head">このまま進めると詰まるところ / BEFORE</div>
+      <div class="item"><b>QRシールは一度貼ると差し替えられない</b><span>抽選サービスのURLが変わったとき、サービスを乗り換えたとき、期間が延びたときに、全台を貼り直すしかなくなる</span></div>
+      <div class="item"><b>全台が同じQRだと、どの自販機が効いたか分からない</b><span>抽選サービスの管理画面に出るのは「応募した人」の数だけ。設置場所ごとの反応は最初から取れない</span></div>
+      <div class="item"><b>読んだが応募しなかった人が見えない</b><span>スキャンと応募の間の離脱が測れないと、来年「どこを直すか」の判断材料が残らない</span></div>
+      <div class="item"><b>終了後、街に死んだQRが残る</b><span>期間が終わってもシールは貼られたまま。読むとエラーページに着地し、ブランドの印象を損ねる</span></div>
+    </div>
+    <div>
+      <div class="col-head">ご提案 / AFTER</div>
+      <div class="item hit"><b>動的QR：行き先はいつでも差し替えられる</b><span>QRが指すのはPivoLinkの固定URL。実際の遷移先は管理画面から変更でき、抽選サービスを乗り換えてもシールはそのまま使える</span></div>
+      <div class="item hit"><b>QRを5本発行すれば、5エリアが別々に見える</b><span>発行したQRの数が、そのまま計測の単位になる。シールの文言もデザインも同じままで、QRの絵柄を分けるだけ（P.07）</span></div>
+      <div class="item hit"><b>クッションページを1枚はさむ</b><span>スキャン数と「抽選ページへ進んだ数」の差が離脱として数字になる。同時に、規約・対象商品・注意事項を提示する面にもなる</span></div>
+      <div class="item hit"><b>期間ごとに景品を変えても、刷り直しゼロ</b><span>A期間は◯◯、B期間は△△、と行き先を日時指定で切り替えられる。シールの再印刷も貼り替え作業も発生しない（P.08）</span></div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>株式会社TSURATSURA</span><span>ISSUE &amp; PROPOSAL</span><span>02 / 11</span></div>
+</section>
+
+<!-- 04 ROLE -->
+<section class="slide" id="s03">
+  <div class="label dark">ROLE</div>
+  <h2 class="s-title">役割分担 — 誰が何を持つか</h2>
+  <p class="s-lead">抽選そのものは外部サービスに任せます。当社が作るのは「そこへ確実に人を運ぶ導線」と「運んだ結果を数える仕組み」です。作る範囲を絞ることで、費用と期間が大きく下がります。</p>
+  <div class="cols3">
+    <div class="role own">
+      <div class="role-h"><svg class="ico-sm"><use href="#i-switch"/></svg><div><h3>PivoLink（当社）</h3><div class="who">TSURATSURA</div></div></div>
+      <ul>
+        <li><b>QRコードの発行と管理</b>／台・エリア・ロット単位。PNG／SVGで入稿可</li>
+        <li><b>クッションページの制作</b>／告知・注意事項・抽選ページへのボタン</li>
+        <li><b>遷移先の差し替え</b>／期間前・期間中・終了後を日時指定で無人切替</li>
+        <li><b>スキャン計測</b>／日時・端末・OS・地域・参照元。CSV出力</li>
+        <li><b>レポート</b>／週次と総括。台別・エリア別の反応</li>
+      </ul>
+    </div>
+    <div class="role out">
+      <div class="role-h"><svg class="ico-sm"><use href="#i-lottery"/></svg><div><h3>外部の抽選サービス</h3><div class="who">EXTERNAL</div></div></div>
+      <ul>
+        <li>応募フォーム・本人確認</li>
+        <li>景品コースの選択</li>
+        <li><b>抽選と当落判定</b>・当選枠の管理</li>
+        <li>当選者への景品配布（デジタルギフト等）</li>
+        <li>応募者の個人情報の保持</li>
+        <li>応募数・当選数の集計</li>
+      </ul>
+    </div>
+    <div class="role">
+      <div class="role-h"><svg class="ico-sm"><use href="#i-shop"/></svg><div><h3>御社</h3><div class="who">CLIENT</div></div></div>
+      <ul>
+        <li>対象商品・実施期間・景品の決定</li>
+        <li>外部抽選サービスの選定・契約</li>
+        <li><b>QRシールの印刷と自販機への貼付</b></li>
+        <li>景品原資の手当て</li>
+        <li>景品表示法・応募規約の最終確認</li>
+      </ul>
+    </div>
+  </div>
+  <div class="info" style="margin-block-start:0.9rem">
+    <b>境界をはっきりさせておきます：</b>PivoLinkは応募者個人を特定しません。記録するのは「いつ・どのQRが・どんな端末から読まれたか」だけで、氏名・連絡先・応募内容は一切通りません。個人情報は外部の抽選サービス側に閉じるため、御社が管理すべき個人情報の範囲が広がりません。
+  </div>
+  <div class="slide-footer"><span>株式会社TSURATSURA</span><span>ROLE</span><span>03 / 11</span></div>
+</section>
+
+<!-- 05 FLOW -->
+<section class="slide" id="s04">
+  <div class="label dark">EXPERIENCE FLOW</div>
+  <h2 class="s-title">体験フロー — 購入から景品受取まで</h2>
+  <div class="flow">
+    <div class="step">
+      <svg class="ico"><use href="#i-vending"/></svg>
+      <div class="step-n">STEP 01</div><h3>自販機で買う</h3>
+      <p>対象飲料を購入。アプリのインストールは不要</p>
+      <span class="chip">USER</span>
+    </div>
+    <div class="step">
+      <svg class="ico"><use href="#i-qr"/></svg>
+      <div class="step-n">STEP 02</div><h3>QRを読む</h3>
+      <p>自販機に貼られたQRをカメラで読む。台ごとに固有のQRなので、読まれた時刻・端末・地域が記録される</p>
+      <span class="chip pivo">PivoLink</span>
+    </div>
+    <div class="step">
+      <svg class="ico"><use href="#i-screen"/></svg>
+      <div class="step-n">STEP 03</div><h3>クッションページ</h3>
+      <p>キャンペーンの案内・対象商品・注意事項を提示し、抽選ページへのボタンを出す。期間外は自動で別ページへ</p>
+      <span class="chip pivo">PivoLink</span>
+    </div>
+    <div class="step out">
+      <svg class="ico"><use href="#i-lottery"/></svg>
+      <div class="step-n">STEP 04</div><h3>応募・抽選</h3>
+      <p>外部の抽選サービスへ遷移。コースを選んで応募し、抽選が行われる</p>
+      <span class="chip ext">外部サービス</span>
+    </div>
+    <div class="step out">
+      <svg class="ico"><use href="#i-gift"/></svg>
+      <div class="step-n">STEP 05</div><h3>結果・景品受取</h3>
+      <p>当落の通知と景品の配布。応募者の個人情報は外部サービス側に閉じる</p>
+      <span class="chip ext">外部サービス</span>
+    </div>
+  </div>
+  <div class="band">
+    <div class="b1">◀ ここまでがPivoLinkの担当範囲 ── 何台に貼って、何回読まれ、何人が抽選ページへ進んだか</div>
+    <div class="b2">ここから先は外部の抽選サービス ── 応募数・当選数 ▶</div>
+  </div>
+  <p class="note" style="margin-block-start:0.6rem">この2つの数字を突き合わせると「スキャン → 抽選ページ遷移 → 応募」の転換率が初めて出ます。片方だけでは出ません。</p>
+  <div class="cols" style="gap:1.4rem; margin-block-start:0.9rem">
+    <div>
+      <div class="col-head">STEP 02–03 でPivoLinkが記録すること</div>
+      <div class="item"><b>いつ・どのQRが読まれたか</b><span>スキャン日時（秒単位）とQRの識別子。エリア別・台別に発行していれば、そのまま設置場所の記録になる</span></div>
+      <div class="item"><b>どんな環境から読まれたか</b><span>デバイス種別（iOS／Android／PC）・OS・ブラウザ・おおまかな地域・参照元</span></div>
+      <div class="item"><b>抽選ページへ進んだかどうか</b><span>クッションページのボタンが押された数。ここがスキャンとの差＝離脱になる</span></div>
+    </div>
+    <div>
+      <div class="col-head">記録しないこと</div>
+      <div class="item"><b>氏名・住所・連絡先・応募内容・当落</b><span>これらはすべて外部の抽選サービス側で完結します。PivoLinkを通りません</span></div>
+      <div class="alert" style="margin-block-start:0.6rem">
+        <b>ここは選定時の判断材料になります。</b>個人情報を当社側に置かない構成なので、御社が管理・委託契約の対象とすべき範囲が広がりません。PivoLinkが持つのは「何回・どこで読まれたか」だけです。
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>株式会社TSURATSURA</span><span>EXPERIENCE FLOW</span><span>04 / 11</span></div>
+</section>
+
+<!-- 06 SCREENS -->
+<section class="slide" id="s05">
+  <div class="label dark">SCREENS</div>
+  <h2 class="s-title">画面遷移イメージ — 同じQRから、行き先だけが変わる</h2>
+  <p class="s-lead">QRを読むと、まずクッションページが出ます。その「進む」ボタンの行き先を管理画面で切り替えるだけで、数週間後には抽選ページBへ流れます。<strong>QRシールもクッションページもそのまま。</strong></p>
+  <div class="sflow">
+    <div class="sf-col">
+      <div class="sf-scan">
+        <svg class="ico"><use href="#i-qr"/></svg>
+      </div>
+      <div class="sf-cap"><b>① 自販機のQRを読む</b><span>台・エリア単位で発行したQR。読まれた時刻・端末・地域が記録される</span></div>
+    </div>
+
+    <div class="sf-arrow">→<small>SCAN</small></div>
+
+    <div class="sf-col">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="ps">
+          <div class="ps-bar">CAMPAIGN</div>
+          <div class="ps-body">
+            <div class="ps-h">夏の当たる<br>キャンペーン</div>
+            <div class="ln m"></div><div class="ln"></div><div class="ln s"></div>
+            <div class="ps-note">対象商品／期間／注意事項をここに掲載します</div>
+            <div class="ps-btn">抽選ページへ進む</div>
+          </div>
+        </div>
+      </div>
+      <div class="sf-cap"><b>② クッションページ</b><span>当社が制作。ロゴ・配色・文言・ボタン文言を管理画面から編集。ここを踏んだ数が「抽選ページへ進んだ数」になる</span></div>
+    </div>
+
+    <div class="sf-arrow">→<small>TAP</small></div>
+
+    <div class="sf-col">
+      <div class="extbox">
+        <svg><use href="#i-lottery"/></svg>
+        <div><div class="tagx">EXTERNAL ／ 外部サービス</div><h4>③ 抽選ページ A</h4></div>
+      </div>
+      <div class="sf-switch"><em>↓</em>数週間後、②の行き先を切り替える（作業は管理画面のみ）</div>
+      <div class="extbox b">
+        <svg><use href="#i-lottery"/></svg>
+        <div><div class="tagx">EXTERNAL ／ 外部サービス</div><h4>③' 抽選ページ B</h4></div>
+      </div>
+      <div class="sf-cap"><b>③ 応募・抽選</b><span>外部の抽選サービス。応募フォーム・コース選択・当落判定はすべて先方の画面と仕様です</span></div>
+    </div>
+  </div>
+  <p class="note" style="margin-block-start:0.8rem">クッションページは<strong>期間前（ティザー）／期間中／終了後</strong>の3パターンを制作し、日時指定で自動的に切り替わります（詳細はP.08）。</p>
+  <div class="slide-footer"><span>株式会社TSURATSURA</span><span>SCREENS</span><span>05 / 11</span></div>
+</section>
+
+<!-- 07 PIVOLINK -->
+<section class="slide" id="s06">
+  <div class="label dark">PIVOLINK SPEC</div>
+  <h2 class="s-title">PivoLinkの仕様 — 本件で使う機能</h2>
+  <p class="s-lead">PivoLinkは「印刷済みのQR・設置済みのNFCタグの遷移先を、後から変えられるようにする」自社SaaS（本番稼働中・<span style="font-family:var(--mono)">redirect.tsuratsura.com</span>）。自販機のように<strong>一度貼ったら剥がせないQR</strong>との相性が、そのまま価値になります。</p>
+  <div class="cols" style="gap:1.4rem">
+    <div>
+      <div class="col-head">遷移ルール（設定できる条件）と本件での使い道</div>
+      <table>
+        <tr class="on"><th>schedule</th><td><b>期間指定</b>／キャンペーン期間中だけ抽選ページへ。期間外は自動で対象外</td></tr>
+        <tr class="on"><th>scheduled_switch</th><td><b>日時で切替</b>／開始前＝ティザー、終了後＝終了ページへ無人で移行</td></tr>
+        <tr><th>time_of_day</th><td>時間帯（JST）／時間帯別に訴求を変える</td></tr>
+        <tr><th>scan_step</th><td>読取回数／1回目は案内つき、2回目以降は抽選ページへ直行</td></tr>
+        <tr><th>device</th><td>iOS／Android／PC別の出し分け</td></tr>
+        <tr class="on"><th>ab_test</th><td><b>重み付きA/B</b>／クッションページの文言・ボタンの勝ち負けを実測する</td></tr>
+        <tr><th>default</th><td>いずれにも当たらないときの既定の行き先</td></tr>
+      </table>
+      <div class="alert" style="margin-block-start:0.5rem">
+        <b>設計上の注意（実運用で踏んだ事実）：</b>ルールは組み合わさらず、<strong>上から順に最初に当たった1つだけが有効</strong>になります。時間帯ルールで1日を覆うとA/Bテストが一度も発火しません。本件では期間ルールを主軸に据え、下位ルールに落ちる余地を意図的に残した設計にします。
+      </div>
+    </div>
+    <div>
+      <div class="col-head">本件で効く機能</div>
+      <div class="item"><b>貼り替えゼロで行き先が変わる</b><span>シールは一度きり。開始前・期間中・終了後・期間延長・抽選サービスの乗り換え・緊急停止まで、すべて管理画面から</span></div>
+      <div class="item"><b>クッションページ</b><span>タイトル・本文・ボタン文言・ロゴ・背景色・文字色・アクセント色・表示秒数・クーポンコードを設定可能。規約提示や注意喚起の面として使う</span></div>
+      <div class="item"><b>スキャン解析</b><span>日時・デバイス種別・OS・ブラウザ・地域・参照元を記録。QR単位で集計し、CSVで出力できる</span></div>
+      <div class="item"><b>変更履歴が残る</b><span>いつ誰がどこへ向き先を変えたかの記録。運用ミスを追跡できる</span></div>
+      <div class="item"><b>QR画像を自動生成</b><span>PNG／SVGで出力。SVGなのでシール印刷の入稿にそのまま使える</span></div>
+      <div class="item"><b>Businessプランは発行数・アクセス数とも無制限</b><span>¥4,980/月。台数が増えても費用が跳ねない</span></div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>株式会社TSURATSURA</span><span>PIVOLINK SPEC</span><span>06 / 11</span></div>
+</section>
+
+<!-- 08 USE CASE 01 -->
+<section class="slide" id="s07">
+  <div class="label dark">USE CASE 01 ／ エリア別計測</div>
+  <h2 class="s-title">QRを5本発行すれば、5つのエリアが別々に見える</h2>
+  <p class="s-lead">抽選ページは1つのままで構いません。<strong>入口のQRを5本に分けるだけで、エリアごとのスキャン数・時間帯・端末構成・抽選ページへの遷移率が、5本ぶん独立して取れます。</strong>シールのデザインも文言も同じ。変わるのはQRの絵柄だけなので、追加費用はほぼ発生しません。</p>
+  <div class="qrmap">
+    <div class="qrcol">
+      <div class="qrcard"><svg><use href="#i-qrtag"/></svg><div><b>北海道・東北エリア</b><code>/r/cp-north</code></div></div>
+      <div class="qrcard"><svg><use href="#i-qrtag"/></svg><div><b>関東エリア</b><code>/r/cp-kanto</code></div></div>
+      <div class="qrcard"><svg><use href="#i-qrtag"/></svg><div><b>中部エリア</b><code>/r/cp-chubu</code></div></div>
+      <div class="qrcard"><svg><use href="#i-qrtag"/></svg><div><b>関西エリア</b><code>/r/cp-kansai</code></div></div>
+      <div class="qrcard"><svg><use href="#i-qrtag"/></svg><div><b>九州・沖縄エリア</b><code>/r/cp-kyushu</code></div></div>
+    </div>
+    <svg class="fan" viewBox="0 0 96 190" preserveAspectRatio="none">
+      <path d="M0 17C40 17 56 95 96 95"/>
+      <path d="M0 56C40 56 56 95 96 95"/>
+      <path d="M0 95H96"/>
+      <path d="M0 134C40 134 56 95 96 95"/>
+      <path d="M0 173C40 173 56 95 96 95"/>
+      <path d="M89 90l7 5-7 5"/>
+    </svg>
+    <div class="dest">
+      <h4>行き先は、5本とも同じ1つの抽選ページでよい</h4>
+      <p>外部の抽選サービス側にエリア別の設定は要りません。応募ページを作り分ける必要も、契約を分ける必要もない。<strong>「入口を分ける」だけで計測が生まれる</strong>のが動的QRの構造です。<br><br>あとから「関東だけ別の景品ページへ」といった出し分けをしたくなった場合も、管理画面で該当QRの行き先を変えるだけで対応できます。</p>
+    </div>
+  </div>
+  <div class="col-head" style="margin-block-start:0.9rem">取れる数字のイメージ（サンプル・架空の数値）</div>
+  <div class="bars">
+    <div class="bh">エリア</div><div class="bh">スキャン数の比較</div><div class="bh num">スキャン</div><div class="bh num">遷移率</div>
+    <div>北海道・東北</div><div class="bar"><i style="inline-size:17%" class="warn"></i></div><div class="num">410</div><div class="num">47%</div>
+    <div>関東</div><div class="bar"><i style="inline-size:100%"></i></div><div class="num">2,480</div><div class="num">62%</div>
+    <div>中部</div><div class="bar"><i style="inline-size:35%"></i></div><div class="num">860</div><div class="num">55%</div>
+    <div>関西</div><div class="bar"><i style="inline-size:45%"></i></div><div class="num">1,120</div><div class="num">58%</div>
+    <div>九州・沖縄</div><div class="bar"><i style="inline-size:26%"></i></div><div class="num">640</div><div class="num">61%</div>
+  </div>
+  <div class="info" style="margin-block-start:0.8rem">
+    <b>この表があると、こう読めます：</b>北海道・東北だけ遷移率が47%と低い ── 文言ではなく掲出位置の問題では、という仮説が立つ。関東は関西の2.2倍で、次回のシール配分と景品原資をこの比率で組める。<strong>QRが全国で1本なら、この差は永久に見えません。</strong>
+  </div>
+  <div class="slide-footer"><span>株式会社TSURATSURA</span><span>USE CASE 01</span><span>07 / 11</span></div>
+</section>
+
+<!-- 09 USE CASE 02 -->
+<section class="slide" id="s08">
+  <div class="label dark">USE CASE 02 ／ 期間切替</div>
+  <h2 class="s-title">同じQRのまま、期間ごとにキャンペーンを差し替える</h2>
+  <p class="s-lead">QRが指しているのはPivoLinkの固定URLで、実際の行き先は管理画面が持っています。<strong>A期間とB期間で景品を変えても、シールの刷り直しも貼り替えも発生しません。</strong>切替日時を先に登録しておけば、当日の作業もゼロです。</p>
+  <div class="oneqr">
+    <svg><use href="#i-qrtag"/></svg>
+    <div><b>自販機に貼るQRシールは、最初から最後まで1種類のまま</b><span>QRが encode するURL（例：redirect.tsuratsura.com/r/cp-kanto）は変わらない。変わるのは、その先だけ</span></div>
+  </div>
+  <div class="tl grow" style="margin-block-start:10px">
+    <div class="tl-when">〜 6/30</div>
+    <div class="tl-bar"><b>ティザー</b><span>「7/1 10:00 スタート」の告知</span><span class="to">→ クッションページ（期間前）</span></div>
+    <div class="tl-when">7/1 – 8/15<br>A期間</div>
+    <div class="tl-bar a"><b>A賞：◯◯◯◯ プレゼント</b><span>夏向けの景品でスタート</span><span class="to">→ 抽選ページ A</span></div>
+    <div class="tl-when">8/16 – 9/30<br>B期間</div>
+    <div class="tl-bar b"><b>B賞：△△△△ プレゼント</b><span>景品を切り替えて再訴求。一度読んだ人にも、もう一度読む理由が生まれる</span><span class="to">→ 抽選ページ B</span></div>
+    <div class="tl-when">10/1 〜</div>
+    <div class="tl-bar"><b>終了</b><span>「終了しました」＋商品ページへ誘導</span><span class="to">→ クッションページ（終了後）</span></div>
+  </div>
+  <div class="info" style="margin-block-start:0.9rem">
+    <b>作業は「管理画面で行き先を1回変える」だけです。</b>切替日時をあらかじめ登録しておけば、当日は誰も何もしません。シールを貼りに行く必要も、印刷会社に発注する必要もありません。次ページで、その差が金額としていくらになるかをお示しします。
+  </div>
+  <div class="slide-footer"><span>株式会社TSURATSURA</span><span>USE CASE 02</span><span>08 / 11</span></div>
+</section>
+
+<!-- 09-2 COST -->
+<section class="slide" id="s09">
+  <div class="label dark">USE CASE 02 ／ コスト</div>
+  <h2 class="s-title">シールの刷り直しと貼り替えが、まるごと消える</h2>
+  <p class="s-lead">前ページの「A期間・B期間で景品を変える」を、静的QR（普通のQRコード）でやろうとすると何が起きるか。500台・期間4区分を例に並べます。</p>
+  <div class="cols stretch" style="gap:1.6rem">
+    <div>
+      <div class="col-head">コストの比較</div>
+      <table>
+        <tr><th></th><th>静的QR（従来）</th><th>動的QR（PivoLink）</th></tr>
+        <tr><td>シールの版</td><td>期間区分ごとに4版</td><td><b>1版</b></td></tr>
+        <tr><td>印刷枚数</td><td>500台 × 4回 ＝ 2,000枚</td><td><b>500枚</b></td></tr>
+        <tr><td>貼り替え作業</td><td>3回 × 500台 ＝ 1,500台分</td><td><b>0回</b></td></tr>
+        <tr><td>切替の所要</td><td>印刷＋巡回で2〜3週間</td><td><b>管理画面で即時</b></td></tr>
+        <tr class="on"><td>期間途中の変更</td><td>事実上できない</td><td><b>何度でも可</b></td></tr>
+      </table>
+      <div class="info" style="margin-block-start:0.7rem">
+        <b>試算（500台・4区分／単価は仮置き）</b><br>
+        追加シール 1,500枚 × @¥40 ＝ ¥60,000<br>
+        貼り替え 1,500台分 × @¥300（巡回込み） ＝ ¥450,000<br>
+        <strong style="font-size:0.9rem">→ 合計 約51万円が、そもそも発生しません</strong><br>
+        <span style="font-size:0.68rem;color:var(--sub)">単価は実際の印刷・巡回費で置き換えてご提示します。台数が増えるほど差は比例して開きます。</span>
+      </div>
+    </div>
+    <div>
+      <div class="col-head">同じ仕組みが効く、ほかの場面</div>
+      <div class="item"><b>景品切れ・想定超過での緊急停止</b><span>在庫が尽きたら即座に「終了しました」へ切替。応募だけが集まり続ける事故を防げる</span></div>
+      <div class="item"><b>抽選サービスの乗り換え</b><span>サービスを変えてURLが変わっても、シールはそのまま。ベンダーロックインが解ける</span></div>
+      <div class="item"><b>不具合時の退避</b><span>抽選ページが落ちても、案内ページに逃がせる。エラー画面を見せずに済む</span></div>
+      <div class="item hit"><b>翌年のキャンペーンで同じシールを再利用できる</b><span>1回のシール投資で、何度でもキャンペーンを打てる。貼った瞬間から資産になる</span></div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>株式会社TSURATSURA</span><span>USE CASE 02 ／ COST</span><span>09 / 11</span></div>
+</section>
+
+<!-- 10 MEASUREMENT -->
+<section class="slide" id="s10">
+  <div class="label dark">MEASUREMENT</div>
+  <h2 class="s-title">計測設計 — 発行の粒度を、最初に決める</h2>
+  <p class="s-lead"><strong>発行したQRの数が、そのまま集計の単位になります。</strong>1本だけ発行すれば全国合計しか出ず、台ごとに発行すれば台ごとに出ます。あとから細かくすることはできないので、ここは着手前に決めておく必要があります。</p>
+  <div class="cols" style="gap:1.4rem">
+    <div>
+      <div class="col-head">発行の粒度と、得られるもの</div>
+      <table>
+        <tr><th>粒度</th><th>QR数</th><th>見えるようになること</th></tr>
+        <tr><td>全国で1本</td><td>1</td><td>総スキャン数・時間帯・端末構成のみ</td></tr>
+        <tr class="on"><td>エリア別</td><td>5〜数十</td><td><b>地域差</b>（P.07の例）。5本発行すれば5エリアが別々に出る。<b>ここが費用対効果の最初の山</b></td></tr>
+        <tr><td>ロット別</td><td>数十〜数百</td><td><b>設置ロット単位の反応</b>。印刷・設置の手間と解像度の折り合いが良い</td></tr>
+        <tr><td>ロケーション別</td><td>数百〜</td><td>駅・オフィス・工場など<b>立地タイプ別</b>の効き方</td></tr>
+        <tr><td>台別</td><td>設置台数分</td><td><b>1台ごとの成績</b>。貼り替え・撤去の判断に直結する</td></tr>
+      </table>
+      <p class="note" style="margin-block-start:0.5rem">シールは粒度ごとに版が変わります。台別にすると印刷は可変データ印刷になり、貼付時に「どのシールをどの台に貼ったか」の台帳が必要です。<strong>まずはエリア別（5本）から始めるのが最も費用対効果が高く</strong>、次回にロット別・台別へ細かくしていくのが安全です。QRの発行そのものに追加費用はかかりません（Businessプランは発行数無制限）。</p>
+    </div>
+    <div>
+      <div class="col-head">取れる数字と、その使い道</div>
+      <div class="item"><b>スキャン数（QR別・日別・時間帯別）</b><span>設置台数で割れば「1台あたり何回読まれたか」。立地の良し悪しがここで出る</span></div>
+      <div class="item"><b>クッション → 抽選ページの遷移率</b><span>読んだのに応募に進まなかった割合。文言・ボタン位置のA/Bで改善できる、唯一こちらで動かせる数字</span></div>
+      <div class="item"><b>端末・OS・地域・参照元</b><span>年齢層の推定と、告知が効いた経路の把握に使う</span></div>
+      <div class="item"><b>外部サービスの応募数との突合</b><span>スキャン → 遷移 → 応募 の3段で転換率が出る。翌年の予算配分の根拠になる</span></div>
+      <div class="alert" style="margin-block-start:0.5rem">
+        <b>正確に申し上げておくと：</b>PivoLinkのスキャン計測はブラウザ単位（Cookie／端末情報ベース）で、個人単位の厳密なユニーク数ではありません。同一人物の複数回スキャンや別端末は分離できません。<strong>「何人が」ではなく「何回・どこで」を測る仕組み</strong>とお考えください。人単位の数字は外部の抽選サービス側にあります。
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>株式会社TSURATSURA</span><span>MEASUREMENT</span><span>10 / 11</span></div>
+</section>
+
+<!-- 10 SCHEDULE -->
+<section class="slide" id="s11">
+  <div class="label dark">SCHEDULE</div>
+  <h2 class="s-title">スケジュール — キックオフから公開まで約5〜6週間</h2>
+  <p class="s-lead">ボトルネックは当社側ではなく、外部抽選サービスの契約と、シールの印刷・設置です。</p>
+  <div class="flow">
+    <div class="step"><svg class="ico"><use href="#i-doc"/></svg><div class="step-n">WEEK 1</div><h3>要件・計測設計</h3><p>対象商品・期間・景品の確定。<strong>QRの発行粒度</strong>を決める。外部抽選サービスの選定支援</p></div>
+    <div class="step"><svg class="ico"><use href="#i-screen"/></svg><div class="step-n">WEEK 2-3</div><h3>クッションページ制作</h3><p>3画面（期間前／期間中／終了後）のデザインと実装。掲載文言・規約リンクの確定</p></div>
+    <div class="step"><svg class="ico"><use href="#i-tag"/></svg><div class="step-n">WEEK 3-4</div><h3>QR発行・入稿</h3><p>粒度に沿ってQRを発行（PNG／SVG）。台帳を作成し、シールの印刷データを入稿</p></div>
+    <div class="step"><svg class="ico"><use href="#i-qr"/></svg><div class="step-n">WEEK 4-5</div><h3>接続テスト</h3><p>実機での読取確認（iOS／Android）、日時切替の動作確認、計測が記録されるかの検証</p></div>
+    <div class="step"><svg class="ico"><use href="#i-chart"/></svg><div class="step-n">WEEK 5-6</div><h3>設置・公開</h3><p>シールの貼付と台帳の突合、公開。以降は週次でレポート</p></div>
+  </div>
+  <div class="cols tight" style="gap:1.4rem; margin-block-start:1rem">
+    <div>
+      <div class="col-head">遅延要因（先に共有しておきます）</div>
+      <div class="item"><b>外部抽選サービスの選定・契約</b><span>コース制の可否、景品配布の方式、応募データの受け渡し。ここが決まらないと遷移先が確定しない</span></div>
+      <div class="item"><b>QRシールの印刷と貼付</b><span>台数が多いほど設置に時間がかかる。粒度を細かくするほど、貼り間違い防止の台帳運用が必要になる</span></div>
+      <div class="item"><b>景品表示法の確認</b><span>取引価額と景品上限。景品が決まらないと告知文言が固まらない</span></div>
+    </div>
+    <div>
+      <div class="col-head">成果物</div>
+      <div class="item"><b>クッションページ 3画面（期間前／期間中／終了後）</b></div>
+      <div class="item"><b>QRコード一式（PNG／SVG・印刷入稿可）＋ 発行台帳</b></div>
+      <div class="item"><b>PivoLink 遷移ルール設定一式（日時切替・A/B）</b></div>
+      <div class="item"><b>計測設計書（粒度・KPI・突合の手順）</b></div>
+      <div class="item"><b>週次レポート／終了後の総括レポート（CSV付き）</b></div>
+      <div class="item"><b>運用マニュアル（差し替え・緊急停止の手順）</b></div>
+    </div>
+  </div>
+  <div class="cta-block">
+    <div>
+      <div class="cta-label">▶ NEXT STEP</div>
+      <div class="cta-text">対象の自販機台数と、計測したい粒度をお知らせください（この2点で構成が固まります）</div>
+    </div>
+    <div style="font-family:var(--mono);font-size:.75rem;white-space:nowrap">info@tsuratsura.com</div>
+  </div>
+  <div class="slide-footer"><span>株式会社TSURATSURA</span><span>SCHEDULE</span><span>11 / 11</span></div>
+</section>
+
+</body>
+</html>

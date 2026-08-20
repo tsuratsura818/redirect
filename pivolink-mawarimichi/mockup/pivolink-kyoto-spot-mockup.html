@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>まわりみち KYOTO｜スポット体験モックアップ｜Pivolink</title>
+<meta name="description" content="動的QR周遊「まわりみち」の観光客向け体験モックアップ。目的地を選び、実在の京都8スポットを回廊ルーティングで巡るデモです。">
+<style>
+@layer reset, tokens, base, layout, components;
+
+@layer reset {
+  *, *::before, *::after { box-sizing: border-box; }
+  * { margin: 0; }
+  img, svg { display: block; max-inline-size: 100%; height: auto; }
+  button, input { font: inherit; }
+  button { cursor: pointer; border: none; background: none; }
+}
+
+@layer tokens {
+  :root {
+    --sumi:  #2A2620;
+    --shu:   #C8553D;
+    --shu-d: #A03E2B;
+    --washi: #F7F2E8;
+    --kin:   #C9A227;
+    --ai:    #2B4C6F;
+    --sub:   #857D6E;
+    --line:  rgba(42, 38, 32, .14);
+    --mono: "SF Mono", "Roboto Mono", Consolas, monospace;
+    --serif: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  }
+}
+
+@layer base {
+  body {
+    background: #DDD6C7;
+    color: var(--sumi);
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    font-feature-settings: "palt" 1;
+    line-height: 1.75;
+    letter-spacing: 0.03em;
+    -webkit-font-smoothing: antialiased;
+    min-block-size: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem 0.5rem;
+  }
+  h1, h2, h3 { line-height: 1.4; word-break: keep-all; }
+  :focus-visible { outline: 2px solid var(--ai); outline-offset: 3px; }
+}
+
+@layer layout {
+  .stage { display: flex; gap: 2.5rem; align-items: center; }
+  .side-note { max-inline-size: 15rem; font-size: 0.78rem; color: #6B6353; }
+  .side-note .t { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.2em; color: var(--shu); margin-block-end: 0.5rem; }
+  .side-note p + p { margin-block-start: 0.6rem; }
+
+  .phone {
+    inline-size: min(400px, 100vw - 1rem);
+    block-size: min(830px, 96dvh);
+    background: var(--washi);
+    border-radius: 34px;
+    border: 8px solid #1B1814;
+    box-shadow: 0 24px 60px rgba(20,16,10,.35);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .app-head {
+    background: var(--sumi); color: var(--washi);
+    padding: 0.9rem 1.1rem 0.7rem;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-shrink: 0;
+  }
+  .brand { font-family: var(--serif); font-size: 1rem; letter-spacing: 0.14em; }
+  .brand small { display: block; font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.26em; color: var(--kin); }
+  .head-tools { display: flex; gap: 0.5rem; align-items: center; }
+  .lang-btn {
+    font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em;
+    color: var(--washi); border: 1px solid rgba(247,242,232,.4);
+    padding: 0.2rem 0.55rem; border-radius: 99px;
+  }
+  .lang-btn[aria-pressed="true"] { background: var(--shu); border-color: var(--shu); }
+  .book-btn { position: relative; font-size: 1.1rem; }
+  .book-count {
+    position: absolute; inset-block-start: -6px; inset-inline-end: -8px;
+    background: var(--shu); color: #fff; font-family: var(--mono);
+    font-size: 0.56rem; min-inline-size: 1.05rem; text-align: center;
+    border-radius: 99px; padding: 1px 3px;
+  }
+  .demo-band {
+    background: var(--kin); color: var(--sumi);
+    font-family: var(--mono); font-size: 0.54rem; letter-spacing: 0.14em;
+    text-align: center; padding: 0.22rem; flex-shrink: 0;
+  }
+  .screen { flex: 1; overflow-y: auto; scrollbar-width: thin; }
+}
+
+@layer components {
+  /* ---------- START / GOAL SELECT ---------- */
+  .start-hero {
+    background: linear-gradient(160deg, var(--sumi) 0%, #4A3B30 70%, var(--shu-d) 130%);
+    color: var(--washi); padding: 1.6rem 1.4rem 1.3rem; text-align: center;
+  }
+  .start-hero .qr { inline-size: 72px; margin-inline: auto; margin-block-end: 0.8rem; background: #fff; padding: 6px; border-radius: 8px; }
+  .start-hero h1 { font-family: var(--serif); font-size: 1.4rem; letter-spacing: 0.1em; }
+  .start-hero .tag { font-size: 0.78rem; color: rgba(247,242,232,.85); margin-block-start: 0.4rem; }
+  .start-loc { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.2em; color: var(--kin); margin-block-end: 0.45rem; }
+
+  .navi-card {
+    margin: 0.9rem 1.1rem; background: #fff; border: 1px solid var(--line);
+    border-radius: 14px; padding: 0.85rem 1rem; display: flex; gap: 0.8rem; align-items: flex-start;
+  }
+  .navi-face { flex-shrink: 0; inline-size: 48px; }
+  .navi-name { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.16em; color: var(--shu); }
+  .navi-text { font-size: 0.8rem; line-height: 1.7; }
+
+  .goal-label { margin: 0.2rem 1.2rem 0.4rem; font-size: 0.8rem; font-weight: 600; }
+  .goal-wrap { padding: 0 1.1rem; display: grid; gap: 0.6rem; }
+  .goal-card {
+    inline-size: 100%; text-align: start; background: #fff;
+    border: 1px solid var(--line); border-radius: 14px; padding: 0.8rem 1rem;
+    display: flex; gap: 0.8rem; align-items: center;
+    transition: transform .12s ease, border-color .12s ease;
+  }
+  .goal-card:hover { border-color: var(--shu); transform: translateY(-1px); }
+  .goal-card .thumb {
+    flex-shrink: 0; inline-size: 50px; block-size: 50px; border-radius: 10px;
+    display: grid; place-items: center; font-family: var(--serif);
+    font-size: 1.4rem; color: rgba(247,242,232,.9);
+  }
+  .goal-card .gn { font-family: var(--serif); font-size: 1rem; }
+  .goal-card .gi { font-size: 0.66rem; color: var(--sub); }
+  .free-input {
+    margin: 0.6rem 1.1rem 1.1rem; display: flex; gap: 0.4rem;
+  }
+  .free-input input {
+    flex: 1; border: 1px dashed var(--line); border-radius: 10px;
+    background: rgba(255,255,255,.6); padding: 0.5rem 0.8rem; font-size: 0.74rem;
+    color: var(--sub);
+  }
+
+  /* ---------- GOAL PROGRESS BAR ---------- */
+  .goal-bar {
+    margin: 0.8rem 1.1rem 0; background: var(--sumi); color: var(--washi);
+    border-radius: 12px; padding: 0.6rem 0.9rem;
+  }
+  .goal-bar .t { font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.18em; color: var(--kin); }
+  .goal-bar .d { font-size: 0.8rem; font-weight: 600; }
+  .goal-bar .d b { color: var(--kin); }
+  .goal-bar .m { font-size: 0.64rem; color: rgba(247,242,232,.72); }
+  .track { block-size: 5px; background: rgba(247,242,232,.18); border-radius: 99px; margin-block-start: 0.4rem; overflow: hidden; }
+  .track i { display: block; block-size: 100%; background: linear-gradient(90deg, var(--shu), var(--kin)); border-radius: 99px; transition: inline-size .6s ease; }
+
+  /* ---------- SPOT ---------- */
+  .spot-visual { position: relative; block-size: 175px; overflow: hidden; margin-block-start: 0.8rem; }
+  .spot-visual .k {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    font-family: var(--serif); font-size: 5rem; color: rgba(247,242,232,.24);
+  }
+  .spot-visual .photo-note {
+    position: absolute; inset-block-end: 8px; inset-inline-end: 10px;
+    font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.12em;
+    color: rgba(255,255,255,.75);
+  }
+  .spot-head { padding: 0.9rem 1.2rem 0.3rem; }
+  .spot-num { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.22em; color: var(--shu); }
+  .spot-name { font-family: var(--serif); font-size: 1.4rem; letter-spacing: 0.06em; }
+  .spot-area { font-size: 0.72rem; color: var(--sub); margin-block-start: 0.15rem; }
+  .spot-story { padding: 0.5rem 1.2rem 0.3rem; font-size: 0.82rem; line-height: 1.85; }
+
+  .nav-link {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    margin-block-start: 0.45rem;
+    font-size: 0.72rem; font-weight: 600; color: var(--ai);
+    text-decoration: none; border: 1px solid rgba(43,76,111,.35);
+    border-radius: 99px; padding: 0.28rem 0.8rem;
+    transition: background .12s ease;
+  }
+  .nav-link:hover { background: rgba(43,76,111,.08); }
+
+  .collab-band {
+    margin: 0.7rem 1.1rem 0; background: rgba(201,162,39,.12);
+    border: 1px dashed var(--kin); border-radius: 10px; padding: 0.7rem 0.9rem;
+  }
+  .collab-band .t { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.18em; color: #8A6D12; }
+  .collab-band p { font-size: 0.76rem; }
+
+  .cta {
+    display: block; inline-size: calc(100% - 2.2rem); margin: 0 1.1rem 1.2rem;
+    background: var(--shu); color: #fff; font-size: 0.92rem; font-weight: 600;
+    padding: 0.85rem; border-radius: 12px; text-align: center;
+    transition: transform .12s ease, background .12s ease;
+  }
+  .cta:hover { background: var(--shu-d); }
+  .cta:active { transform: scale(.98); }
+  .cta.ghost { background: none; color: var(--shu); border: 1.5px solid var(--shu); }
+  .cta.gold { background: var(--kin); color: var(--sumi); }
+
+  .stamp-zone { text-align: center; padding: 0.9rem 0 0.3rem; }
+  .stamp { inline-size: 104px; margin-inline: auto; transform: rotate(-6deg); }
+  @keyframes stampIn {
+    0% { transform: rotate(-6deg) scale(2.1); opacity: 0; }
+    60% { transform: rotate(-6deg) scale(.92); opacity: 1; }
+    100% { transform: rotate(-6deg) scale(1); }
+  }
+  .stamp.landed { animation: stampIn .5s cubic-bezier(.2,.9,.3,1.2) both; }
+  .stamp-msg { font-size: 0.78rem; font-weight: 600; margin-block-start: 0.3rem; }
+  .rare-msg { color: var(--kin); font-weight: 700; }
+
+  /* ---------- ROUTING / CHOICE ---------- */
+  .routing-note {
+    margin: 0.9rem 1.1rem 0.5rem; background: var(--sumi); color: var(--washi);
+    border-radius: 10px; padding: 0.6rem 0.9rem;
+  }
+  .routing-note .t { font-family: var(--mono); font-size: 0.54rem; letter-spacing: 0.18em; color: var(--kin); }
+  .routing-note p { font-size: 0.72rem; line-height: 1.6; }
+
+  .choice-wrap { padding: 0 1.1rem 1.2rem; display: grid; gap: 0.7rem; }
+  .choice {
+    inline-size: 100%; text-align: start; background: #fff;
+    border: 1px solid var(--line); border-radius: 14px; padding: 0.85rem 1rem;
+    display: flex; gap: 0.8rem; align-items: center;
+    transition: transform .12s ease, border-color .12s ease;
+  }
+  .choice:hover { border-color: var(--shu); transform: translateY(-1px); }
+  .choice .thumb {
+    flex-shrink: 0; inline-size: 54px; block-size: 54px; border-radius: 10px;
+    display: grid; place-items: center; font-family: var(--serif);
+    font-size: 1.5rem; color: rgba(247,242,232,.9);
+  }
+  .choice .cn { font-family: var(--serif); font-size: 0.96rem; }
+  .choice .ci { font-size: 0.66rem; color: var(--sub); }
+  .choice .cg { margin-inline-start: auto; text-align: center; flex-shrink: 0; }
+  .choice .cg b { display: block; font-size: 0.9rem; }
+  .choice .cg span { font-family: var(--mono); font-size: 0.5rem; letter-spacing: 0.1em; color: var(--sub); }
+
+  /* ---------- STAMP BOOK ---------- */
+  .book { padding: 1.1rem 1.2rem; }
+  .book h2 { font-family: var(--serif); font-size: 1.2rem; margin-block-end: 0.2rem; }
+  .book-sub { font-size: 0.72rem; color: var(--sub); margin-block-end: 0.9rem; }
+  .book-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
+  .slot {
+    aspect-ratio: 1; border: 1.5px dashed var(--line); border-radius: 50%;
+    display: grid; place-items: center; position: relative;
+  }
+  .slot .n { font-family: var(--mono); font-size: 0.6rem; color: #C9C1B0; }
+  .slot svg { inline-size: 82%; }
+  .route-list { margin-block-start: 1rem; font-size: 0.76rem; }
+  .route-list .t { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.18em; color: var(--shu); margin-block-end: 0.3rem; }
+  .route-list li { margin-inline-start: 1.2rem; padding-block: 0.1rem; }
+
+  /* ---------- ARRIVAL ---------- */
+  .goal-hero {
+    background: linear-gradient(160deg, var(--shu-d), var(--shu) 60%, var(--kin) 160%);
+    color: #fff; text-align: center; padding: 1.8rem 1.4rem 1.4rem;
+  }
+  .goal-hero .gl { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.22em; color: rgba(255,255,255,.85); }
+  .goal-hero h1 { font-family: var(--serif); font-size: 1.6rem; letter-spacing: 0.1em; margin-block: 0.15rem; }
+  .goal-hero p { font-size: 0.8rem; }
+  .stats {
+    margin: 1rem 1.1rem 0; background: #fff; border: 1px solid var(--line);
+    border-radius: 14px; padding: 0.9rem 1rem;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; text-align: center;
+  }
+  .stats .sv { font-family: var(--mono); font-size: 1.05rem; font-weight: 700; color: var(--shu); }
+  .stats .sv.big { color: var(--kin); }
+  .stats .sk { font-size: 0.58rem; color: var(--sub); }
+  .stats-note { grid-column: 1 / -1; font-size: 0.68rem; color: var(--sub); border-block-start: 1px solid var(--line); padding-block-start: 0.5rem; }
+  .coupon {
+    margin: 0.8rem 1.1rem; background: #fff; border: 1.5px dashed var(--shu);
+    border-radius: 14px; padding: 0.9rem 1.1rem; text-align: center;
+  }
+  .coupon .t { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.2em; color: var(--shu); }
+  .coupon .code { font-family: var(--mono); font-size: 1.25rem; letter-spacing: 0.14em; font-weight: 700; margin-block: 0.25rem; }
+  .coupon p { font-size: 0.7rem; color: var(--sub); }
+
+  .fade-in { animation: fade .35s ease both; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+}
+
+@media (max-width: 900px) {
+  body { padding: 0; }
+  .stage { display: block; }
+  .side-note { display: none; }
+  .phone { inline-size: 100vw; block-size: 100dvh; border: none; border-radius: 0; box-shadow: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="side-note">
+    <div class="t">MOCKUP NOTE</div>
+    <p><b>まわりみち KYOTO</b> — QRを読み込んだ観光客が見る画面のモックアップです。</p>
+    <p>まず最終目的地を選ぶと、実在の東山〜京都駅エリア8スポットのプールから「目的地への回廊」内で二択ルーティング。5つのスタンプを経て目的地に到着し、まわりみち率が表示されます。</p>
+    <p>右上でJA/EN切替。同じ目的地でも、巡るたびに道のりが変わります。</p>
+  </div>
+
+  <div class="phone">
+    <div class="app-head">
+      <div class="brand">まわりみち<small>MAWARIMICHI KYOTO / PIVOLINK</small></div>
+      <div class="head-tools">
+        <button class="lang-btn" id="langJa" aria-pressed="true" type="button">JA</button>
+        <button class="lang-btn" id="langEn" aria-pressed="false" type="button">EN</button>
+        <button class="book-btn" id="bookBtn" type="button" aria-label="スタンプ帳">📖<span class="book-count" id="bookCount">0</span></button>
+      </div>
+    </div>
+    <div class="demo-band" id="demoBand">DEMO — QRスキャンをボタンで再現しています</div>
+    <div class="screen" id="screen"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ================= DATA ================= */
+
+const GOAL_COUNT = 5;
+const START = { lat: 34.9858, lng: 135.7588 };
+
+const NAVI = {
+  ja: { name: "案内狐・コン", note: "※デモ用の仮ナビゲーター。実運用ではVTuber・ご当地キャラ等のコラボ枠" },
+  en: { name: "Kon the Guide Fox", note: "Placeholder navigator. Replaced by collab characters in production." }
+};
+
+const GOALS = {
+  kiyomizu: { lat: 34.9949, lng: 135.7850, kanji: "清", grad: ["#7A3E2E", "#C8553D"],
+    name: { ja: "清水寺", en: "Kiyomizu-dera" },
+    sub:  { ja: "定番へ、定番じゃない道から", en: "The classic — by an unclassic road" } },
+  yasaka: { lat: 35.0037, lng: 135.7787, kanji: "八", grad: ["#8E3A4E", "#C8553D"],
+    name: { ja: "八坂神社", en: "Yasaka Shrine" },
+    sub:  { ja: "祇園の入口へ、路地伝いに", en: "Into Gion, lane by lane" } },
+  nishiki: { lat: 35.0050, lng: 135.7649, kanji: "錦", grad: ["#3A5E4A", "#7BA05B"],
+    name: { ja: "錦市場", en: "Nishiki Market" },
+    sub:  { ja: "京の台所へ、寄り道しながら", en: "To Kyoto's kitchen, the long way" } }
+};
+
+const SPOTS = {
+  rokuhara: {
+    lat: 34.9970, lng: 135.7721,
+    kanji: "空", grad: ["#7A3E2E", "#C8553D"], walk: 8,
+    name: { ja: "六波羅蜜寺", en: "Rokuharamitsu-ji" },
+    area: { ja: "東山・清水寺から徒歩10分", en: "Higashiyama — 10 min from Kiyomizu-dera" },
+    story: {
+      ja: "口から六体の阿弥陀仏が現れる「空也上人立像」で知られる古刹。行列のできる清水寺のすぐそばにありながら、境内は驚くほど静かです。951年、疫病の都を念仏とともに歩いた空也上人。その祈りの原点が、いまもここにあります。",
+      en: "Home to the famous statue of Kuya, six tiny Buddhas emerging from his lips. Just steps from crowded Kiyomizu-dera, yet remarkably quiet — the origin of a prayer that walked plague-era Kyoto in 951."
+    },
+    navi: {
+      ja: "清水寺の行列を横目に、こっちは静かなもんやで。空也さんの口から仏さまが出てるの、ほんまにびっくりするから見ときや〜",
+      en: "While everyone queues at Kiyomizu, this place is all yours. Wait till you see the Buddhas coming out of Kuya's mouth!"
+    },
+    congestion: 1
+  },
+  rokudo: {
+    lat: 34.9979, lng: 135.7748,
+    kanji: "冥", grad: ["#2A2620", "#4A3B5E"], walk: 6,
+    name: { ja: "六道珍皇寺", en: "Rokudo Chinno-ji" },
+    area: { ja: "東山・六道の辻", en: "Higashiyama — Rokudo Crossing" },
+    story: {
+      ja: "ここは「六道の辻」— あの世とこの世の境目と言い伝えられてきた場所。平安の官僚・小野篁が夜ごと冥界へ通ったという井戸が、いまも本堂の奥に残ります。京都で最も物語の濃い、知る人ぞ知る一角です。",
+      en: "The legendary border between this world and the next. A well behind the main hall is said to have carried the Heian official Ono no Takamura to the underworld each night. One of Kyoto's most story-rich hidden corners."
+    },
+    navi: {
+      ja: "ここ、あの世への入口って言われてるんやで…。井戸を覗くときは、そーっとな。帰りは一緒に帰ろな？",
+      en: "They say this is the gateway to the other world... Peek into the well gently, okay? And let's go home together!"
+    },
+    congestion: 1
+  },
+  kenninji: {
+    lat: 35.0006, lng: 135.7735,
+    kanji: "禅", grad: ["#3D4A3A", "#6B7D5A"], walk: 10,
+    name: { ja: "建仁寺", en: "Kennin-ji" },
+    area: { ja: "祇園・花見小路の南端", en: "Gion — south end of Hanamikoji" },
+    story: {
+      ja: "1202年創建、京都最古の禅寺。俵屋宗達の「風神雷神図」、天井いっぱいの「双龍図」。観光客であふれる花見小路を数分歩いただけで、これほどの静寂と美術に出会えることは、あまり知られていません。",
+      en: "Kyoto's oldest Zen temple (1202), holding the iconic Wind and Thunder Gods screen and the ceiling-filling Twin Dragons. Minutes from packed Hanamikoji, yet astonishingly serene."
+    },
+    navi: {
+      ja: "花見小路の人混みを抜けたら、急に静かになるやろ？ 天井の双龍、首が痛くなるまで見上げてしまうで〜",
+      en: "Feel how the noise of Hanamikoji just disappears? The twin dragons on the ceiling will keep your head tilted for a while!"
+    },
+    congestion: 2
+  },
+  shoseien: {
+    lat: 34.9910, lng: 135.7622,
+    kanji: "庭", grad: ["#2E5E4E", "#7BA05B"], walk: 12,
+    name: { ja: "渉成園", en: "Shosei-en Garden" },
+    area: { ja: "京都駅から徒歩10分", en: "10 min walk from Kyoto Station" },
+    story: {
+      ja: "東本願寺の飛地境内にある池泉回遊式庭園。京都駅からわずか徒歩10分に、四季の花と水鏡の広がる名庭があることを、多くの旅行者は知りません。朝の光の時間帯は、ほとんど貸切です。",
+      en: "A strolling pond garden of Higashi Hongan-ji, just 10 minutes from Kyoto Station — and somehow still a secret. In the morning light, you may have it almost to yourself."
+    },
+    navi: {
+      ja: "京都駅のすぐ近くにこんな庭があるって、みんな知らんのよ。朝イチは水面がぴかぴかの鏡やで〜",
+      en: "Nobody expects a garden like this so close to the station. In early morning the pond turns into a perfect mirror!"
+    },
+    congestion: 0, rare: { ja: "朝の水鏡（時間帯限定スタンプ）", en: "Morning Mirror (time-limited stamp)" }
+  },
+  yasui: {
+    lat: 35.0009, lng: 135.7770,
+    kanji: "縁", grad: ["#6E2E3E", "#B85C7A"], walk: 7,
+    name: { ja: "安井金比羅宮", en: "Yasui Konpira-gu" },
+    area: { ja: "東山・祇園の南", en: "Higashiyama — south of Gion" },
+    story: {
+      ja: "「悪縁を切り、良縁を結ぶ」— お札に覆われた縁切り縁結び碑をくぐる、京都でも他に類のない参拝体験。切りたい縁と結びたい縁をひとつずつ胸に、碑の穴をくぐってみてください。",
+      en: "Crawl through the paper-covered stone to cut bad ties and bind good ones — a ritual found nowhere else. Bring one bond to break and one to make."
+    },
+    navi: {
+      ja: "碑をくぐるときは、切りたい縁と結びたい縁をひとつずつ、はっきり思い浮かべるんやで。よくばりは禁物！",
+      en: "When you crawl through, picture one tie to cut and one to bind — clearly! No being greedy!"
+    },
+    congestion: 2
+  },
+  kawai: {
+    lat: 34.9928, lng: 135.7754,
+    kanji: "陶", grad: ["#5A4632", "#A67B4B"], walk: 9,
+    name: { ja: "河井寬次郎記念館", en: "Kawai Kanjiro's House" },
+    area: { ja: "東山・五条坂", en: "Higashiyama — Gojozaka" },
+    story: {
+      ja: "民藝運動を代表する陶工・河井寬次郎が自ら設計した自宅兼工房。裏手には巨大な登り窯が当時のまま残ります。「暮らしが仕事 仕事が暮らし」— 静かな町家の中に、作り手の哲学が息づいています。",
+      en: "The self-designed home and studio of Mingei potter Kawai Kanjiro, with his massive climbing kiln preserved out back. 'Life is work, work is life' — his philosophy still breathes in this quiet townhouse."
+    },
+    navi: {
+      ja: "ここの登り窯、ほんまに大きいんやで。椅子も棚も全部、河井さんの手づくり。座ってええ椅子もあるから探してみ〜",
+      en: "The climbing kiln here is huge! Every chair and shelf was made by Kanjiro himself — some you can even sit on. Find them!"
+    },
+    congestion: 0
+  },
+  bukkoji: {
+    lat: 35.0017, lng: 135.7627,
+    kanji: "縁", grad: ["#3A3E5E", "#5E6E9E"], walk: 11, collab: true,
+    name: { ja: "佛光寺と、d食堂", en: "Bukko-ji & d shokudo" },
+    area: { ja: "四条烏丸から徒歩5分", en: "5 min from Shijo-Karasuma" },
+    story: {
+      ja: "町なかの静かな古刹・佛光寺。その境内には、京都の定番を丁寧に出す食堂とデザインストアが息づいています。お寺の境内でいただくおやつと定食 — 京都の「いま」と「むかし」が同じ敷地にある、めずらしい場所です。",
+      en: "A quiet urban temple whose grounds host a design store and a beloved set-meal shokudo. Sweets and lunch inside temple grounds — old and new Kyoto sharing one courtyard."
+    },
+    navi: {
+      ja: "お寺の中にごはん屋さんがあるんやで！ スタンプ画面を見せたら、デモ特典で甘味がちょっとおトクになるらしいで〜",
+      en: "There's a shokudo inside the temple grounds! Show your stamp screen for a little demo treat discount!"
+    },
+    congestion: 1,
+    coupon: { ja: "コラボ特典：スタンプ画面提示で境内の甘味 50円引（デモ表記）", en: "Collab perk: show stamps for ¥50 off sweets (demo)" }
+  },
+  ichihime: {
+    lat: 34.9932, lng: 135.7669,
+    kanji: "姫", grad: ["#8E3A4E", "#D98A9E"], walk: 8,
+    name: { ja: "市比賣神社", en: "Ichihime Shrine" },
+    area: { ja: "河原町五条の路地の奥", en: "Down a lane off Kawaramachi-Gojo" },
+    story: {
+      ja: "女性の守り神として1200年、市場の神として都の商いを見守ってきた小さなお社。ビルの谷間の路地の奥という立地ゆえ、地図を持っていても通り過ぎてしまう — まさに「連れてきてもらわないと出会えない」場所です。",
+      en: "A tiny shrine guarding women and the city's markets for 1,200 years, tucked so deep in a lane between buildings that even map-holders walk past. Exactly the kind of place you must be led to."
+    },
+    navi: {
+      ja: "ここ、自分ではぜったい見つけられへん場所やろ？ こういう出会いのために、わたしがおるんやで〜",
+      en: "You'd never find this on your own, right? This is exactly why you've got me!"
+    },
+    congestion: 0
+  }
+};
+
+const UI = {
+  ja: {
+    startLoc: "START — 京都駅ビル 観光案内所",
+    startTitle: "目的地は、あなたが決める。\n道のりは、京都が決める。",
+    startTag: "行きたい場所には、ちゃんと着きます。ただし最短ルートでは行きません。5つの寄り道の果てに、目的地へ。",
+    naviIntro: "はじめまして、案内狐のコンやで！ まず、最後に行きたい場所を教えてな。そこまでの道は、わたしに任せて。まっすぐは行かへんけど、ぜったい後悔させへんから〜",
+    goalLabel: "最後に行きたい場所は？",
+    freeInput: "自由入力（実運用では地図検索に対応・デモでは上から選択）",
+    scanBtn: "このスポットのQRを読み込む（デモ）",
+    stampGet: "スタンプを獲得しました！",
+    rareGet: "★ レアスタンプ獲得！",
+    goalBarT: "DESTINATION",
+    goalBarD: (g, m) => `${g}まで あと ${fmtM(m)}`,
+    goalBarM: m => `まっすぐ行けば徒歩${Math.max(1, Math.ceil(m / 80))}分。でも今日は、まわりみち。`,
+    routingT: "ROUTING — 目的地への回廊から選びました",
+    routing: c => `目的地の方向へ少しずつ近づきながら、いま空いている${c}件を含む二択をご案内します。`,
+    choiceT: "コンが選んだ、次の寄り道",
+    walk: "徒歩",
+    min: "分",
+    cong: ["空き ◎", "空き ○", "やや混雑"],
+    bookT: "スタンプ帳",
+    bookSub: n => `${n} / ${GOAL_COUNT} 個 — 今日のあなたの道のり`,
+    routeT: "YOUR ROUTE — 今日の寄り道",
+    back: "戻る",
+    toGoal: g => `目的地 ${g} へ向かう →`,
+    arriveL: "ARRIVED",
+    arriveT: "たどり着きました。",
+    arriveP: g => `${g}に、5つの物語を連れて到着。この道のりは、世界であなただけのものです。`,
+    stWalked: "歩いた道のり",
+    stDirect: "最短ルート",
+    stRate: "まわりみち率",
+    statsNote: (w, d) => `最短${fmtM(d)}のところを、あなたは${fmtM(w)}かけて、5つの物語と出会いながら着きました。`,
+    couponT: "参加店舗共通クーポン",
+    couponP: "東山エリアの参加飲食店・店舗でご提示ください（デモ表記）",
+    again: "もう一度巡る — 同じ目的地でも、別の道",
+    naviGoal: "おつかれさま！ ええまわりみちやったやろ？ 今日の道は今日だけのもの。またおいで、同じ目的地でも、ぜんぜん違う道を用意しとくで〜",
+    demo: "DEMO — QRスキャンをボタンで再現しています",
+    photoNote: "PHOTO PLACEHOLDER — 実装時に現地写真",
+    navBtn: "🧭 ここまでの道順（Google マップ・徒歩）",
+    navGoalBtn: "🧭 目的地までの道順（Google マップ・徒歩）"
+  },
+  en: {
+    startLoc: "START — Kyoto Station Tourist Info",
+    startTitle: "You choose the destination.\nKyoto chooses the way.",
+    startTag: "You will reach the place you want — just not by the shortest path. Five detours, then your destination.",
+    naviIntro: "Hi! I'm Kon, your guide fox. First, tell me where you want to end up. Leave the road to me — it won't be straight, but you won't regret it!",
+    goalLabel: "Where do you want to end up?",
+    freeInput: "Free input (map search in production — pick above in this demo)",
+    scanBtn: "Scan this spot's QR (demo)",
+    stampGet: "Stamp collected!",
+    rareGet: "★ Rare stamp!",
+    goalBarT: "DESTINATION",
+    goalBarD: (g, m) => `${fmtM(m)} to ${g}`,
+    goalBarM: m => `${Math.max(1, Math.ceil(m / 80))} min if you walked straight. But today, we wander.`,
+    routingT: "ROUTING — picked from the corridor to your goal",
+    routing: c => `Edging toward your destination — two options including ${c} uncrowded pick(s).`,
+    choiceT: "Kon's picks for your next detour",
+    walk: "walk",
+    min: "min",
+    cong: ["Quiet", "Calm", "Busy-ish"],
+    bookT: "Stamp Book",
+    bookSub: n => `${n} / ${GOAL_COUNT} — your road today`,
+    routeT: "YOUR ROUTE — today's detours",
+    back: "Back",
+    toGoal: g => `Head to ${g} →`,
+    arriveL: "ARRIVED",
+    arriveT: "You made it.",
+    arriveP: g => `You arrived at ${g} carrying five stories. This road belongs to you alone.`,
+    stWalked: "You walked",
+    stDirect: "Shortest",
+    stRate: "Detour rate",
+    statsNote: (w, d) => `The straight line was ${fmtM(d)}. You took ${fmtM(w)} — and met five stories on the way.`,
+    couponT: "Partner Shops Coupon",
+    couponP: "Show at partner shops in the Higashiyama area (demo)",
+    again: "Walk again — same destination, different road",
+    naviGoal: "Well done! A good mawarimichi, right? Today's road exists only today. Come back — same destination, completely different way!",
+    demo: "DEMO — buttons simulate QR scans",
+    photoNote: "PHOTO PLACEHOLDER",
+    navBtn: "🧭 Walking directions (Google Maps)",
+    navGoalBtn: "🧭 Walking directions to your destination"
+  }
+};
+
+/* ================= STATE ================= */
+
+let lang = "ja";
+let goal = null;            // goal id
+let stamps = [];            // [{id, rare}]
+let current = null;
+let scanned = false;
+let walkedM = 0;
+let prevScreen = "start";
+
+const $ = sel => document.querySelector(sel);
+const screen = $("#screen");
+
+/* ================= HELPERS ================= */
+
+function t() { return UI[lang]; }
+
+function fmtM(m) {
+  return m >= 1000 ? (m / 1000).toFixed(1) + "km" : Math.round(m / 10) * 10 + "m";
+}
+
+function distM(a, b) {
+  const r = Math.PI / 180;
+  const x = (b.lng - a.lng) * r * Math.cos((a.lat + b.lat) / 2 * r);
+  const y = (b.lat - a.lat) * r;
+  return Math.sqrt(x * x + y * y) * 6371000;
+}
+
+function curPos() { return current ? SPOTS[current] : START; }
+
+function foxSVG(size) {
+  return `<svg viewBox="0 0 64 64" width="${size}" role="img" aria-label="navigator">
+    <polygon points="14,8 26,20 10,24" fill="#C8553D"/>
+    <polygon points="50,8 38,20 54,24" fill="#C8553D"/>
+    <circle cx="32" cy="36" r="20" fill="#E8965A"/>
+    <ellipse cx="32" cy="44" rx="11" ry="8" fill="#F7F2E8"/>
+    <circle cx="25" cy="33" r="2.6" fill="#2A2620"/>
+    <circle cx="39" cy="33" r="2.6" fill="#2A2620"/>
+    <polygon points="32,38 29,41 35,41" fill="#2A2620"/>
+  </svg>`;
+}
+
+function qrSVG() {
+  let cells = "";
+  const pat = [1,1,1,0,1,0,1, 1,0,1,1,0,1,1, 1,1,0,1,1,0,1, 0,1,1,0,1,1,0, 1,0,1,1,0,1,1, 1,1,0,1,1,0,1, 1,0,1,0,1,1,1];
+  pat.forEach((v, i) => {
+    if (v) cells += `<rect x="${(i % 7) * 10}" y="${Math.floor(i / 7) * 10}" width="9" height="9" fill="#1B1814"/>`;
+  });
+  return `<svg viewBox="0 0 70 70" role="img" aria-label="QR">${cells}</svg>`;
+}
+
+function stampSVG(spot, rare, size) {
+  const c = rare ? "#C9A227" : "#C8553D";
+  return `<svg viewBox="0 0 100 100" width="${size}">
+    <circle cx="50" cy="50" r="46" fill="none" stroke="${c}" stroke-width="4" stroke-dasharray="4 3"/>
+    <circle cx="50" cy="50" r="38" fill="none" stroke="${c}" stroke-width="1.6"/>
+    <text x="50" y="60" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="34" fill="${c}">${spot.kanji}</text>
+    <text x="50" y="80" text-anchor="middle" font-family="monospace" font-size="7" letter-spacing="2" fill="${c}">MAWARIMICHI</text>
+    ${rare ? `<text x="50" y="26" text-anchor="middle" font-size="12" fill="${c}">★</text>` : ""}
+  </svg>`;
+}
+
+function visitedIds() { return stamps.map(s => s.id); }
+
+/* 目的地への回廊内から二択を抽選する（まわりみちルーティング） */
+function pickChoices() {
+  const g = GOALS[goal];
+  const dNow = distM(curPos(), g);
+  const remain = Object.keys(SPOTS).filter(id => !visitedIds().includes(id) && id !== current);
+  const scored = remain.map(id => ({ id, d: distM(SPOTS[id], g) }));
+  // 回廊ルール: 目的地への距離が「現在地+220mの寄り道許容」を超えないスポットを優先
+  let pool = scored.filter(x => x.d < dNow + 220);
+  if (pool.length < 2) pool = scored.sort((a, b) => a.d - b.d).slice(0, 3);
+  const bag = [];
+  pool.forEach(x => {
+    const w = 3 - SPOTS[x.id].congestion;   // 空いているほど重い
+    for (let i = 0; i < w; i++) bag.push(x.id);
+  });
+  const picks = [];
+  while (picks.length < 2 && bag.length) {
+    const id = bag[Math.floor(Math.random() * bag.length)];
+    if (!picks.includes(id)) picks.push(id);
+    for (let i = bag.length - 1; i >= 0; i--) if (bag[i] === id) bag.splice(i, 1);
+  }
+  return picks;
+}
+
+/* ================= SCREENS ================= */
+
+function goalBarHTML() {
+  if (!goal) return "";
+  const g = GOALS[goal];
+  const u = t();
+  const dTotal = distM(START, g);
+  const dLeft = distM(curPos(), g);
+  const pct = Math.max(6, Math.min(100, Math.round((1 - dLeft / dTotal) * 100)));
+  return `
+    <div class="goal-bar">
+      <div class="t">${u.goalBarT}</div>
+      <div class="d">${u.goalBarD("<b>" + g.name[lang] + "</b>", dLeft)}</div>
+      <div class="m">${u.goalBarM(dLeft)}</div>
+      <div class="track"><i style="inline-size:${pct}%"></i></div>
+    </div>`;
+}
+
+function renderStart() {
+  prevScreen = "start";
+  const u = t();
+  screen.innerHTML = `
+    <div class="fade-in">
+      <div class="start-hero">
+        <div class="qr">${qrSVG()}</div>
+        <div class="start-loc">${u.startLoc}</div>
+        <h1>${u.startTitle.replace("\n", "<br>")}</h1>
+        <p class="tag">${u.startTag}</p>
+      </div>
+      <div class="navi-card">
+        <div class="navi-face">${foxSVG(48)}</div>
+        <div>
+          <div class="navi-name">${NAVI[lang].name}</div>
+          <p class="navi-text">${u.naviIntro}</p>
+        </div>
+      </div>
+      <p class="goal-label">${u.goalLabel}</p>
+      <div class="goal-wrap">
+        ${Object.keys(GOALS).map(id => {
+          const g = GOALS[id];
+          return `
+          <button class="goal-card" type="button" data-goal="${id}">
+            <div class="thumb" style="background:linear-gradient(140deg,${g.grad[0]},${g.grad[1]})">${g.kanji}</div>
+            <div>
+              <div class="gn">${g.name[lang]}</div>
+              <div class="gi">${g.sub[lang]}</div>
+            </div>
+          </button>`;
+        }).join("")}
+      </div>
+      <div class="free-input">
+        <input type="text" placeholder="${u.freeInput}" aria-label="${u.freeInput}" readonly>
+      </div>
+      <p style="text-align:center;font-size:.6rem;color:var(--sub);padding-block-end:1rem">${NAVI[lang].note}</p>
+    </div>`;
+  screen.querySelectorAll("[data-goal]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      goal = btn.dataset.goal;
+      stamps = []; current = null; scanned = false; walkedM = 0;
+      $("#bookCount").textContent = "0";
+      renderChoiceOnly(pickChoices());
+    });
+  });
+}
+
+function renderChoiceOnly(picks) {
+  prevScreen = "choice";
+  const u = t();
+  screen.innerHTML = `
+    <div class="fade-in">
+      ${goalBarHTML()}
+      <div class="routing-note">
+        <div class="t">${u.routingT}</div>
+        <p>${u.routing(picks.filter(id => SPOTS[id].congestion === 0).length)}</p>
+      </div>
+      <p style="margin:0.4rem 1.2rem 0.5rem;font-size:.8rem;font-weight:600">${u.choiceT}</p>
+      <div class="choice-wrap">${picks.map(choiceCard).join("")}</div>
+    </div>`;
+  bindChoices();
+}
+
+function choiceCard(id) {
+  const s = SPOTS[id];
+  const u = t();
+  return `
+    <button class="choice" type="button" data-go="${id}">
+      <div class="thumb" style="background:linear-gradient(140deg,${s.grad[0]},${s.grad[1]})">${s.kanji}</div>
+      <div>
+        <div class="cn">${s.name[lang]}</div>
+        <div class="ci">${s.area[lang]} ・ ${u.walk}${s.walk}${u.min} ・ ${u.cong[s.congestion]}</div>
+      </div>
+      <div class="cg"><b>→</b><span>GO</span></div>
+    </button>`;
+}
+
+function bindChoices() {
+  screen.querySelectorAll("[data-go]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const next = btn.dataset.go;
+      walkedM += distM(curPos(), SPOTS[next]);
+      current = next;
+      scanned = false;
+      renderSpot();
+    });
+  });
+}
+
+function renderSpot() {
+  prevScreen = "spot";
+  const s = SPOTS[current];
+  const u = t();
+  const num = String(Math.min(stamps.length + 1, GOAL_COUNT)).padStart(2, "0");
+  screen.innerHTML = `
+    <div class="fade-in">
+      ${goalBarHTML()}
+      <div class="spot-visual" style="background:linear-gradient(140deg,${s.grad[0]},${s.grad[1]})">
+        <div class="k">${s.kanji}</div>
+        <div class="photo-note">${u.photoNote}</div>
+      </div>
+      <div class="spot-head">
+        <div class="spot-num">DETOUR ${num} / 0${GOAL_COUNT}</div>
+        <h1 class="spot-name">${s.name[lang]}</h1>
+        <div class="spot-area">${s.area[lang]}</div>
+        <a class="nav-link" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}&travelmode=walking" target="_blank" rel="noopener">${u.navBtn}</a>
+      </div>
+      <p class="spot-story">${s.story[lang]}</p>
+      <div class="navi-card">
+        <div class="navi-face">${foxSVG(44)}</div>
+        <div>
+          <div class="navi-name">${NAVI[lang].name}</div>
+          <p class="navi-text">${s.navi[lang]}</p>
+        </div>
+      </div>
+      ${s.collab ? `<div class="collab-band"><div class="t">COLLAB SPOT — 飲食店コラボ</div><p>${s.coupon[lang]}</p></div>` : ""}
+      <div id="stampArea">
+        <button class="cta" type="button" id="scanBtn" style="margin-block-start:1rem">${u.scanBtn}</button>
+      </div>
+    </div>`;
+  $("#scanBtn").addEventListener("click", doScan);
+}
+
+function doScan() {
+  if (scanned) return;
+  scanned = true;
+  const s = SPOTS[current];
+  const u = t();
+  // 既に獲得済みのスポットは再登録しない（画面復帰時の二重登録防止）
+  let entry = stamps.find(x => x.id === current);
+  if (!entry) {
+    entry = { id: current, rare: Math.random() < (s.rare ? 0.4 : 0.2) };
+    stamps.push(entry);
+  }
+  const rare = entry.rare;
+  $("#bookCount").textContent = stamps.length;
+
+  const area = $("#stampArea");
+  const done = stamps.length >= GOAL_COUNT;
+  let html = `
+    <div class="stamp-zone">
+      <div class="stamp landed">${stampSVG(s, rare, 104)}</div>
+      <p class="stamp-msg ${rare ? "rare-msg" : ""}">${rare ? u.rareGet : u.stampGet}${rare && s.rare ? "<br><span style='font-size:.68rem'>" + s.rare[lang] + "</span>" : ""}</p>
+    </div>`;
+
+  if (done) {
+    const gg = GOALS[goal];
+    html += `
+      <div style="text-align:center;margin-block-start:.4rem">
+        <a class="nav-link" href="https://www.google.com/maps/dir/?api=1&destination=${gg.lat},${gg.lng}&travelmode=walking" target="_blank" rel="noopener">${u.navGoalBtn}</a>
+      </div>
+      <button class="cta gold" type="button" id="goalBtn" style="margin-block-start:.6rem">${u.toGoal(gg.name[lang])}</button>`;
+    area.innerHTML = html;
+    $("#goalBtn").addEventListener("click", renderArrival);
+  } else {
+    const picks = pickChoices();
+    html += `
+      <div class="routing-note">
+        <div class="t">${u.routingT}</div>
+        <p>${u.routing(picks.filter(id => SPOTS[id].congestion === 0).length)}</p>
+      </div>
+      <p style="margin:0.4rem 1.2rem 0.5rem;font-size:.8rem;font-weight:600">${u.choiceT}</p>
+      <div class="choice-wrap">${picks.map(choiceCard).join("")}</div>`;
+    area.innerHTML = html;
+    bindChoices();
+  }
+  area.scrollIntoView({ behavior: "smooth", block: "end" });
+}
+
+function renderBook() {
+  const u = t();
+  const wasBefore = prevScreen;
+  const slots = [];
+  for (let i = 0; i < GOAL_COUNT; i++) {
+    if (stamps[i]) {
+      const st = stamps[i];
+      slots.push(`<div class="slot" style="border-style:solid;border-color:${st.rare ? "var(--kin)" : "var(--shu)"}">${stampSVG(SPOTS[st.id], st.rare, 80)}</div>`);
+    } else {
+      slots.push(`<div class="slot"><span class="n">0${i + 1}</span></div>`);
+    }
+  }
+  screen.innerHTML = `
+    <div class="book fade-in">
+      <h2>${u.bookT}</h2>
+      <div class="book-sub">${u.bookSub(stamps.length)}</div>
+      <div class="book-grid">${slots.join("")}</div>
+      <div class="route-list">
+        <div class="t">${u.routeT}</div>
+        <ol>${stamps.map(st => `<li>${SPOTS[st.id].name[lang]}${st.rare ? " ★" : ""}</li>`).join("") || "<li style='list-style:none;color:var(--sub)'>—</li>"}</ol>
+      </div>
+      <button class="cta ghost" type="button" id="backBtn" style="inline-size:100%;margin:1.2rem 0 0">${u.back}</button>
+    </div>`;
+  $("#backBtn").addEventListener("click", () => restore(wasBefore));
+}
+
+function restore(where) {
+  if (where === "spot" && current) {
+    if (scanned) { scanned = false; renderSpot(); doScan(); }
+    else renderSpot();
+  }
+  else if (where === "arrival") renderArrival();
+  else if (where === "choice" && goal) renderChoiceOnly(pickChoices());
+  else renderStart();
+}
+
+function renderArrival() {
+  prevScreen = "arrival";
+  const u = t();
+  const g = GOALS[goal];
+  const totalWalked = walkedM + distM(curPos(), g);
+  const direct = distM(START, g);
+  const rate = Math.round(totalWalked / direct * 100);
+  const code = "MAWARI-" + Math.random().toString(36).slice(2, 6).toUpperCase();
+  screen.innerHTML = `
+    <div class="fade-in">
+      <div class="goal-hero">
+        <div class="gl">${u.arriveL} — ${g.name[lang]}</div>
+        <h1>${u.arriveT}</h1>
+        <p>${u.arriveP(g.name[lang])}</p>
+      </div>
+      <div class="stats">
+        <div><div class="sv">${fmtM(totalWalked)}</div><div class="sk">${u.stWalked}</div></div>
+        <div><div class="sv" style="color:var(--sub)">${fmtM(direct)}</div><div class="sk">${u.stDirect}</div></div>
+        <div><div class="sv big">${rate}%</div><div class="sk">${u.stRate}</div></div>
+        <div class="stats-note">${u.statsNote(totalWalked, direct)}</div>
+      </div>
+      <div class="coupon">
+        <div class="t">${u.couponT}</div>
+        <div class="code">${code}</div>
+        <p>${u.couponP}</p>
+      </div>
+      <div class="navi-card">
+        <div class="navi-face">${foxSVG(48)}</div>
+        <div>
+          <div class="navi-name">${NAVI[lang].name}</div>
+          <p class="navi-text">${u.naviGoal}</p>
+        </div>
+      </div>
+      <button class="cta" type="button" id="againBtn">${u.again}</button>
+    </div>`;
+  $("#againBtn").addEventListener("click", () => {
+    goal = null; stamps = []; current = null; scanned = false; walkedM = 0;
+    $("#bookCount").textContent = "0";
+    renderStart();
+  });
+}
+
+/* ================= GLOBAL UI ================= */
+
+function setLang(next) {
+  lang = next;
+  $("#langJa").setAttribute("aria-pressed", String(next === "ja"));
+  $("#langEn").setAttribute("aria-pressed", String(next === "en"));
+  $("#demoBand").textContent = t().demo;
+  restore(prevScreen);
+}
+
+$("#langJa").addEventListener("click", () => setLang("ja"));
+$("#langEn").addEventListener("click", () => setLang("en"));
+$("#bookBtn").addEventListener("click", renderBook);
+
+renderStart();
+</script>
+</body>
+</html>

@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { isApprovedAffiliate } from '@/lib/affiliate'
 import type { BankAccount } from '@/types/affiliate'
+import { requireUser } from '@/lib/auth'
 
 // 口座情報取得
 export async function GET() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { userId } = auth
 
-    const approved = await isApprovedAffiliate(user.id)
+    const approved = await isApprovedAffiliate(userId)
     if (!approved) {
       return NextResponse.json({ error: 'アフィリエイトとして承認されていません' }, { status: 403 })
     }
@@ -20,7 +20,7 @@ export async function GET() {
     const { data, error } = await admin
       .from('affiliate_bank_accounts')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single()
 
     if (error && error.code !== 'PGRST116') throw error
@@ -35,11 +35,11 @@ export async function GET() {
 // 口座情報登録・更新
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { userId } = auth
 
-    const approved = await isApprovedAffiliate(user.id)
+    const approved = await isApprovedAffiliate(userId)
     if (!approved) {
       return NextResponse.json({ error: 'アフィリエイトとして承認されていません' }, { status: 403 })
     }
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       .from('affiliate_bank_accounts')
       .upsert(
         {
-          user_id: user.id,
+          user_id: userId,
           bank_name: bankName,
           branch_name: branchName,
           account_type: accountType,

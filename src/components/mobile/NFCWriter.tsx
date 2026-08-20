@@ -5,6 +5,7 @@ import { useNFC } from '@/hooks/useNFC'
 import { useAppReview } from '@/hooks/useAppReview'
 import LinkSelector from './LinkSelector'
 import NFCWriteStatus from './NFCWriteStatus'
+import { SITE_URL } from '@/lib/site'
 
 interface SelectedLink {
   id: string
@@ -30,7 +31,7 @@ export default function NFCWriter() {
 
   const handleWrite = useCallback(async () => {
     if (!selectedLink) return
-    const pivolinkUrl = `https://redirect.tsuratsura.com/r/${selectedLink.slug}`
+    const pivolinkUrl = `${SITE_URL}/r/${selectedLink.slug}`
     const success = await writeTag(pivolinkUrl)
     if (success) {
       setStep('result')

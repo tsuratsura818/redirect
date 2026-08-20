@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { shareContent, canShare } from '@/lib/capacitor/share'
 import { saveQRImage } from '@/lib/capacitor/filesystem'
 import { useEffect } from 'react'
+import { SITE_URL } from '@/lib/site'
 
 interface ShareSheetProps {
   slug: string
@@ -19,7 +20,7 @@ export default function ShareSheet({ slug, label, qrBase64, onClose }: ShareShee
     canShare().then(setShareAvailable)
   }, [])
 
-  const pivolinkUrl = `https://redirect.tsuratsura.com/r/${slug}`
+  const pivolinkUrl = `${SITE_URL}/r/${slug}`
 
   const handleShareLink = async () => {
     await shareContent({

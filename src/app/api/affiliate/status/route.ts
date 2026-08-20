@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { AffiliateApplication, Coupon } from '@/types/affiliate'
+import { requireUser } from '@/lib/auth'
 
 // アフィリエイトステータス・クーポン情報取得
 export async function GET() {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { userId } = auth
 
     const admin = createAdminClient()
 
@@ -16,7 +16,7 @@ export async function GET() {
     const { data: application } = await admin
       .from('affiliate_applications')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single()
 
     let coupon: Coupon | null = null
@@ -26,7 +26,7 @@ export async function GET() {
       const { data: couponData } = await admin
         .from('coupons')
         .select('*')
-        .eq('affiliate_user_id', user.id)
+        .eq('affiliate_user_id', userId)
         .eq('is_active', true)
         .single()
 

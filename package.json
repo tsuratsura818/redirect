@@ -1,7 +1,7 @@
 {
-  "name": "qr-redirect-manager",
+  "name": "pivolink",
   "version": "0.1.0",
-  "description": "QRコードのリダイレクト先を動的に管理するSaaSサービス",
+  "description": "PivoLink — QR/NFCのリンク先を動的に管理するSaaS",
   "private": true,
   "scripts": {
     "dev": "next dev",

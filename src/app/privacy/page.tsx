@@ -55,8 +55,10 @@ const sections = [
 ・GitHub（OAuth認証・利用時）: https://docs.github.com/en/site-policy/privacy-policies`,
   },
   {
-    title: '5. Cookieの使用',
-    content: `本サービスでは、認証状態の維持およびサービスの提供に必要なCookieを使用します。ブラウザの設定によりCookieを無効にすることができますが、一部機能が利用できなくなる場合があります。`,
+    title: '5. Cookieの使用とアクセス解析',
+    content: `本サービスでは、認証状態の維持およびサービスの提供に必要なCookieを使用します。ブラウザの設定によりCookieを無効にすることができますが、一部機能が利用できなくなる場合があります。
+
+また、サービス改善のためGoogle LLCが提供するアクセス解析ツール「Google アナリティクス」を利用しています。Google アナリティクスはCookieを使用してトラフィックデータを収集しますが、このデータは匿名で収集されており、個人を特定するものではありません。収集される情報の取り扱いについてはGoogleのプライバシーポリシー（https://policies.google.com/privacy）をご確認ください。ブラウザのアドオン設定によりデータ収集を無効にすることもできます（https://tools.google.com/dlpage/gaoptout）。`,
   },
   {
     title: '6. セキュリティ',

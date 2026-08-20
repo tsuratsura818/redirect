@@ -4,6 +4,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import { CASE_STUDIES } from '@/lib/cases'
 import Logo from '@/components/Logo'
+import { SITE_URL } from '@/lib/site'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -18,18 +19,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cs = CASE_STUDIES.find((c) => c.slug === slug)
   if (!cs) return {}
 
-  const fullImageUrl = `https://redirect.tsuratsura.com${cs.image}`
+  const fullImageUrl = `${SITE_URL}${cs.image}`
 
   return {
     title: cs.seoTitle,
     description: cs.metaDescription,
     alternates: {
-      canonical: `https://redirect.tsuratsura.com/cases/${cs.slug}`,
+      canonical: `${SITE_URL}/cases/${cs.slug}`,
     },
     openGraph: {
       title: cs.seoTitle,
       description: cs.metaDescription,
-      url: `https://redirect.tsuratsura.com/cases/${cs.slug}`,
+      url: `${SITE_URL}/cases/${cs.slug}`,
       siteName: 'Pivolink',
       type: 'article',
       publishedTime: cs.publishedAt,
@@ -102,13 +103,13 @@ export default async function CaseDetailPage({ params }: Props) {
     '@type': 'Article',
     headline: cs.title,
     description: cs.metaDescription,
-    image: `https://redirect.tsuratsura.com${cs.image}`,
+    image: `${SITE_URL}${cs.image}`,
     datePublished: cs.publishedAt,
     author: { '@type': 'Organization', name: 'Pivolink by TSURATSURA' },
     publisher: {
       '@type': 'Organization',
       name: 'Pivolink',
-      logo: { '@type': 'ImageObject', url: 'https://redirect.tsuratsura.com/pivofavicon.png' },
+      logo: { '@type': 'ImageObject', url: `${SITE_URL}/pivofavicon.png` },
     },
   }
 
@@ -116,9 +117,9 @@ export default async function CaseDetailPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Pivolink', item: 'https://redirect.tsuratsura.com' },
-      { '@type': 'ListItem', position: 2, name: '活用事例', item: 'https://redirect.tsuratsura.com/cases' },
-      { '@type': 'ListItem', position: 3, name: cs.title, item: `https://redirect.tsuratsura.com/cases/${cs.slug}` },
+      { '@type': 'ListItem', position: 1, name: 'Pivolink', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: '活用事例', item: `${SITE_URL}/cases` },
+      { '@type': 'ListItem', position: 3, name: cs.title, item: `${SITE_URL}/cases/${cs.slug}` },
     ],
   }
 

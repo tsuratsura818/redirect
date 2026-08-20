@@ -1,0 +1,7 @@
+# ★ルート直下だけを除外する（先頭の / が無いと src/app/admin/qr/ まで巻き込む）
+/qr/
+/docs/
+/mockup/
+/supabase/
+/scripts/
+/tests/

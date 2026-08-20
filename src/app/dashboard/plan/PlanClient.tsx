@@ -6,6 +6,7 @@ import { PLANS, IS_BETA, type PlanId, type BillingCycle } from '@/lib/plans'
 import type { UserSubscription } from '@/lib/subscription'
 import { PaymentMethodSelector } from '@/components/payment/PaymentMethodSelector'
 import type { JpycPlan } from '@/types/jpyc'
+import { pushEvent } from '@/lib/gtm'
 
 interface SubscriptionData {
   subscription: UserSubscription
@@ -95,6 +96,13 @@ export default function PlanClient() {
     if (res.ok) {
       // Stripe Checkoutにリダイレクト
       if (result.url) {
+        // 遷移前に計測。実際の課金完了はStripe側なのでここは「申込に進んだ」の意味
+        pushEvent('begin_checkout', {
+          plan: planId,
+          billing,
+          value: PLANS[planId].price,
+          currency: 'JPY',
+        })
         window.location.href = result.url
         return
       }

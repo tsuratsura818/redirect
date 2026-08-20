@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireUser } from '@/lib/auth'
 
 // デバイストークン登録・更新
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
-    }
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { supabase, userId } = auth
 
     const { token, platform } = await request.json()
 
@@ -22,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     const { error } = await supabase.from('device_tokens').upsert(
       {
-        user_id: user.id,
+        user_id: userId,
         token,
         platform,
         is_active: true,
@@ -43,11 +41,9 @@ export async function POST(request: NextRequest) {
 // デバイストークン削除（ログアウト時）
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: '認証が必要です' }, { status: 401 })
-    }
+    const auth = await requireUser()
+    if (auth.error) return auth.error
+    const { supabase, userId } = auth
 
     const { token } = await request.json()
 
@@ -58,7 +54,7 @@ export async function DELETE(request: NextRequest) {
     const { error } = await supabase
       .from('device_tokens')
       .delete()
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('token', token)
 
     if (error) {

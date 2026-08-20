@@ -1,0 +1,1087 @@
+@import "tailwindcss";
+
+/*
+ * 参加者UIのスタイルは mockup/pivolink-kyoto-spot-mockup.html の <style> が正。
+ * クラス名も含めてそのまま移植してあるので、モックアップとの差分が追える。
+ * 管理画面(/admin)は Tailwind ユーティリティで組む。
+ */
+
+@layer tokens {
+  :root {
+    /*
+     * 和モダン。伝統色の名前は残しつつ、彩度と明度を上げて「触ってみたくなる」側に寄せた。
+     * ★ナビゲーター（ルル）の白銀髪・紅・桜と喧嘩しないことを基準に選んでいる。
+     *   旧配色（くすんだ和紙 #f7f2e8 と 沈んだ朱 #c8553d）は落ち着くが古く見えるので、
+     *   背景は白に近づけ、朱は明るい方へ、差し色に藤と浅葱を足した。
+     */
+    --sumi: #1e1a17; /* 墨 — 文字 */
+    --shu: #e2543f; /* 朱 — 白地に載せる文字・線・アイコン用 */
+    /*
+     * ★白文字を「載せる面」はこちら。#e2543f に白文字だと 3.3:1 で 4.5:1 を割る。
+     *   Lighthouse の色コントラスト監査で実際に落ちた（言語ボタン）。
+     *   明るい朱は白地の上でだけ使い、塗りには沈めた朱を使う。
+     */
+    --shu-solid: #b8492f; /* 朱（塗り・白文字が載る） */
+    --shu-d: #9d3a23; /* 朱（塗りのホバー） */
+    --kurenai: #d94a6e; /* 紅梅 — ルルに寄せた差し色 */
+    --fuji: #8b7fd4; /* 藤 — レア・特別 */
+    --asagi: #2fa8a0; /* 浅葱 — 空き・成功 */
+    --washi: #fbf8f3; /* 和紙 — 面の背景 */
+    --kin: #dda82e; /* 金 — レアスタンプ */
+    --ai: #2b4c6f; /* 藍 — フォーカス */
+    --sub: #7a7167;
+    --line: rgba(30, 26, 23, 0.1);
+    --shadow: 0 1px 2px rgba(30, 26, 23, 0.04), 0 8px 24px -12px rgba(30, 26, 23, 0.18);
+    --radius: 18px;
+    --mono: "SF Mono", "Roboto Mono", Consolas, monospace;
+    --serif: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  }
+}
+
+@layer base {
+  .visitor {
+    /* 外周。単色のベージュ→淡いグラデにして、端末で見たときの野暮ったさを取る */
+    background:
+      radial-gradient(120% 60% at 50% 0%, #f3ece2 0%, transparent 60%),
+      linear-gradient(180deg, #ece5da 0%, #e4dcd0 100%);
+    color: var(--sumi);
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo,
+      sans-serif;
+    font-feature-settings: "palt" 1;
+    line-height: 1.75;
+    letter-spacing: 0.03em;
+    -webkit-font-smoothing: antialiased;
+    min-block-size: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem 0.5rem;
+  }
+  .visitor h1,
+  .visitor h2,
+  .visitor h3 {
+    line-height: 1.4;
+    word-break: keep-all;
+  }
+  .visitor :focus-visible {
+    outline: 2px solid var(--ai);
+    outline-offset: 3px;
+  }
+  .visitor img,
+  .visitor svg {
+    display: block;
+    max-inline-size: 100%;
+    height: auto;
+  }
+  .visitor button {
+    cursor: pointer;
+    border: none;
+    background: none;
+    font: inherit;
+  }
+}
+
+@layer components {
+  .stage {
+    display: flex;
+    gap: 2.5rem;
+    align-items: center;
+  }
+  .side-note {
+    max-inline-size: 15rem;
+    font-size: 0.78rem;
+    color: #6b6353;
+  }
+  .side-note .t {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    color: var(--shu);
+    margin-block-end: 0.5rem;
+  }
+  .side-note p + p {
+    margin-block-start: 0.6rem;
+  }
+
+  .phone {
+    inline-size: min(400px, 100vw - 1rem);
+    block-size: min(830px, 96dvh);
+    background: var(--washi);
+    border-radius: 34px;
+    border: 8px solid #1b1814;
+    box-shadow: 0 24px 60px rgba(20, 16, 10, 0.35);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .app-head {
+    background: var(--sumi);
+    color: var(--washi);
+    padding: 0.9rem 1.1rem 0.7rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .brand {
+    font-family: var(--serif);
+    font-size: 1rem;
+    letter-spacing: 0.14em;
+  }
+  .brand small {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.52rem;
+    letter-spacing: 0.26em;
+    color: var(--kin);
+  }
+  .head-tools {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .lang-btn {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--washi);
+    border: 1px solid rgba(247, 242, 232, 0.4);
+    padding: 0.2rem 0.55rem;
+    border-radius: 99px;
+    text-decoration: none;
+  }
+  .lang-btn {
+    transition: background 0.15s ease;
+  }
+  .lang-btn[aria-pressed="true"] {
+    background: var(--shu-solid);
+    border-color: var(--shu-solid);
+  }
+  .book-btn {
+    position: relative;
+    font-size: 1.1rem;
+    text-decoration: none;
+    color: inherit;
+  }
+  .book-count {
+    position: absolute;
+    inset-block-start: -6px;
+    inset-inline-end: -8px;
+    background: var(--shu-solid);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 0.56rem;
+    min-inline-size: 1.05rem;
+    text-align: center;
+    border-radius: 99px;
+    padding: 1px 3px;
+  }
+  .demo-band {
+    background: var(--kin);
+    color: var(--sumi);
+    font-family: var(--mono);
+    font-size: 0.54rem;
+    letter-spacing: 0.14em;
+    text-align: center;
+    padding: 0.22rem;
+    flex-shrink: 0;
+  }
+  .screen {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  /* ---------- START / GOAL SELECT ---------- */
+  .start-hero {
+    /*
+     * 旧: 墨→茶→朱の茶色グラデ。落ち着くが古く見えたので作り直した。
+     * 新: 藍墨をベースに、紅梅と藤の光を上下から差す。
+     *     ルル（白銀髪・紅・桜）が乗ったときに彼女が浮く配色にしている。
+     */
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(90% 55% at 78% 8%, color-mix(in srgb, var(--kurenai) 45%, transparent) 0%, transparent 62%),
+      radial-gradient(80% 50% at 12% 96%, color-mix(in srgb, var(--fuji) 40%, transparent) 0%, transparent 60%),
+      linear-gradient(165deg, #221f2e 0%, #1b1a22 55%, #241a1e 100%);
+    color: var(--washi);
+    padding: 1.6rem 1.4rem 0;
+    text-align: center;
+  }
+  /* 下端をぼかして本文へつなぐ。切り替わりの直線をなくすと今どきに見える */
+  .start-hero::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    block-size: 90px;
+    background: linear-gradient(180deg, transparent 0%, var(--washi) 100%);
+    pointer-events: none;
+  }
+  .start-hero > * {
+    position: relative;
+    z-index: 1;
+  }
+  .start-hero img {
+    /* 立ち絵は下端に接地させる。宙に浮くと素材を置いただけに見える */
+    margin-block-start: 0.6rem;
+    filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.45));
+  }
+  /* 朱印風の印。白い四角に入れるとQRに見えるので、地の上に直接置く */
+  .start-hero .qr {
+    inline-size: 56px;
+    margin-inline: auto;
+    margin-block-end: 0.7rem;
+    opacity: 0.95;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
+  }
+  .start-hero h1 {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    letter-spacing: 0.1em;
+  }
+  .start-hero .tag {
+    font-size: 0.78rem;
+    color: rgba(247, 242, 232, 0.85);
+    margin-block-start: 0.4rem;
+  }
+  .start-loc {
+    font-family: var(--mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.2em;
+    color: var(--kin);
+    margin-block-end: 0.45rem;
+  }
+
+  /*
+   * ナビゲーター（ルル）はチャットの見た目にする。
+   * ★1つの枠にアイコンと文章を同居させると「説明パネル」に見えて読み飛ばされる。
+   *   アイコンと吹き出しを分けると、話しかけられている感じになって読まれる。
+   */
+  .navi-card {
+    margin: 0.9rem 1.1rem;
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-end;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  .navi-face {
+    flex-shrink: 0;
+    inline-size: 48px;
+    block-size: 48px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid color-mix(in srgb, var(--kurenai) 45%, transparent);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  .navi-face img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    transform: scale(1.08);
+  }
+  .navi-body {
+    min-inline-size: 0;
+    flex: 1;
+  }
+  .navi-name {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--sub);
+    margin-inline-start: 0.55rem;
+    margin-block-end: 0.2rem;
+  }
+  /* 吹き出し。左下にしっぽを出してアイコンとつなぐ */
+  .navi-bubble {
+    position: relative;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    border-end-start-radius: 4px;
+    padding: 0.75rem 0.95rem;
+    box-shadow: var(--shadow);
+  }
+  .navi-bubble::before {
+    content: "";
+    position: absolute;
+    inset-block-end: 8px;
+    inset-inline-start: -7px;
+    inline-size: 12px;
+    block-size: 12px;
+    background: #fff;
+    border-inline-start: 1px solid var(--line);
+    border-block-end: 1px solid var(--line);
+    transform: rotate(45deg);
+    border-end-start-radius: 3px;
+  }
+  .navi-text {
+    font-size: 0.82rem;
+    line-height: 1.75;
+  }
+  /* 暗い面（ヒーロー）の上に置くとき */
+  .start-hero .navi-card {
+    margin-inline: 0;
+  }
+
+  .goal-label {
+    margin: 0.2rem 1.2rem 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .goal-wrap {
+    padding: 0 1.1rem;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .goal-card {
+    inline-size: 100%;
+    text-align: start;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 0.8rem 1rem;
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    transition:
+      transform 0.12s ease,
+      border-color 0.12s ease;
+  }
+  .goal-card:hover {
+    border-color: var(--shu);
+    transform: translateY(-1px);
+  }
+  .goal-card .thumb {
+    flex-shrink: 0;
+    inline-size: 50px;
+    block-size: 50px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    color: rgba(247, 242, 232, 0.9);
+  }
+  .goal-card .gn {
+    font-family: var(--serif);
+    font-size: 1rem;
+  }
+  .goal-card .gi {
+    font-size: 0.66rem;
+    color: var(--sub);
+  }
+  .free-input {
+    margin: 0.6rem 1.1rem 1.1rem;
+    display: flex;
+    gap: 0.4rem;
+  }
+  .free-input input {
+    flex: 1;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 0.5rem 0.8rem;
+    font-size: 0.74rem;
+    color: var(--sub);
+    font: inherit;
+    font-size: 0.74rem;
+  }
+
+  /* ---------- GOAL PROGRESS BAR ---------- */
+  .goal-bar {
+    margin: 0.8rem 1.1rem 0;
+    background: #fff;
+    color: var(--sumi);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0.75rem 1rem;
+  }
+  .goal-bar .t {
+    font-family: var(--mono);
+    font-size: 0.52rem;
+    letter-spacing: 0.18em;
+    color: var(--shu);
+  }
+  .goal-bar .d {
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .goal-bar .d b {
+    color: var(--shu);
+  }
+  .goal-bar .m {
+    font-size: 0.64rem;
+    color: var(--sub);
+  }
+  .track {
+    block-size: 6px;
+    background: color-mix(in srgb, var(--sumi) 8%, transparent);
+    border-radius: 99px;
+    margin-block-start: 0.4rem;
+    overflow: hidden;
+  }
+  .track i {
+    display: block;
+    block-size: 100%;
+    background: linear-gradient(90deg, var(--kurenai), var(--shu) 60%, var(--kin));
+    border-radius: 99px;
+    transition: inline-size 0.6s ease;
+  }
+
+  /* ---------- SPOT ---------- */
+  .spot-visual {
+    position: relative;
+    block-size: 175px;
+    overflow: hidden;
+    margin-block-start: 0.8rem;
+  }
+  /* 写真がある場合は写真を主役にし、下端を墨に溶かして文字を載せる */
+  .spot-visual.has-photo {
+    block-size: 260px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .spot-visual.has-photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(26, 22, 18, 0.15) 30%, rgba(26, 22, 18, 0.82) 100%);
+  }
+  .spot-visual .k {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--serif);
+    font-size: 5rem;
+    color: rgba(247, 242, 232, 0.24);
+  }
+  .spot-visual.has-photo .k {
+    inset-block-end: auto;
+    block-size: 150px;
+    font-size: 4.2rem;
+    color: rgba(255, 255, 255, 0.3);
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+  }
+  .spot-visual-head {
+    position: relative;
+    z-index: 1;
+    padding: 0 1.2rem 0.9rem;
+    color: #fff;
+  }
+  .spot-visual-head .spot-num {
+    color: rgba(255, 255, 255, 0.82);
+  }
+  .spot-visual-head .spot-name {
+    font-family: var(--serif);
+    font-size: 1.55rem;
+    letter-spacing: 0.06em;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
+  }
+  .spot-visual-head .spot-area {
+    color: rgba(255, 255, 255, 0.8);
+  }
+  .spot-visual .photo-note {
+    position: absolute;
+    inset-block-end: 8px;
+    inset-inline-end: 10px;
+    font-family: var(--mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.75);
+  }
+  .spot-visual.has-photo .photo-note {
+    z-index: 2;
+    inset-block-start: 8px;
+    inset-block-end: auto;
+    background: rgba(26, 22, 18, 0.5);
+    border-radius: 99px;
+    padding: 0.12rem 0.5rem;
+    font-size: 0.46rem;
+  }
+  .spot-head {
+    padding: 0.9rem 1.2rem 0.3rem;
+  }
+  .spot-num {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    color: var(--shu);
+  }
+  .spot-name {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    letter-spacing: 0.06em;
+  }
+  .spot-area {
+    font-size: 0.72rem;
+    color: var(--sub);
+    margin-block-start: 0.15rem;
+  }
+  .spot-story {
+    padding: 0.5rem 1.2rem 0.3rem;
+    font-size: 0.82rem;
+    line-height: 1.85;
+  }
+
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-block-start: 0.45rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ai);
+    text-decoration: none;
+    border: 1px solid rgba(43, 76, 111, 0.35);
+    border-radius: 99px;
+    padding: 0.28rem 0.8rem;
+    transition: background 0.12s ease;
+  }
+  .nav-link:hover {
+    background: rgba(43, 76, 111, 0.08);
+  }
+
+  .collab-band {
+    margin: 0.7rem 1.1rem 0;
+    background: rgba(201, 162, 39, 0.12);
+    border: 1px dashed var(--kin);
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+  }
+  .collab-band .t {
+    font-family: var(--mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.18em;
+    color: #8a6d12;
+  }
+  .collab-band p {
+    font-size: 0.76rem;
+  }
+
+  .cta {
+    display: block;
+    inline-size: calc(100% - 2.2rem);
+    margin: 0 1.1rem 1.2rem;
+    background: var(--shu-solid);
+    color: #fff;
+    font-size: 0.92rem;
+    font-weight: 600;
+    padding: 0.85rem;
+    border-radius: 12px;
+    text-align: center;
+    text-decoration: none;
+    transition:
+      transform 0.12s ease,
+      background 0.12s ease;
+  }
+  .cta:hover {
+    background: var(--shu-d);
+  }
+  .cta:active {
+    transform: scale(0.98);
+  }
+  .cta.ghost {
+    background: none;
+    color: var(--shu);
+    border: 1.5px solid var(--shu);
+  }
+  .cta.gold {
+    background: var(--kin);
+    color: var(--sumi);
+  }
+
+  .stamp-zone {
+    text-align: center;
+    padding: 0.9rem 0 0.3rem;
+  }
+  .stamp {
+    inline-size: 104px;
+    margin-inline: auto;
+    transform: rotate(-6deg);
+  }
+  @keyframes stampIn {
+    0% {
+      transform: rotate(-6deg) scale(2.1);
+      opacity: 0;
+    }
+    60% {
+      transform: rotate(-6deg) scale(0.92);
+      opacity: 1;
+    }
+    100% {
+      transform: rotate(-6deg) scale(1);
+    }
+  }
+  .stamp.landed {
+    animation: stampIn 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  }
+  .stamp-msg {
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-block-start: 0.3rem;
+  }
+  .rare-msg {
+    color: var(--kin);
+    font-weight: 700;
+  }
+
+  /* ---------- ROUTING / CHOICE ---------- */
+  .routing-note {
+    margin: 0.9rem 1.1rem 0.5rem;
+    background: color-mix(in srgb, var(--fuji) 8%, #fff);
+    color: var(--sumi);
+    border: 1px solid color-mix(in srgb, var(--fuji) 22%, transparent);
+    border-inline-start: 3px solid var(--fuji);
+    border-radius: 12px;
+    padding: 0.65rem 0.9rem;
+  }
+  .routing-note .t {
+    font-family: var(--mono);
+    font-size: 0.54rem;
+    letter-spacing: 0.18em;
+    color: color-mix(in srgb, var(--fuji) 75%, var(--sumi));
+  }
+  .routing-note p {
+    font-size: 0.72rem;
+    line-height: 1.6;
+    color: var(--sub);
+  }
+  .routing-note .pv-trace {
+    border-block-start-color: color-mix(in srgb, var(--fuji) 25%, transparent);
+  }
+
+  .choice-wrap {
+    padding: 0 1.1rem 1.2rem;
+    display: grid;
+    gap: 0.7rem;
+  }
+  .choice {
+    inline-size: 100%;
+    text-align: start;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 0.85rem 1rem;
+    display: flex;
+    gap: 0.85rem;
+    /* ★中央揃えだと、食べどきタグが付いたカードだけサムネがずれる */
+    align-items: flex-start;
+    text-decoration: none;
+    color: inherit;
+    transition:
+      transform 0.12s ease,
+      border-color 0.12s ease,
+      box-shadow 0.12s ease;
+  }
+  .choice:hover,
+  .choice:active {
+    border-color: var(--shu);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(30, 26, 23, 0.06), 0 14px 30px -14px rgba(226, 84, 63, 0.45);
+  }
+  .choice > div:nth-child(2) {
+    min-inline-size: 0;
+    flex: 1;
+  }
+  .choice .thumb {
+    flex-shrink: 0;
+    inline-size: 64px;
+    block-size: 64px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    color: rgba(247, 242, 232, 0.9);
+  }
+  .choice .thumb.has-photo {
+    background-size: cover;
+    background-position: center;
+  }
+  .choice .cn {
+    font-family: var(--serif);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .choice .ci {
+    font-size: 0.66rem;
+    color: var(--sub);
+  }
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+  }
+
+  /* 送信中の見た目。押した瞬間に「効いた」ことを見せる */
+  [data-pending="1"],
+  button[aria-busy="true"] {
+    opacity: 0.72;
+    cursor: progress;
+  }
+  .btn-pending {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+  .spin {
+    inline-size: 1em;
+    block-size: 1em;
+    border: 2px solid currentColor;
+    border-block-start-color: transparent;
+    border-radius: 50%;
+    animation: mw-spin 0.7s linear infinite;
+  }
+  @keyframes mw-spin {
+    to { transform: rotate(360deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spin { animation-duration: 2s; }
+  }
+
+  /* この二択を決めたのが PivoLink であることの開示 */
+  .pv-trace {
+    margin-block-start: 0.4rem;
+    padding-block-start: 0.4rem;
+    border-block-start: 1px dashed var(--line);
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.04em;
+    color: var(--shu);
+  }
+  .pv-trace b {
+    letter-spacing: 0.1em;
+  }
+
+  .hours-warn {
+    margin: 0.9rem 1.1rem 0;
+    border: 1px solid var(--kin);
+    background: color-mix(in srgb, var(--kin) 10%, transparent);
+    border-radius: 12px;
+    padding: 0.7rem 0.9rem;
+  }
+  .hours-warn .t {
+    font-family: var(--mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.16em;
+    color: #7a6414;
+    margin-block-end: 0.25rem;
+  }
+  .hours-warn p {
+    font-size: 0.76rem;
+    line-height: 1.65;
+  }
+
+  .goal-card .gc {
+    margin-block-start: 0.2rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--shu);
+  }
+  .goal-card.is-closed .thumb {
+    filter: grayscale(0.7);
+  }
+
+  /* 食べどき・開閉の注記 */
+  .meal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-block: 0.15rem 0.1rem;
+  }
+  /* 閉まっている / まもなく閉まる は、おすすめより先に読ませる */
+  .meal-tag.closed {
+    border-color: var(--sumi);
+    background: var(--sumi);
+    color: #fff;
+    font-weight: 700;
+  }
+  .meal-tag.soon {
+    border-color: var(--kin);
+    background: color-mix(in srgb, var(--kin) 14%, transparent);
+    color: #7a6414;
+    font-weight: 700;
+  }
+  .spot-visual .meal-tag.closed,
+  .spot-visual .meal-tag.soon {
+    border-color: color-mix(in srgb, #fff 70%, transparent);
+    background: color-mix(in srgb, #000 45%, transparent);
+    color: #fff;
+  }
+
+  /* 飲食スポットの食べどき。いま該当していれば朱で強調する */
+  .meal-tag {
+    display: inline-block;
+    margin-block: 0.15rem 0.1rem;
+    padding: 0.08rem 0.4rem;
+    border: 1px solid color-mix(in srgb, var(--sub) 45%, transparent);
+    border-radius: 999px;
+    font-size: 0.6rem;
+    letter-spacing: 0.02em;
+    color: var(--sub);
+    white-space: nowrap;
+  }
+  .meal-tag.now {
+    border-color: var(--shu);
+    background: color-mix(in srgb, var(--shu) 10%, transparent);
+    color: var(--shu);
+    font-weight: 700;
+  }
+  .spot-visual .meal-tag.now {
+    border-color: color-mix(in srgb, #fff 70%, transparent);
+    background: color-mix(in srgb, #fff 22%, transparent);
+    color: #fff;
+  }
+  .spot-visual .meal-tag {
+    border-color: color-mix(in srgb, #fff 45%, transparent);
+    color: color-mix(in srgb, #fff 88%, transparent);
+  }
+
+  .choice .cg {
+    margin-inline-start: auto;
+    text-align: center;
+    flex-shrink: 0;
+    align-self: center;
+    color: var(--shu);
+  }
+  .choice .cg b {
+    display: block;
+    font-size: 0.9rem;
+  }
+  .choice .cg span {
+    font-family: var(--mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+    color: var(--sub);
+  }
+
+  /* ---------- STAMP BOOK ---------- */
+  .book {
+    padding: 1.1rem 1.2rem;
+  }
+  .book h2 {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    margin-block-end: 0.2rem;
+  }
+  .book-sub {
+    font-size: 0.72rem;
+    color: var(--sub);
+    margin-block-end: 0.9rem;
+  }
+  /*
+   * ★列数を決め打ちにしない。3列だと5個のとき「3＋2」で下段が間延びする。
+   *   auto-fit + minmax にすると、寄り道の数（stamp_target）を変えても
+   *   幅に応じて詰まる。円が大きくなりすぎないよう上限も付ける。
+   */
+  .book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+    gap: 0.7rem;
+    justify-content: center;
+    max-inline-size: 420px;
+    margin-inline: auto;
+  }
+  .slot {
+    aspect-ratio: 1;
+    border: 1.5px dashed var(--line);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+  .slot .n {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: #c9c1b0;
+  }
+  .slot svg {
+    inline-size: 82%;
+  }
+  .route-list {
+    margin-block-start: 1rem;
+    font-size: 0.76rem;
+  }
+  .route-list .t {
+    font-family: var(--mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.18em;
+    color: var(--shu);
+    margin-block-end: 0.3rem;
+  }
+  .route-list li {
+    margin-inline-start: 1.2rem;
+    padding-block: 0.1rem;
+    list-style: decimal;
+  }
+
+  /* ---------- ARRIVAL ---------- */
+  .goal-hero {
+    background: linear-gradient(160deg, var(--shu-d), var(--shu) 60%, var(--kin) 160%);
+    color: #fff;
+    text-align: center;
+    padding: 1.8rem 1.4rem 1.4rem;
+  }
+  .goal-hero .gl {
+    font-family: var(--mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.22em;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .goal-hero h1 {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    letter-spacing: 0.1em;
+    margin-block: 0.15rem;
+  }
+  .goal-hero p {
+    font-size: 0.8rem;
+  }
+  .stats {
+    margin: 1rem 1.1rem 0;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+    text-align: center;
+  }
+  .stats .sv {
+    font-family: var(--mono);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--shu);
+  }
+  .stats .sv.big {
+    color: var(--kin);
+  }
+  .stats .sk {
+    font-size: 0.58rem;
+    color: var(--sub);
+  }
+  .stats-note {
+    grid-column: 1 / -1;
+    font-size: 0.68rem;
+    color: var(--sub);
+    border-block-start: 1px solid var(--line);
+    padding-block-start: 0.5rem;
+  }
+  .coupon {
+    margin: 0.8rem 1.1rem;
+    background: #fff;
+    border: 1.5px dashed var(--shu);
+    border-radius: 14px;
+    padding: 0.9rem 1.1rem;
+    text-align: center;
+  }
+  .coupon .t {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+    color: var(--shu);
+  }
+  .coupon .code {
+    font-family: var(--mono);
+    font-size: 1.25rem;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    margin-block: 0.25rem;
+  }
+  .coupon p {
+    font-size: 0.7rem;
+    color: var(--sub);
+  }
+
+  /* ---------- ROUTE MAP ---------- */
+  .route-map {
+    margin: 0.9rem 1.1rem 0;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 0.7rem 0.8rem 0.55rem;
+  }
+  .route-map svg {
+    inline-size: 100%;
+    block-size: auto;
+  }
+  .route-map figcaption {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-block-start: 0.35rem;
+    font-size: 0.62rem;
+    color: var(--sub);
+  }
+  .rm-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .rm-key::before {
+    content: "";
+    inline-size: 14px;
+    block-size: 0;
+    border-block-start: 2.4px solid var(--shu);
+  }
+  .rm-short::before {
+    border-block-start: 1.5px dashed var(--sub);
+  }
+
+  .fade-in {
+    animation: fade 0.35s ease both;
+  }
+  @keyframes fade {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .visitor {
+    padding: 0;
+  }
+  .stage {
+    display: block;
+  }
+  .side-note {
+    display: none;
+  }
+  .phone {
+    inline-size: 100vw;
+    block-size: 100dvh;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
